@@ -314,7 +314,7 @@ public class StreamEventsServiceImpl extends StreamServiceImpl implements Stream
                             .filter(i -> i.getElementId().equals(confidentialInfo.getTimelineElementId()))
                             .findFirst()
                             .get();
-                    timelineService.enrichTimelineElementWithConfidentialInformation(internal.getDetails(), confidentialInfo);
+                    internal.setDetails(timelineService.enrichTimelineElementWithConfidentialInformation(internal.getDetails(), confidentialInfo));
                     return internal;
                 })
                 .collectList()

@@ -1,5 +1,8 @@
 package it.pagopa.pn.stream.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import it.pagopa.pn.stream.dto.address.CourtesyDigitalAddressInt;
 import it.pagopa.pn.stream.dto.address.DigitalAddressSourceInt;
 import it.pagopa.pn.stream.dto.address.LegalDigitalAddressInt;
 import it.pagopa.pn.stream.dto.address.PhysicalAddressInt;
@@ -24,9 +27,9 @@ class TimeLineServiceImplTest {
     @BeforeEach
     void setup() {
         timelineDao = Mockito.mock( TimelineDao.class );
-
+        ObjectMapper mapper = JsonMapper.builder().findAndAddModules().build();
         confidentialInformationService = Mockito.mock( ConfidentialInformationService.class );
-        timeLineService = new TimeLineServiceImpl(timelineDao, confidentialInformationService);
+        timeLineService = new TimeLineServiceImpl(mapper, timelineDao, confidentialInformationService);
 
     }
 
@@ -158,5 +161,23 @@ class TimeLineServiceImplTest {
                 .iun(iun)
                 .details( details )
                 .build();
+    }
+
+    @Test
+    void enrichTimelineElementWithConfidentialInformationForSendCourtesyMessageDetailsInt() {
+        // Given
+        SendCourtesyMessageDetailsInt details = SendCourtesyMessageDetailsInt.builder()
+                .digitalAddress(CourtesyDigitalAddressInt.builder().build())
+                .build();
+        ConfidentialTimelineElementDtoInt confidentialDto = ConfidentialTimelineElementDtoInt.builder()
+                .digitalAddress("confidential@address.com")
+                .build();
+
+        // When
+        details = timeLineService.enrichTimelineElementWithConfidentialInformation(details, confidentialDto);
+
+        // Then
+        Assertions.assertNotNull(details.getDigitalAddress());
+        Assertions.assertEquals("confidential@address.com", details.getDigitalAddress().getAddress());
     }
 }

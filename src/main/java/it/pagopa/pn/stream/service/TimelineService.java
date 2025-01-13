@@ -8,7 +8,7 @@ import java.util.Set;
 
 public interface TimelineService {
 
-    void enrichTimelineElementWithConfidentialInformation(TimelineElementDetailsInt details,
+    <T extends TimelineElementDetailsInt> T enrichTimelineElementWithConfidentialInformation(TimelineElementDetailsInt details,
                                                           ConfidentialTimelineElementDtoInt confidentialDto);
 
     Set<TimelineElementInternal> getTimelineByIunTimelineId(String iun, String timelineId,
