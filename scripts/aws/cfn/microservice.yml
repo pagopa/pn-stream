@@ -202,6 +202,10 @@ Parameters:
     Type: String
     Description: actions queue ARN
 
+  DoneActionsQueueURL:
+    Type: String
+    Description: 'Send done actions to this queue read by stream'
+
   StreamEventManagerDLQAlarmARN:
     Type: String
     Description: 'DLQ Alarm ARN for StreamEventManagerLambda'
@@ -223,6 +227,16 @@ Parameters:
   StreamEventManagerLambdaName:
     Type: String
     Default: Name of Event Manager Lambda
+  
+  NotificationEventManagerLambdaMaximumBatchingWindowInSeconds:
+    Type: Number
+    Default: 20
+    Description: Batching window size for lambda triggering
+
+  NotificationEventManagerLambdaBatchSize:
+    Type: Number
+    Default: 60
+    Description: Batch size for notification lambda triggering
 
   # CDC
 
@@ -245,6 +259,21 @@ Parameters:
   PnNotificationTableName:
     Type: String
     Description: 'Name of dynamodb table containing notifications'
+
+  PnTimelinesTableName:
+    Type: String
+    Default: 'pn-Timelines'
+    Description: 'Name of dynamodb table containing timelines'
+  
+  StartReadStreamTimestamp:
+    Type: String
+    Description: 'Start timestamp for read stream'
+    Default: "1999-01-01T00:00:00Z"
+
+  StopReadStreamTimestamp:
+    Type: String
+    Description: 'Stop timestamp for read stream'
+    Default: "2099-01-01T00:00:00Z"
 
 Resources:
 
@@ -313,6 +342,118 @@ Resources:
               - sqs:SendMessage
               - sqs:SendMessageBatch
             Resource: !Ref DoneActionsQueueARN
+
+  #########################################################
+  ###              StreamEventManagerLambda            ###
+  #########################################################
+
+  # Lambda function
+  StreamEventManagerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref StreamEventManagerLambdaName
+      Runtime: nodejs18.x
+      Handler: "index.handler"
+      Code:
+        S3Bucket: !Ref MicroserviceBucketName
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/streamEventManager.zip"
+      Role: !GetAtt StreamEventManagerLambdaRole.Arn
+      Environment:
+        Variables:
+          REGION: !Sub ${AWS::Region}
+          QUEUE_URL: !Ref DoneActionsQueueURL
+          START_READ_STREAM_TIMESTAMP: !Sub '${StartReadStreamTimestamp}'
+          STOP_READ_STREAM_TIMESTAMP: !Sub '${StopReadStreamTimestamp}'
+      TracingConfig:
+        Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:339249233099:layer:LambdaInsightsExtension:13"
+      Timeout: 10
+
+  # Lambda function role
+  StreamEventManagerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-streamEventManagerLambdaRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # Lambda function IAM policy
+  StreamEventManagerLambdaPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-StreamEventManagerLambdaPolicy
+      Roles:
+        - !Ref StreamEventManagerLambdaRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - kinesis:DescribeStream
+              - kinesis:DescribeStreamSummary
+              - kinesis:GetShardIterator
+              - kinesis:GetRecords
+              - kinesis:ListShards
+              - kinesis:ListStreams
+              - kinesis:SubscribeToShard
+            Resource: !Ref CdcKinesisSourceStreamArn
+          - Action: kms:Decrypt
+            Effect: Allow
+            Resource: !Ref CdcKinesisSourceStreamKeyArn
+          - Effect: Allow
+            Action:
+              - sqs:ChangeMessageVisibility
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:SendMessage
+            Resource:
+              !Ref DoneActionsQueueARN
+          - Effect: Allow
+            Action:
+              - sqs:ChangeMessageVisibility
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:SendMessage
+            Resource:
+              !Ref StreamEventManagerDLQARN
+
+
+  # CDC to Stream Event Manager
+  StreamEventManagerLambdaKinesisSource:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: !Sub ${StreamEventManagerLambdaBatchSize}
+      BisectBatchOnFunctionError: true
+      EventSourceArn: !Ref CdcKinesisSourceStreamArn
+      FunctionName: !Ref StreamEventManagerLambda
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
+      MaximumBatchingWindowInSeconds: !Sub ${StreamEventManagerLambdaMaximumBatchingWindowInSeconds}
+      StartingPosition: TRIM_HORIZON
+      DestinationConfig:
+        OnFailure:
+          Destination: !Ref StreamEventManagerDLQARN
+      FilterCriteria:
+        Filters:
+          - Pattern: !Sub '{"tableName": [${PnTimelinesTableName}], "eventName": ["INSERT"]}'
+
+  StreamEventManagerLambdaAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/lambda-alarms.yaml"
+      Parameters:
+        FunctionName: !Ref StreamEventManagerLambda
+        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
 
   #########################################################
   ###         NotificationStreamManagerLambda           ###
@@ -391,13 +532,13 @@ Resources:
   NotificationStreamManagerLambdaKinesisSource:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
-      BatchSize: !Sub ${StreamEventManagerLambdaBatchSize}
+      BatchSize: !Sub ${NotificationEventManagerLambdaBatchSize}
       BisectBatchOnFunctionError: true
       EventSourceArn: !Ref CdcKinesisSourceStreamArn
       FunctionName: !Ref NotificationStreamManagerLambda
       FunctionResponseTypes:
         - ReportBatchItemFailures
-      MaximumBatchingWindowInSeconds: !Sub ${StreamEventManagerLambdaMaximumBatchingWindowInSeconds}
+      MaximumBatchingWindowInSeconds: !Sub ${NotificationEventManagerLambdaMaximumBatchingWindowInSeconds}
       StartingPosition: TRIM_HORIZON
       DestinationConfig:
         OnFailure:

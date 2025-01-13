@@ -124,6 +124,8 @@ Outputs:
 
   NotificationStreamManagerLambdaName:
     Value: !Sub "${ProjectName}-notificationStreamManagerLambda"
+  StreamEventManagerLambdaName:
+    Value: !Sub "${ProjectName}-streamEventManagerLambda"
 
   # Webhook Step Manager DLQ
   WebhookEventManagerDLQName:
