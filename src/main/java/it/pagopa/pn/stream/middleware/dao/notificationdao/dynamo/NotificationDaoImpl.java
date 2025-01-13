@@ -21,7 +21,7 @@ import static it.pagopa.pn.stream.middleware.dao.notificationdao.dynamo.entity.N
 public class NotificationDaoImpl extends BaseDao<NotificationEntity> implements NotificationDao {
 
     protected NotificationDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient, PnStreamConfigs config) {
-        super(dynamoDbEnhancedAsyncClient, config.getNotificationDao().getTableName(), NotificationEntity.class);
+        super(dynamoDbEnhancedAsyncClient, config.getDao().getWebhookNotificationTable(), NotificationEntity.class);
     }
 
     @Override
