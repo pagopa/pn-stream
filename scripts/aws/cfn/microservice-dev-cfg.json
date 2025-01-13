@@ -1,5 +1,7 @@
 {
   "Parameters" : {
+    "StartReadStreamTimestamp": "1999-01-01T00:00:00Z",
+    "StopReadStreamTimestamp": "2099-01-01T00:00:00Z",
     "StreamEventManagerLambdaMaximumBatchingWindowInSeconds": "20",
     "StreamEventManagerLambdaBatchSize": "60",
     "PnNotificationTableName": "pn-Notification"
