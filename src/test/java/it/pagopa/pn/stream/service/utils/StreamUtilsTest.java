@@ -2,6 +2,7 @@ package it.pagopa.pn.stream.service.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.address.CourtesyDigitalAddressInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.NotificationInt;
@@ -9,6 +10,8 @@ import it.pagopa.pn.stream.dto.legalfacts.LegalFactCategoryInt;
 import it.pagopa.pn.stream.dto.legalfacts.LegalFactsIdInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.dto.timeline.details.*;
+import it.pagopa.pn.stream.middleware.dao.notificationdao.NotificationDao;
+import it.pagopa.pn.stream.middleware.dao.notificationdao.dynamo.entity.NotificationEntity;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.WebhookTimelineElementJsonConverter;
@@ -21,16 +24,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 class StreamUtilsTest {
 
@@ -45,19 +47,19 @@ class StreamUtilsTest {
     private WebhookTimelineElementJsonConverter timelineElementJsonConverter;
     private ObjectMapper objectMapper;
     private EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper;
+    private NotificationDao notificationDao;
 
     private StreamUtils streamUtils;
 
     @BeforeEach
     void setup() {
 
-        timelineService = Mockito.mock(TimelineService.class);
         notificationService = Mockito.mock(NotificationService.class);
-        statusService = Mockito.mock(StatusService.class);
         pnStreamConfigs = Mockito.mock( PnStreamConfigs.class );
         timelineMapper = new DtoToEntityWebhookTimelineMapper();
         objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         timelineElementJsonConverter = new WebhookTimelineElementJsonConverter(objectMapper);
+        notificationDao = Mockito.mock(NotificationDao.class);
 
         PnStreamConfigs.Webhook webhook = new PnStreamConfigs.Webhook();
         webhook.setScheduleInterval(1000L);
@@ -69,29 +71,41 @@ class StreamUtilsTest {
         webhook.setCurrentVersion("v23");
         Mockito.when(pnStreamConfigs.getWebhook()).thenReturn(webhook);
 
-        streamUtils = new StreamUtils(timelineService, statusService, notificationService, pnStreamConfigs, timelineMapper, entityToDtoTimelineMapper, timelineElementJsonConverter);
+        streamUtils = new StreamUtils(notificationService, pnStreamConfigs, timelineMapper, entityToDtoTimelineMapper, timelineElementJsonConverter, notificationDao);
     }
 
     @Test
-    void retrieveTimeline() {
+    void testGetNotification_Success() {
+        NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setGroups(Collections.singletonList("group1"));
 
-        String iun = "IUN-ABC-123";
-        String xpagopacxid = "PF-123456";
+        when(notificationDao.getNotificationEntity(anyString())).thenReturn(Mono.just(notificationEntity));
 
-        List<TimelineElementInternal> timeline = generateTimeline(iun, xpagopacxid);
-        Set<TimelineElementInternal> settimeline = new HashSet<>(timeline);
-        Mockito.when(timelineService.getTimeline(Mockito.anyString(), Mockito.anyBoolean())).thenReturn(settimeline);
-        Mockito.when(statusService.computeStatusChange(Mockito.any(), Mockito.anySet(), Mockito.any())).thenReturn(Mockito.mock(StatusService.NotificationStatusUpdate.class));
-        Mockito.when(notificationService.getNotificationByIun(iun)).thenReturn(Mockito.mock(NotificationInt.class));
-
-        StreamUtils.RetrieveTimelineResult retrieveTimelineResult = streamUtils.retrieveTimeline(iun, timeline.get(0).getElementId());
-
-        assertNotNull(retrieveTimelineResult);
-        assertEquals(retrieveTimelineResult.getEvent().getElementId(), timeline.get(0).getElementId());
-        assertNotNull(retrieveTimelineResult.getNotificationStatusUpdate());
-        assertNotNull(retrieveTimelineResult.getNotificationInt());
+        List<String> result = streamUtils.getNotification("IUN-123");
+        assertEquals(Collections.singletonList("group1"), result);
     }
 
+    @Test
+    void testGetNotification_FallbackSuccess() {
+        when(notificationDao.getNotificationEntity(anyString())).thenReturn(Mono.empty());
+
+        NotificationInt notificationInt = NotificationInt.builder().group("group1").build();
+
+        when(notificationService.getNotificationByIun(anyString())).thenReturn(notificationInt);
+
+        List<String> result = streamUtils.getNotification("IUN-123");
+        assertEquals(Collections.singletonList("group1"), result);
+    }
+
+    @Test
+    void testGetNotification_FallbackFailure() {
+        when(notificationDao.getNotificationEntity(anyString())).thenReturn(Mono.empty());
+        when(notificationService.getNotificationByIun(anyString())).thenThrow(new RuntimeException("Service error"));
+
+        assertThrows(PnInternalException.class, () -> {
+            streamUtils.getNotification("IUN-123");
+        });
+    }
     @Test
     void buildEventEntity() {
 

@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.middleware.queue.consumer.handler;
 
+import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl.StreamActionsEventHandler;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +48,7 @@ class ActionHandlerTest {
             public StreamAction getPayload() {
                 return StreamAction.builder()
                         .iun("test")
+                        .timelineElementInternal(new TimelineElementInternal())
                         .build();
             }
 

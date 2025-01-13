@@ -11,4 +11,5 @@ public interface NotificationDao {
 
     Mono<NotificationInternal> findByHashkey(String hashkey);
 
+    Mono<NotificationEntity> getNotificationEntity(String hashkey);
 }

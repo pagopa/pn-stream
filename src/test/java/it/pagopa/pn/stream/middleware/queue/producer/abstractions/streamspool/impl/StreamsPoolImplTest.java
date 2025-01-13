@@ -49,10 +49,8 @@ class StreamsPoolImplTest {
         return StreamAction.builder()
                 .streamId("001")
                 .eventId("002")
-                .paId("003")
                 .iun("004")
                 .delay(5)
-                .timelineId("006")
                 .type(StreamEventType.REGISTER_EVENT)
                 .build();
     }

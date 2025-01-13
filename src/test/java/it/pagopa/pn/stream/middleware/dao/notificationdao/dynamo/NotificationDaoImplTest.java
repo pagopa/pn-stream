@@ -38,9 +38,9 @@ class NotificationDaoImplTest {
     void setUp() {
         tableAsync = mock(DynamoDbAsyncTable.class);
         PnStreamConfigs pnStreamConfigs = new PnStreamConfigs();
-        PnStreamConfigs.NotificationDao dao = new PnStreamConfigs.NotificationDao();
-        dao.setTableName("pn-notification");
-        pnStreamConfigs.setNotificationDao(dao);
+        PnStreamConfigs.Dao dao = new PnStreamConfigs.Dao();
+        dao.setWebhookNotificationTable("pn-notification");
+        pnStreamConfigs.setDao(dao);
         when(dynamoDbEnhancedAsyncClient.table(anyString(), (TableSchema<NotificationEntity>) any())).thenReturn(tableAsync);
         notificationDao = new NotificationDaoImpl(dynamoDbEnhancedAsyncClient, pnStreamConfigs);
     }

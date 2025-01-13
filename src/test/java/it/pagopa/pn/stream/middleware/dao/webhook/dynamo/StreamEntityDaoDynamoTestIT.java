@@ -53,7 +53,7 @@ class StreamEntityDaoDynamoTestIT {
     TestDao<StreamEntity> testDao;
 
     @BeforeEach
-    void setup( @Value("${pn.delivery-push.webhook-dao.streams-table-name}") String table) {
+    void setup( @Value("${pn.stream.webhook-dao.streams-table-name}") String table) {
         testDao = new TestDao<>(dynamoDbEnhancedAsyncClient, table, StreamEntity.class);
 
     }

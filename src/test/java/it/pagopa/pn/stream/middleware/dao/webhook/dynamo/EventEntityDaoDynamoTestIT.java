@@ -56,7 +56,7 @@ class EventEntityDaoDynamoTestIT {
     int limitCount = 10;
 
     @BeforeEach
-    void setup( @Value("${pn.delivery-push.webhook-dao.events-table-name}") String table) {
+    void setup( @Value("${pn.stream.webhook-dao.events-table-name}") String table) {
         testDao = new TestDao<EventEntity>( dynamoDbEnhancedAsyncClient, table, EventEntity.class);
 
         this.limitCount = cfg.getWebhook().getMaxLength();

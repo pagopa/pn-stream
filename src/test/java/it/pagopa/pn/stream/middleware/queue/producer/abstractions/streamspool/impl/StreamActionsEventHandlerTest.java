@@ -27,14 +27,14 @@ class StreamActionsEventHandlerTest {
     void handleEventRegister() {
         // GIVEN
         StreamAction action = buildWebhookAction();
-        Mockito.when(webhookService.saveEvent(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(webhookService.saveEvent(Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
 
         // WHEN
         handler.handleEvent(action);
 
         // THEN
         Mockito.verify(webhookService, Mockito.times(1))
-                .saveEvent(action.getPaId(), action.getTimelineId(), action.getIun());
+                .saveEvent(action.getTimelineElementInternal(), action.getType());
     }
 
 
@@ -57,10 +57,8 @@ class StreamActionsEventHandlerTest {
 
         return StreamAction.builder()
                 .type(StreamEventType.REGISTER_EVENT)
-                .paId("001")
                 .eventId("002")
                 .iun("003")
-                .timelineId("timelineId")
                 .build();
     }
 
@@ -70,11 +68,9 @@ class StreamActionsEventHandlerTest {
 
         return StreamAction.builder()
                 .type(StreamEventType.PURGE_STREAM)
-                .paId("001")
                 .streamId("001")
                 .eventId("002")
                 .iun("003")
-                .timelineId("timelineId")
                 .build();
     }
 }

@@ -6,6 +6,8 @@ import it.pagopa.pn.stream.dto.ext.delivery.notification.NotificationInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes;
+import it.pagopa.pn.stream.middleware.dao.notificationdao.NotificationDao;
+import it.pagopa.pn.stream.middleware.dao.notificationdao.dynamo.entity.NotificationEntity;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
@@ -14,14 +16,13 @@ import it.pagopa.pn.stream.middleware.dao.webhook.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.webhook.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.service.NotificationService;
 import it.pagopa.pn.stream.service.StatusService;
-import it.pagopa.pn.stream.service.TimelineService;
-import it.pagopa.pn.stream.service.mapper.SmartMapper;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -30,9 +31,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Component
@@ -40,46 +39,39 @@ public class StreamUtils {
     private final DtoToEntityWebhookTimelineMapper mapperTimeline;
     private final EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper;
     private final WebhookTimelineElementJsonConverter timelineElementJsonConverter;
-    private final TimelineService timelineService;
-    private final StatusService statusService;
     private final NotificationService notificationService;
     private final Duration ttl;
     private final PnStreamConfigs pnStreamConfigs;
+    private final NotificationDao notificationDao;
 
-    public StreamUtils(TimelineService timelineService, StatusService statusService, NotificationService notificationService,
+    public StreamUtils(NotificationService notificationService,
                        PnStreamConfigs pnStreamConfigs, DtoToEntityWebhookTimelineMapper mapperTimeline, EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper,
-                       WebhookTimelineElementJsonConverter timelineElementJsonConverter) {
-        this.timelineService = timelineService;
-        this.statusService = statusService;
+                       WebhookTimelineElementJsonConverter timelineElementJsonConverter, NotificationDao notificationDao) {
         this.notificationService = notificationService;
         this.entityToDtoTimelineMapper = entityToDtoTimelineMapper;
         this.pnStreamConfigs = pnStreamConfigs;
         this.ttl = pnStreamConfigs.getWebhook().getTtl();
         this.mapperTimeline = mapperTimeline;
         this.timelineElementJsonConverter = timelineElementJsonConverter;
+        this.notificationDao = notificationDao;
     }
 
-
-    public RetrieveTimelineResult retrieveTimeline(String iun, String timelineId) {
-        NotificationInt notificationInt = notificationService.getNotificationByIun(iun);
-        // Non sono richieste le confidential infos. Nel caso in cui dovesse cambiare in futuro, rivedere il log dell'elemento timeline
-        Set<TimelineElementInternal> timelineElementInternalSet = timelineService.getTimeline(iun, false);
-        Optional<TimelineElementInternal> event = timelineElementInternalSet.stream().filter(x -> x.getElementId().equals(timelineId)).findFirst();
-
-        if (event.isEmpty())
-            throw new PnInternalException("Timeline event not found in timeline history", PnStreamExceptionCodes.ERROR_CODE_WEBHOOK_SAVEEVENT);
-
-        // considero gli elementi di timeline più vecchi di quello passato
-        Set<TimelineElementInternal> filteredPreviousTimelineElementInternalSet = timelineElementInternalSet.stream().filter(x -> x.getTimestamp().isBefore(event.get().getTimestamp())).collect(Collectors.toSet());
-        // calcolo vecchio e nuovo stato in base allo storico "di quel momento"
-        StatusService.NotificationStatusUpdate notificationStatusUpdate = statusService.computeStatusChange(event.get(), filteredPreviousTimelineElementInternalSet, notificationInt);
-        return RetrieveTimelineResult.builder()
-                .event(SmartMapper.mapTimelineInternal(event.get(), timelineElementInternalSet))  //bisogna cmq rimappare l'evento per sistemare le date
-                .notificationStatusUpdate(notificationStatusUpdate)
-                .notificationInt(notificationInt)
-                .build();
+    public List<String> getNotification(String iun) {
+        return notificationDao.getNotificationEntity(iun)
+                .switchIfEmpty(Mono.defer(() -> {
+                    try {
+                        NotificationInt notificationInt = notificationService.getNotificationByIun(iun);
+                        NotificationEntity fallbackEntity = new NotificationEntity();
+                        fallbackEntity.setGroups(Collections.singletonList(notificationInt.getGroup()));
+                        return Mono.just(fallbackEntity);
+                    } catch (Exception ex) {
+                        log.error("Error while retrieving notification from notificationService", ex);
+                        return Mono.error(new PnInternalException("Notification not found in notificationService", PnStreamExceptionCodes.ERROR_CODE_WEBHOOK_SAVEEVENT));
+                    }
+                }))
+                .map(NotificationEntity::getGroups)
+                .block();
     }
-
 
     public EventEntity buildEventEntity(Long atomicCounterUpdated, StreamEntity streamEntity,
                                         String newStatus, TimelineElementInternal timelineElementInternal) throws PnInternalException{

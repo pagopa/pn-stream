@@ -1,6 +1,8 @@
 package it.pagopa.pn.stream.action.it.mockbean;
 
 import it.pagopa.pn.stream.dto.stream.ProgressResponseElementDto;
+import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
+import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.StreamEventsService;
 import reactor.core.publisher.Mono;
 
@@ -14,7 +16,7 @@ public class StreamEventsServiceMock implements StreamEventsService {
     }
 
     @Override
-    public Mono<Void> saveEvent(String paId, String eventId, String iun) {
+    public Mono<Void> saveEvent(TimelineElementInternal timelineElementInternal, StreamEventType streamEventType) {
         return null;
     }
 

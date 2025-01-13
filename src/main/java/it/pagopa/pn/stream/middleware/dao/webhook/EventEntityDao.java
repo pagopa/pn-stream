@@ -26,4 +26,6 @@ public interface EventEntityDao {
     Mono<Boolean> delete(String streamId, String eventId, boolean olderThan);
 
     Mono<EventEntity> save(EventEntity entity);
+
+    Mono<EventEntity> saveWithCondition(EventEntity entity);
 }

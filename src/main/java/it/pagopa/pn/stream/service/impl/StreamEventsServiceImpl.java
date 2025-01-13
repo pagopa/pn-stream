@@ -3,7 +3,6 @@ package it.pagopa.pn.stream.service.impl;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.dto.ext.delivery.notification.NotificationInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.dto.timeline.details.TimelineElementCategoryInt;
@@ -140,8 +139,8 @@ public class StreamEventsServiceImpl extends StreamServiceImpl implements Stream
     }
 
     @Override
-    public Mono<Void> saveEvent(String paId, String timelineId, String iun) {
-        return streamEntityDao.findByPa(paId)
+    public Mono<Void> saveEvent(TimelineElementInternal timelineElementInternal, StreamEventType streamEventType) {
+        return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null)
                 .collectList()
             .flatMap(l -> {
@@ -149,21 +148,15 @@ public class StreamEventsServiceImpl extends StreamServiceImpl implements Stream
                     return Mono.empty();    // se non ho stream in ascolto, non c'è motivo di fare le query in dynamo
                 }
                 else {
-                    return Mono.fromSupplier(() -> streamUtils.retrieveTimeline(iun, timelineId))
-                        .map(timelineData -> Tuples.of(l, timelineData.getEvent(), timelineData.getNotificationInt(),
-                            timelineData.getNotificationStatusUpdate().getOldStatus().getValue(), timelineData.getNotificationStatusUpdate().getNewStatus().getValue()));
+                    return Mono.fromSupplier(() -> Tuples.of(l, timelineElementInternal, streamUtils.getNotification(timelineElementInternal.getIun())));
                 }
             })
-            .flatMapMany(res -> {
-                String oldStatus = res.getT4();
-                String newStatus = res.getT5();
-                return Flux.fromIterable(res.getT1())
-                    .flatMap(stream -> processEvent(stream, oldStatus, newStatus, res.getT2(), (NotificationInt) res.getT3()));
-            }).collectList().then();
+            .flatMapMany(res -> Flux.fromIterable(res.getT1())
+                .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3()))).collectList().then();
     }
-    private Mono<Void> processEvent(StreamEntity stream,  String oldStatus, String newStatus, TimelineElementInternal timelineElementInternal, NotificationInt notificationInt) {
+    private Mono<Void> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, List<String> groups) {
 
-        if (!CollectionUtils.isEmpty(stream.getGroups()) && !checkGroups(Collections.singletonList(notificationInt.getGroup()), stream.getGroups())){
+        if (!CollectionUtils.isEmpty(stream.getGroups()) && !checkGroups(groups, stream.getGroups())){
             log.info("skipping saving webhook event for stream={} because stream groups are different", stream.getStreamId());
             return Mono.empty();
         }
@@ -177,9 +170,9 @@ public class StreamEventsServiceImpl extends StreamServiceImpl implements Stream
 
         StreamCreationRequestV25.EventTypeEnum eventType = StreamCreationRequestV25.EventTypeEnum.fromValue(stream.getEventType());
         if (eventType == StreamCreationRequestV25.EventTypeEnum.STATUS
-            && newStatus.equals(oldStatus))
+            && !timelineElementInternal.getStatusInfo().isStatusChanged())
         {
-            log.info("skipping saving webhook event for stream={} because old and new status are same status={} iun={}", stream.getStreamId(), newStatus, timelineElementInternal.getIun());
+            log.info("skipping saving webhook event for stream={} because there was no change in status iun={}", stream.getStreamId(), timelineElementInternal.getIun());
             return Mono.empty();
         }
 
@@ -203,10 +196,10 @@ public class StreamEventsServiceImpl extends StreamServiceImpl implements Stream
 
         // e poi c'è il caso in cui lo stream ha un filtro sugli eventi interessati
         // se è nullo/vuoto o contiene lo stato, vuol dire che devo salvarlo
-        if ( (eventType == StreamCreationRequestV25.EventTypeEnum.STATUS && filteredValues.contains(newStatus))
+        if ( (eventType == StreamCreationRequestV25.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
             || (eventType == StreamCreationRequestV25.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory)))
         {
-            return saveEventWithAtomicIncrement(stream, newStatus, timelineElementInternal);
+            return saveEventWithAtomicIncrement(stream, timelineElementInternal.getStatusInfo().getActual(), timelineElementInternal);
         }
         else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
@@ -227,23 +220,24 @@ public class StreamEventsServiceImpl extends StreamServiceImpl implements Stream
     }
 
     private Mono<Void> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
-        TimelineElementInternal timelineElementInternal){
+                                                    TimelineElementInternal timelineElementInternal) {
         // recupero un contatore aggiornato
         return streamEntityDao.updateAndGetAtomicCounter(streamEntity)
-            .flatMap(atomicCounterUpdated -> {
-                if (atomicCounterUpdated < 0)
-                {
-                    log.warn("updateAndGetAtomicCounter counter is -1, skipping saving stream");
-                    return Mono.empty();
-                }
+                .flatMap(atomicCounterUpdated -> {
+                    if (atomicCounterUpdated < 0) {
+                        log.warn("updateAndGetAtomicCounter counter is -1, skipping saving stream");
+                        return Mono.empty();
+                    }
 
-                return eventEntityDao.save(streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity,
-                        newStatus, timelineElementInternal))
-                        .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
-                    .doOnSuccess(event -> log.info("saved webhookevent={}", event))
-                    .then();
-            });
+                    EventEntity eventEntity = streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity, newStatus, timelineElementInternal);
+
+                    return eventEntityDao.saveWithCondition(eventEntity)
+                            .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
+                            .doOnSuccess(event -> log.info("saved webhookevent={}", event))
+                            .then();
+                });
     }
+
     @Override
     public Mono<Void> purgeEvents(String streamId, String eventId, boolean olderThan) {
         log.info("purgeEvents streamId={} eventId={} olderThan={}", streamId, eventId, olderThan);

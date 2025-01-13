@@ -21,18 +21,18 @@ import java.util.function.Consumer;
 @CustomLog
 public class ActionHandler {
     private final StreamActionsEventHandler streamActionsEventHandler;
-    
+
     @Bean
     public Consumer<Message<StreamAction>> pnStreamActionConsumer() {
         final String processName = "STREAM ACTION";
-        
+
         return message -> {
             try {
                 MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
 
                 log.debug("Handle action pnStreamActionConsumer, with content {}", message);log.debug("pnStreamActionConsumer, message={}", message);
                 StreamAction action = message.getPayload();
-                HandleEventUtils.addIunToMdc(action.getIun());
+                HandleEventUtils.addIunToMdc(action.getTimelineElementInternal().getIun());
 
                 log.logStartingProcess(processName);
                 streamActionsEventHandler.handleEvent(action);

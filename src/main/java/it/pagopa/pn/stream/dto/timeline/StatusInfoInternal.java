@@ -1,9 +1,6 @@
 package it.pagopa.pn.stream.dto.timeline;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.Instant;
 
@@ -11,6 +8,9 @@ import java.time.Instant;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class StatusInfoInternal {
 
     private final String actual;
