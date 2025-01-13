@@ -63,7 +63,7 @@ public class StreamUtils {
     public RetrieveTimelineResult retrieveTimeline(String iun, String timelineId) {
         NotificationInt notificationInt = notificationService.getNotificationByIun(iun);
         // Non sono richieste le confidential infos. Nel caso in cui dovesse cambiare in futuro, rivedere il log dell'elemento timeline
-        Set<TimelineElementInternal> timelineElementInternalSet = timelineService.getTimeline(iun, false);
+        Set<TimelineElementInternal> timelineElementInternalSet = null;
         Optional<TimelineElementInternal> event = timelineElementInternalSet.stream().filter(x -> x.getElementId().equals(timelineId)).findFirst();
 
         if (event.isEmpty())

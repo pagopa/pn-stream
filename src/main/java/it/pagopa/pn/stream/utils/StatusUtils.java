@@ -35,18 +35,7 @@ public class StatusUtils {
     private static final Set<TimelineElementCategoryInt> FAILURE_DELIVERY_WORKFLOW_CATEGORY = new HashSet<>(List.of(
             TimelineElementCategoryInt.COMPLETELY_UNREACHABLE
     ));
-    
-    public NotificationStatusInt getCurrentStatusFromNotification(NotificationInt notification, TimelineService timelineService) {
-        Set<TimelineElementInternal> timelineElements =  timelineService.getTimeline(notification.getIun(), true);
-        
-        List<NotificationStatusHistoryElementInt> statusHistory = getStatusHistory( 
-                timelineElements,
-                notification.getRecipients().size(),
-                notification.getSentAt()
-        );
 
-        return getCurrentStatus( statusHistory );
-    }
     
     public NotificationStatusInt getCurrentStatus(List<NotificationStatusHistoryElementInt> statusHistory) {
         if (!statusHistory.isEmpty()) {

@@ -4,7 +4,6 @@ import it.pagopa.pn.commons.abstractions.impl.MiddlewareTypes;
 import it.pagopa.pn.stream.LocalStackTestConfig;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.TimelineCounterEntityDao;
-import it.pagopa.pn.stream.middleware.dao.timelinedao.TimelineDao;
 import it.pagopa.pn.stream.middleware.dao.webhook.dynamo.entity.StreamEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

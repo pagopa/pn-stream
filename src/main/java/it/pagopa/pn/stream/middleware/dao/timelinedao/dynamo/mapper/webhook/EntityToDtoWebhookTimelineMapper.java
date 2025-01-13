@@ -26,7 +26,7 @@ public class EntityToDtoWebhookTimelineMapper {
                 .iun(entity.getIun())
                 .elementId( entity.getTimelineElementId() )
                 .category( category )
-                .details( parseDetailsFromEntity( entity.getDetails(), category) )
+              //  .details( parseDetailsFromEntity( entity.getDetails(), category) )
                 .legalFactsIds( convertLegalFactsFromEntity( entity.getLegalFactIds() ) )
                 .statusInfo(entityToStatusInfoInternal(entity.getStatusInfo()))
                 .notificationSentAt(entity.getNotificationSentAt())

@@ -27,7 +27,7 @@ public class EntityToDtoTimelineMapper {
                 .elementId( entity.getTimelineElementId() )
                 .category( category )
                 .timestamp( entity.getTimestamp() )
-                .details( parseDetailsFromEntity( entity.getDetails(), category) )
+                .details( parseDetailsFromEntity( entity.getDetails(), category).toString() )
                 .legalFactsIds( convertLegalFactsFromEntity( entity.getLegalFactIds() ) )
                 .statusInfo(entityToStatusInfoInternal(entity.getStatusInfo()))
                 .notificationSentAt(entity.getNotificationSentAt())

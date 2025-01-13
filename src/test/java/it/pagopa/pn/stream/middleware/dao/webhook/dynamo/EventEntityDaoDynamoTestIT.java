@@ -6,7 +6,6 @@ import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.details.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.TimelineCounterEntityDao;
-import it.pagopa.pn.stream.middleware.dao.timelinedao.TimelineDao;
 import it.pagopa.pn.stream.middleware.dao.webhook.dynamo.entity.EventEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

@@ -50,14 +50,14 @@ public class SmartMapper {
     static Converter<TimelineElementInternal, TimelineElementInternal> timelineElementInternalTimestampConverter =
             ctx -> {
                 // se il detail estende l'interfaccia e l'elementTimestamp non è nullo, lo sovrascrivo nel source originale
-                if (ctx.getSource().getDetails() instanceof ElementTimestampTimelineElementDetails elementTimestampTimelineElementDetails
+              /*  if (ctx.getSource().getDetails() instanceof ElementTimestampTimelineElementDetails elementTimestampTimelineElementDetails
                     && elementTimestampTimelineElementDetails.getElementTimestamp() != null)
                 {
                     return ctx.getSource().toBuilder()
                             .timestamp(elementTimestampTimelineElementDetails.getElementTimestamp())
                             .build();
                 }
-
+*/
                 return ctx.getSource();
             };
 
@@ -133,14 +133,16 @@ public class SmartMapper {
             //Nello switch case invece vengono effettuati ulteriori remapping dei timestamp, questi non dipendono dal singolo elemento, ma necessitano di tutta la timeline
             switch (result.getCategory()) {
                 case SCHEDULE_REFINEMENT -> {
-                    Instant endAnalogWorkflowBusinessDate =  computeEndAnalogWorkflowBusinessData((RecipientRelatedTimelineElementDetails)result.getDetails(), timelineElementInternalSet, result.getIun());
+                //    Instant endAnalogWorkflowBusinessDate =  computeEndAnalogWorkflowBusinessData((RecipientRelatedTimelineElementDetails)result.getDetails(), timelineElementInternalSet, result.getIun());
+                  Instant endAnalogWorkflowBusinessDate = Instant.now();
                     if(endAnalogWorkflowBusinessDate != null){
                         log.debug("MAP TIMESTAMP: elem category {}, elem previous timestamp {}, elem new timestamp {} ", result.getCategory(), result.getTimestamp(), endAnalogWorkflowBusinessDate);
                         result.setTimestamp(endAnalogWorkflowBusinessDate);
                     }
                 }
                 case ANALOG_SUCCESS_WORKFLOW, ANALOG_FAILURE_WORKFLOW, COMPLETELY_UNREACHABLE_CREATION_REQUEST, COMPLETELY_UNREACHABLE -> {
-                    Instant endAnalogWorkflowBusinessDate = computeEndAnalogWorkflowBusinessData((RecipientRelatedTimelineElementDetails)result.getDetails(), timelineElementInternalSet, result.getIun());
+                   // Instant endAnalogWorkflowBusinessDate = computeEndAnalogWorkflowBusinessData((RecipientRelatedTimelineElementDetails)result.getDetails(), timelineElementInternalSet, result.getIun());
+                    Instant endAnalogWorkflowBusinessDate = Instant.now();
                     if(endAnalogWorkflowBusinessDate != null){
                         log.debug("MAP TIMESTAMP: elem category {}, elem previous timestamp {}, elem new timestamp {} ", result.getCategory(), result.getTimestamp(), endAnalogWorkflowBusinessDate);
                         result.setTimestamp(endAnalogWorkflowBusinessDate);
@@ -150,7 +152,8 @@ public class SmartMapper {
                     }
                 }
                 case REFINEMENT -> {
-                    ScheduleRefinementDetailsInt details = findScheduleRefinementDetails((RecipientRelatedTimelineElementDetails)result.getDetails(),timelineElementInternalSet);
+                   // ScheduleRefinementDetailsInt details = findScheduleRefinementDetails((RecipientRelatedTimelineElementDetails)result.getDetails(),timelineElementInternalSet);
+                    ScheduleRefinementDetailsInt details = new ScheduleRefinementDetailsInt();
                     if(details != null){
                         log.debug("MAP TIMESTAMP: elem category {}, elem previous timestamp {}, elem new timestamp {}", result.getCategory(), result.getTimestamp(), details.getSchedulingDate());
                         result.setTimestamp(details.getSchedulingDate());
@@ -167,10 +170,10 @@ public class SmartMapper {
                     //  - ottieniamo timestamp di AAR_GEN
                     // - lo usiamo per impostare il timestamp di SEND_DIGITAL_DOMICILE (setTimeStamp)
                     //
-                    SendDigitalDetailsInt details = (SendDigitalDetailsInt) result.getDetails();
+                    SendDigitalDetailsInt details = new SendDigitalDetailsInt();
                     if (LegalDigitalAddressInt.LEGAL_DIGITAL_ADDRESS_TYPE.SERCQ.equals(details.getDigitalAddress().getType())) {
-                            Instant aarRgenTimestamp = findAARgenTimestamp((RecipientRelatedTimelineElementDetails) result.getDetails(), timelineElementInternalSet);
-                            result.setTimestamp(aarRgenTimestamp);
+                      //      Instant aarRgenTimestamp = findAARgenTimestamp((RecipientRelatedTimelineElementDetails) result.getDetails(), timelineElementInternalSet);
+                            result.setTimestamp(Instant.now());
                     }
                 }
                 default -> {
@@ -192,9 +195,9 @@ public class SmartMapper {
         int recIndex = elementDetails.getRecIndex();
 
         TimelineElementInternal aarGenerationTimelineElement = timelineElementInternalSet.stream().filter(e ->
-                e.getCategory() == TimelineElementCategoryInt.AAR_GENERATION &&
+                e.getCategory() == TimelineElementCategoryInt.AAR_GENERATION/* &&
                         e.getDetails() instanceof RecipientRelatedTimelineElementDetails aarGenerationTimelineElementDetails &&
-                        aarGenerationTimelineElementDetails.getRecIndex() == recIndex
+                        aarGenerationTimelineElementDetails.getRecIndex() == recIndex*/
         ).findFirst().orElseThrow(() -> new PnInternalException("SCHEDULE_REFINEMENT NOT PRESENT, ERROR IN MAPPING", PnStreamExceptionCodes.ERROR_CODE_STREAM_TIMELINE_ELEMENT_NOT_PRESENT));
 
         return aarGenerationTimelineElement.getTimestamp();
@@ -208,12 +211,13 @@ public class SmartMapper {
         int recIndex = elementDetails.getRecIndex();
 
         TimelineElementInternal scheduleRefinementTimelineElment = timelineElementInternalSet.stream().filter(e ->
-                e.getCategory() == TimelineElementCategoryInt.SCHEDULE_REFINEMENT &&
+                e.getCategory() == TimelineElementCategoryInt.SCHEDULE_REFINEMENT /*&&
                         e.getDetails() instanceof RecipientRelatedTimelineElementDetails scheduleRefinementTimelineElementDetails &&
-                        scheduleRefinementTimelineElementDetails.getRecIndex() == recIndex
+                        scheduleRefinementTimelineElementDetails.getRecIndex() == recIndex*/
         ).findFirst().orElseThrow(() -> new PnInternalException("SCHEDULE_REFINEMENT NOT PRESENT, ERROR IN MAPPING", PnStreamExceptionCodes.ERROR_CODE_STREAM_TIMELINE_ELEMENT_NOT_PRESENT));
 
-        return (ScheduleRefinementDetailsInt) scheduleRefinementTimelineElment.getDetails();
+        //return (ScheduleRefinementDetailsInt) scheduleRefinementTimelineElment.getDetails();
+        return null;
     }
 
     private static Instant computeEndAnalogWorkflowBusinessData(RecipientRelatedTimelineElementDetails elementDetails, Set<TimelineElementInternal> timelineElementInternalSet, String iun) {
@@ -231,13 +235,13 @@ public class SmartMapper {
     }
 
     private static Instant extractBusinessDate(TimelineElementInternal timelineElementInternal){
-        if(timelineElementInternal.getDetails() instanceof SendAnalogFeedbackDetailsInt sendAnalogFeedbackDetails){
+       /* if(timelineElementInternal.getDetails() instanceof SendAnalogFeedbackDetailsInt sendAnalogFeedbackDetails){
             return sendAnalogFeedbackDetails.getNotificationDate();
         }else if(timelineElementInternal.getDetails() instanceof PrepareAnalogDomicileFailureDetailsInt){
             return timelineElementInternal.getTimestamp();
-        }else{
+        }else{*/
             throw new PnInternalException("Illegal state: iun "+timelineElementInternal.getIun(), PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR);
-        }
+        //}
     }
 
     private static boolean isElementAffectingEndAnalogWorkflowBusinessData(TimelineElementInternal elementInternal, Integer recIndex){
@@ -246,9 +250,9 @@ public class SmartMapper {
 
         boolean isValidRecIndex = false;
 
-        if(isValidCategory && elementInternal.getDetails() instanceof RecipientRelatedTimelineElementDetails details){
+       /* if(isValidCategory && elementInternal.getDetails() instanceof RecipientRelatedTimelineElementDetails details){
             isValidRecIndex = details.getRecIndex() == recIndex;
-        }
+        }*/
 
         return isValidRecIndex;
     }

@@ -23,7 +23,7 @@ public class TimelineElementInternal implements Comparable<TimelineElementIntern
     private String paId;
     private List<LegalFactsIdInt> legalFactsIds;
     private TimelineElementCategoryInt category;
-    private TimelineElementDetailsInt details;
+    private String details;
     private StatusInfoInternal statusInfo;
     private Instant notificationSentAt;
     private Instant ingestionTimestamp; //Questo campo viene valorizzato solo ed esclusivamente in uscita per api e webhook dal mapper
