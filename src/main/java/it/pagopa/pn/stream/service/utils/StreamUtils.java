@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.service.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
@@ -22,6 +23,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+
+import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
 
 
 @Slf4j
@@ -64,7 +67,12 @@ public class StreamUtils {
         // il requestId ci va sempre, ed è il base64 dello iun
         eventEntity.setNotificationRequestId(Base64Utils.encodeToString(timelineElementInternal.getIun().getBytes(StandardCharsets.UTF_8)));
 
-        WebhookTimelineElementEntity timelineElementEntity = mapperTimeline.dtoToEntity(timelineElementInternal);
+        WebhookTimelineElementEntity timelineElementEntity = null;
+        try {
+            timelineElementEntity = mapperTimeline.dtoToEntity(timelineElementInternal);
+        } catch (JsonProcessingException e) {
+            throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
+        }
 
         eventEntity.setElement(this.timelineElementJsonConverter.entityToJson(timelineElementEntity));
 
@@ -73,7 +81,11 @@ public class StreamUtils {
 
     public TimelineElementInternal getTimelineInternalFromEvent(EventEntity entity) throws PnInternalException{
         WebhookTimelineElementEntity timelineElementEntity = this.timelineElementJsonConverter.jsonToEntity(entity.getElement());
-        return entityToDtoTimelineMapper.entityToDto(timelineElementEntity);
+        try {
+            return entityToDtoTimelineMapper.entityToDto(timelineElementEntity);
+        } catch (JsonProcessingException e) {
+            throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
+        }
     }
 
 
