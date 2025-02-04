@@ -212,7 +212,7 @@ class StreamUtilsTest {
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE )
                 .timestamp(t0.plusMillis(1000))
-                .details("{recIndex:0, \"digitalAddress\":{\"address\":\"\",\"type\":\"MAIL\"}}")
+                .details("{\"recIndex\":\"0\", \"digitalAddress\":{\"address\":\"\",\"type\":\"MAIL\"}}")
                 .paId(paId)
                 .build());
 
