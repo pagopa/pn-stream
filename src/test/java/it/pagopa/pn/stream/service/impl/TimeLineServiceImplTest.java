@@ -85,7 +85,7 @@ class TimeLineServiceImplTest {
                         .addressDetails("details")
                         .build())
                 .build();
-        String details = "{\"normalizedAddress\":{\"address\":\"VIA SENZA NOME\",\"addressDetails\":\"SCALA B\",\"at\":\"Presso\",\"foreignState\":\"ITALIA\",\"municipality\":\"COSENZA\",\"municipalityDetails\":\"COSENZA\",\"province\":\"CS\",\"zip\":\"87100\"},\"oldAddress\":{\"address\":\"Via senza nome\",\"addressDetails\":\"scala b\",\"at\":\"Presso\",\"foreignState\":\"ITALIA\",\"municipality\":\"Cosenza\",\"municipalityDetails\":\"Cosenza\",\"province\":\"CS\",\"zip\":\"87100\"},\"recIndex\":0}";
+        String details = "{\"normalizedAddress\":{\"address\":\"VIA SENZA NOME\",\"addressDetails\":\"SCALA B\",\"at\":\"Presso\",\"foreignState\":\"ITALIA\",\"municipality\":\"COSENZA\",\"municipalityDetails\":\"COSENZA\",\"province\":\"CS\",\"zip\":\"87100\"},\"oldAddress\":{\"address\":\"Via senza nome\",\"addressDetails\":\"scala b\",\"at\":\"Presso\",\"foreignState\":\"ITALIA\",\"municipality\":\"Cosenza\",\"municipalityDetails\":\"Cosenza\",\"province\":\"CS\",\"zip\":\"87100\"},\"recIndex\":0,\"newAddress\":{}}";
 
         String result = timeLineService.enrichTimelineElementWithConfidentialInformation(String.valueOf(ConfidentialInformationEnum.CustomCategory.NORMALIZED_ADDRESS), details, confidentialDto);
 
