@@ -11,6 +11,9 @@ import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCatego
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementDetailsV26;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV26;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.util.Objects;
 
 import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_CODE_GENERIC;
 
@@ -29,7 +32,7 @@ public class TimelineElementMapper {
             if (!CollectionUtils.isEmpty(timelineElement.getSendingReceipts())) {
                 timelineElement.sendingReceipts(timelineElement.getSendingReceipts().stream().map(elem -> SendingReceipt.builder().build()).toList());
             }
-            if (timelineElement.getNextDigitalAddressSource() == null || timelineElement.getNextDigitalAddressSource().getValue().isEmpty()) {
+            if (Objects.isNull(timelineElement.getNextDigitalAddressSource())){
                 timelineElement.setNextSourceAttemptsMade(null);
             }
             builder = TimelineElementV26.builder()
