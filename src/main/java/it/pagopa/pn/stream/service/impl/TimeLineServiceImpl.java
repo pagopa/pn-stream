@@ -63,6 +63,7 @@ public class TimeLineServiceImpl implements TimelineService {
         targetNode.set(OLD_ADDRESS.getEventValue(), confidentialJson.get(OLD_ADDRESS.getConfidentialValue()));
         targetNode.set(NORMALIZED_ADDRESS.getEventValue(), confidentialJson.get(NORMALIZED_ADDRESS.getConfidentialValue()));
         targetNode.remove(OLD_ADDRESS.getTimelineKey());
+        targetNode.remove(NORMALIZED_ADDRESS.getTimelineKey());
         return targetNode;
     }
 

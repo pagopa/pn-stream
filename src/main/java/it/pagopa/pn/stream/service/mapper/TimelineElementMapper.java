@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.SendingReceipt;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV26;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementDetailsV26;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV26;
+import org.springframework.util.CollectionUtils;
 
 import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_CODE_GENERIC;
 
@@ -22,6 +24,14 @@ public class TimelineElementMapper {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         TimelineElementV26.TimelineElementV26Builder builder;
         try {
+            TimelineElementDetailsV26 timelineElement = objectMapper.readValue(internalDto.getDetails(), TimelineElementDetailsV26.class);
+            //TODO: remove this when the digital feedback and progress will be managed correctly by the new service
+            if (!CollectionUtils.isEmpty(timelineElement.getSendingReceipts())) {
+                timelineElement.sendingReceipts(timelineElement.getSendingReceipts().stream().map(elem -> SendingReceipt.builder().build()).toList());
+            }
+            if (timelineElement.getNextDigitalAddressSource() == null || timelineElement.getNextDigitalAddressSource().getValue().isEmpty()) {
+                timelineElement.setNextSourceAttemptsMade(null);
+            }
             builder = TimelineElementV26.builder()
                     .category(internalDto.getCategory() != null ? TimelineElementCategoryV26.fromValue(internalDto.getCategory()) : null)
                     .elementId(internalDto.getTimelineElementId())
@@ -29,7 +39,7 @@ public class TimelineElementMapper {
                     .notificationSentAt(internalDto.getNotificationSentAt())
                     .ingestionTimestamp(internalDto.getIngestionTimestamp())
                     .eventTimestamp(internalDto.getEventTimestamp())
-                    .details(objectMapper.readValue(internalDto.getDetails(), TimelineElementDetailsV26.class).nextSourceAttemptsMade(null))
+                    .details(timelineElement)
                     .legalFactsIds(internalDto.getLegalFactsIds());
 
         } catch (JsonProcessingException e) {
