@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "StartReadStreamTimestamp": "2099-01-01T00:00:00Z",
+    "StartReadStreamTimestamp": "2019-01-01T00:00:00Z",
     "StopReadStreamTimestamp": "2099-12-01T00:00:00Z",
     "StreamEventManagerLambdaMaximumBatchingWindowInSeconds": "20",
     "StreamEventManagerLambdaBatchSize": "60",
