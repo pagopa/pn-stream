@@ -302,6 +302,16 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing'
 
+  MaximumRetryAttemptsValueStream:
+    Type: Number
+    Description: 'Maximum number of retries for stream lambda function'
+    Default: 5
+
+  MaximumRetryAttemptsValueNotification:
+    Type: Number
+    Description: 'Maximum number of retries for notification lambda function'
+    Default: 5
+
 Resources:
 
   # pn-stream microservice
@@ -485,6 +495,7 @@ Resources:
       FunctionResponseTypes:
         - ReportBatchItemFailures
       MaximumBatchingWindowInSeconds: !Sub ${StreamEventManagerLambdaMaximumBatchingWindowInSeconds}
+      MaximumRetryAttempts: !Ref MaximumRetryAttemptsValueStream
       StartingPosition: TRIM_HORIZON
       DestinationConfig:
         OnFailure:
@@ -592,6 +603,7 @@ Resources:
       FunctionResponseTypes:
         - ReportBatchItemFailures
       MaximumBatchingWindowInSeconds: !Sub ${NotificationStreamManagerLambdaMaximumBatchingWindowInSeconds}
+      MaximumRetryAttempts: !Ref MaximumRetryAttemptsValueNotification
       StartingPosition: TRIM_HORIZON
       DestinationConfig:
         OnFailure:
