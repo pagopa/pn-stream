@@ -40,6 +40,7 @@ public class PnStreamConfigs {
         private String streamsTableName;
         private String eventsTableName;
         private String streamNotificationTable;
+        private String webhookStatsTable;
     }
 
     @Data
