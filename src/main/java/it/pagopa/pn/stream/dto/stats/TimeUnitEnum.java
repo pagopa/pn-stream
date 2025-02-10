@@ -8,7 +8,7 @@ public enum TimeUnitEnum {
     HOURS("hours"),
     MINUTES("minute");
 
-    private String value;
+    private final String value;
 
     TimeUnitEnum(String value) {
         this.value = value;
