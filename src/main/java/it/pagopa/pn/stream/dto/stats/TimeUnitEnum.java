@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum TimeUnitEnum {
     DAYS("days"),
     HOURS("hours"),
-    MINUTES("minute");
+    MINUTES("minutes");
 
     private final String value;
 

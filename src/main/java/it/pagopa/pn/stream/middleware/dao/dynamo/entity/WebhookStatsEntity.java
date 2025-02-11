@@ -19,24 +19,17 @@ public class WebhookStatsEntity {
 
     public static final String COL_PK = "pk";
     public static final String COL_SK = "sk";
-    public static final String COL_TIMEUNIT = "timeUnit";
     public static final String COL_VALUE = "value";
-    public static final String COL_SPANUNIT = "spanUnit";
     public static final String COL_TTL = "ttl";
 
-    public WebhookStatsEntity(String pk, String sk, TimeUnitEnum timeUnit, Number value, Number ttl,String spanUnit) {
+    public WebhookStatsEntity(String pk, String sk) {
         this.pk = pk;
         this.sk = sk;
-        this.timeUnit = timeUnit;
-        this.value = value;
-        this.spanUnit = spanUnit;
-        this.ttl = ttl;
+        this.value = 0L;
     }
 
     @Getter(onMethod=@__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_PK)})) private String pk;
     @Getter(onMethod=@__({@DynamoDbSortKey, @DynamoDbAttribute(COL_SK)})) private String sk;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_TIMEUNIT)})) private TimeUnitEnum timeUnit;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_SPANUNIT)})) private String spanUnit;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_VALUE)})) private Number value;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_TTL)})) private Number ttl;
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_VALUE)})) private Long value;
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_TTL)})) private long ttl;
 }
