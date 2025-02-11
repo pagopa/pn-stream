@@ -15,7 +15,7 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
     @Test
     void getItem() {
         WebhookStatsEntity entity = new WebhookStatsEntity("pk1", "sk1");
-        webhookStatsDao.updateItem(entity).block();
+        webhookStatsDao.putItem(entity).block();
         WebhookStatsEntity retrievedEntity = webhookStatsDao.getItem("pk1").block();
         assert retrievedEntity != null;
         Assertions.assertEquals("pk1", retrievedEntity.getPk());
@@ -27,7 +27,7 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
     @Test
     void updateItem() {
         WebhookStatsEntity entity = new WebhookStatsEntity("pk2", "sk2");
-        webhookStatsDao.updateItem(entity).block();
+        webhookStatsDao.putItem(entity).block();
         entity.setValue(2L);
         webhookStatsDao.updateItem(entity).block();
         WebhookStatsEntity updatedEntity = webhookStatsDao.getItem("pk2").block();

@@ -6,4 +6,7 @@ import reactor.core.publisher.Mono;
 public interface WebhookStatsDao {
     Mono<WebhookStatsEntity> getItem(String pk);
 
-    Mono<WebhookStatsEntity> updateItem(WebhookStatsEntity entity);}
+    Mono<WebhookStatsEntity> updateItem(WebhookStatsEntity entity);
+
+    Mono<WebhookStatsEntity> putItem (WebhookStatsEntity entity);
+}

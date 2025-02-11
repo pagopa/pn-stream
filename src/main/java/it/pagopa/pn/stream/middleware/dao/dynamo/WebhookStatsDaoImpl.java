@@ -14,12 +14,10 @@ import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 @Slf4j
 @Repository
 public class WebhookStatsDaoImpl implements WebhookStatsDao {
-    private final DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient;
     private final DynamoDbAsyncTable<WebhookStatsEntity> table;
 
     public WebhookStatsDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg) {
         this.table = dynamoDbEnhancedClient.table(cfg.getDao().getWebhookStatsTable(), TableSchema.fromBean(WebhookStatsEntity.class));
-        this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
     }
 
 
@@ -41,5 +39,10 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
 
         log.info("update webhook stats entity={}", entity);
         return Mono.fromFuture(table.updateItem(updateItemEnhancedRequest).thenApply(r -> entity));
+    }
+
+    @Override
+    public Mono<WebhookStatsEntity> putItem(WebhookStatsEntity entity) {
+        return Mono.fromFuture(table.putItem(entity).thenApply(r -> entity));
     }
 }
