@@ -16,7 +16,7 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
     @Test
     void getItem() {
         WebhookStatsEntity entity = new WebhookStatsEntity("pk1", "sk1");
-        webhookStatsDao.updateItem(entity).block();
+        webhookStatsDao.updateAtomicCounterStats(entity).block();
         WebhookStatsEntity retrievedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk1").sortValue("sk1").build()).block();
         assert retrievedEntity != null;
         Assertions.assertEquals("pk1", retrievedEntity.getPk());
@@ -26,11 +26,11 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
     }
 
     @Test
-    void updateItem() {
+    void updateAtomicCounterStats() {
         WebhookStatsEntity entity = new WebhookStatsEntity("pk2", "sk2");
-        webhookStatsDao.updateItem(entity).block();
+        webhookStatsDao.updateAtomicCounterStats(entity).block();
         entity.setValue(2L);
-        webhookStatsDao.updateItem(entity).block();
+        webhookStatsDao.updateAtomicCounterStats(entity).block();
         WebhookStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk2").sortValue("sk2").build()).block();
         assert updatedEntity != null;
         Assertions.assertEquals("pk2", updatedEntity.getPk());
@@ -41,7 +41,7 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
     @Test
     void updateCustomCounterStats() {
         WebhookStatsEntity entity = new WebhookStatsEntity("pk3", "sk3");
-        webhookStatsDao.updateItem(entity).block();
+        webhookStatsDao.updateAtomicCounterStats(entity).block();
         webhookStatsDao.updateCustomCounterStats("pk3", "sk3", "5").block();
         WebhookStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk3").sortValue("sk3").build()).block();
         assert updatedEntity != null;

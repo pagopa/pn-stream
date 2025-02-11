@@ -37,7 +37,7 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
     }
 
     @Override
-    public Mono<WebhookStatsEntity> updateItem(WebhookStatsEntity entity) {
+    public Mono<WebhookStatsEntity> updateAtomicCounterStats(WebhookStatsEntity entity) {
         log.info("update webhook stats entity={}", entity);
 
         Map<String, AttributeValue> key = new HashMap<>();

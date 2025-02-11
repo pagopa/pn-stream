@@ -7,7 +7,7 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 public interface WebhookStatsDao {
     Mono<WebhookStatsEntity> getItem(Key key);
 
-    Mono<WebhookStatsEntity> updateItem(WebhookStatsEntity entity);
+    Mono<WebhookStatsEntity> updateAtomicCounterStats(WebhookStatsEntity entity);
 
     Mono<WebhookStatsEntity> updateCustomCounterStats(String pk, String sk, String increment);
 
