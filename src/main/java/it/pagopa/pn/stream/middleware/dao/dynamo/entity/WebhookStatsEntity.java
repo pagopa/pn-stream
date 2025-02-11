@@ -3,6 +3,7 @@ package it.pagopa.pn.stream.middleware.dao.dynamo.entity;
 import it.pagopa.pn.stream.dto.stats.TimeUnitEnum;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
  */
 @DynamoDbBean
 @Data
+@NoArgsConstructor
 public class WebhookStatsEntity {
 
     public static final String COL_PK = "pk";
