@@ -64,6 +64,7 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
                 .updateExpression("ADD #counter :v")
                 .expressionAttributeNames(Map.of("#counter", WebhookStatsEntity.COL_VALUE_COUNTER))
                 .expressionAttributeValues(Map.of(":v", AttributeValue.builder().n(increment).build()))
+                .conditionExpression("attribute_exists(" + WebhookStatsEntity.COL_PK + ")")
                 .build();
 
         return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateRequest))

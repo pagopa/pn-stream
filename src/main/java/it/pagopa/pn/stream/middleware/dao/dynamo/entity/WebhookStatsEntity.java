@@ -36,7 +36,7 @@ public class WebhookStatsEntity {
     private String sk;
 
     @Setter
-    @Getter(onMethod = @__({@DynamoDbAtomicCounter(startValue = 1)}))
+    @Getter(onMethod = @__({@DynamoDbAtomicCounter(startValue = 1), @DynamoDbAttribute(COL_VALUE_COUNTER)}))
     private Long valueCounter;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_TTL)}))
