@@ -3,6 +3,8 @@ package it.pagopa.pn.stream.middleware.dao.dynamo.entity;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbAtomicCounter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -27,8 +29,16 @@ public class WebhookStatsEntity {
         this.value = 0L;
     }
 
-    @Getter(onMethod=@__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_PK)})) private String pk;
-    @Getter(onMethod=@__({@DynamoDbSortKey, @DynamoDbAttribute(COL_SK)})) private String sk;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_VALUE)})) private Long value;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_TTL)})) private long ttl;
+    @Getter(onMethod = @__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_PK)}))
+    private String pk;
+
+    @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_SK)}))
+    private String sk;
+
+    @Setter
+    @Getter(onMethod = @__({@DynamoDbAtomicCounter(startValue = 1)}))
+    private Long value;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_TTL)}))
+    private long ttl;
 }
