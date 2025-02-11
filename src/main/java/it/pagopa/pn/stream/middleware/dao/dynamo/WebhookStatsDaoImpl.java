@@ -22,27 +22,28 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
 
 
     @Override
-    public Mono<WebhookStatsEntity> getItem(String pk) {
-        log.info("get pk={}", pk);
-        Key key = Key.builder().partitionValue(pk).build();
+    public Mono<WebhookStatsEntity> getItem(String pk,String sk) {
+        log.info("get pk={} , sk={}", pk,sk);
+        Key key = Key.builder().partitionValue(pk).sortValue(sk).build();
         return Mono.fromFuture(table.getItem(key));
     }
 
     @Override
     public Mono<WebhookStatsEntity> updateItem(WebhookStatsEntity entity) {
-
+        log.info("update webhook stats entity={}", entity);
         UpdateItemEnhancedRequest<WebhookStatsEntity> updateItemEnhancedRequest =
                 UpdateItemEnhancedRequest.builder(WebhookStatsEntity.class)
                         .item(entity)
                         .ignoreNulls(true)
                         .build();
 
-        log.info("update webhook stats entity={}", entity);
+        log.info("updated webhook stats entity={}", entity);
         return Mono.fromFuture(table.updateItem(updateItemEnhancedRequest).thenApply(r -> entity));
     }
 
     @Override
     public Mono<WebhookStatsEntity> putItem(WebhookStatsEntity entity) {
+        log.info("put webhook stats entity={}", entity);
         return Mono.fromFuture(table.putItem(entity).thenApply(r -> entity));
     }
 }
