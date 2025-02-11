@@ -61,9 +61,8 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
         UpdateItemRequest updateRequest = UpdateItemRequest.builder()
                 .tableName(table.tableName())
                 .key(key)
-                .updateExpression("ADD #val :v")
-                //utilizzo e mappo #val come alias per l'attributo value nell'espressione di aggiornamento per evitare il conflitto
-                .expressionAttributeNames(Map.of("#val", WebhookStatsEntity.COL_VALUE))
+                .updateExpression("ADD #counter :v")
+                .expressionAttributeNames(Map.of("#counter", WebhookStatsEntity.COL_VALUE_COUNTER))
                 .expressionAttributeValues(Map.of(":v", AttributeValue.builder().n(increment).build()))
                 .build();
 

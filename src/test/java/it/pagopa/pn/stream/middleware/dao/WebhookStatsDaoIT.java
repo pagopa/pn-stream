@@ -21,21 +21,21 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
         assert retrievedEntity != null;
         Assertions.assertEquals("pk1", retrievedEntity.getPk());
         Assertions.assertEquals("sk1", retrievedEntity.getSk());
-        Assertions.assertNotNull(retrievedEntity.getValue());
-        Assertions.assertEquals(0L, retrievedEntity.getValue());
+        Assertions.assertNotNull(retrievedEntity.getValueCounter());
+        Assertions.assertEquals(0L, retrievedEntity.getValueCounter());
     }
 
     @Test
     void updateAtomicCounterStats() {
         WebhookStatsEntity entity = new WebhookStatsEntity("pk2", "sk2");
         webhookStatsDao.updateAtomicCounterStats(entity).block();
-        entity.setValue(2L);
+        entity.setValueCounter(2L);
         webhookStatsDao.updateAtomicCounterStats(entity).block();
         WebhookStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk2").sortValue("sk2").build()).block();
         assert updatedEntity != null;
         Assertions.assertEquals("pk2", updatedEntity.getPk());
         Assertions.assertEquals("sk2", updatedEntity.getSk());
-        Assertions.assertEquals(2L, updatedEntity.getValue());
+        Assertions.assertEquals(2L, updatedEntity.getValueCounter());
     }
 
     @Test
@@ -47,6 +47,6 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
         assert updatedEntity != null;
         Assertions.assertEquals("pk3", updatedEntity.getPk());
         Assertions.assertEquals("sk3", updatedEntity.getSk());
-        Assertions.assertEquals(5L, updatedEntity.getValue());
+        Assertions.assertEquals(5L, updatedEntity.getValueCounter());
     }
 }
