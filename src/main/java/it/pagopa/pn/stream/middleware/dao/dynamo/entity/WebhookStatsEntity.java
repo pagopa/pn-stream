@@ -1,6 +1,5 @@
 package it.pagopa.pn.stream.middleware.dao.dynamo.entity;
 
-import it.pagopa.pn.stream.dto.stats.TimeUnitEnum;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
