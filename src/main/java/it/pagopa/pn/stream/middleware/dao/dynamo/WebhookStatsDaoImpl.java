@@ -9,6 +9,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
@@ -40,22 +41,13 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
     public Mono<WebhookStatsEntity> updateAtomicCounterStats(WebhookStatsEntity entity) {
         log.info("update webhook stats entity={}", entity);
 
-        Map<String, AttributeValue> key = new HashMap<>();
-        key.put(WebhookStatsEntity.COL_PK, AttributeValue.builder().s(entity.getPk()).build());
-        key.put(WebhookStatsEntity.COL_SK, AttributeValue.builder().s(entity.getSk()).build());
-
-        UpdateItemRequest updateRequest = UpdateItemRequest.builder()
-                .tableName(table.tableName())
-                .key(key)
-                .updateExpression("ADD " + WebhookStatsEntity.COL_VALUE + " :v")
-                .expressionAttributeValues(Map.of(
-                        ":v", AttributeValue.builder().n("1").build()))
-                .build();
-
-        return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateRequest))
-                .doOnSuccess(response -> log.info("Successfully updated item: {}", entity))
-                .doOnError(error -> log.error("Failed to update item: {}", entity, error))
-                .then(Mono.just(entity));
+        UpdateItemEnhancedRequest<WebhookStatsEntity> updateItemEnhancedRequest =
+                UpdateItemEnhancedRequest.builder(WebhookStatsEntity.class)
+                        .item(entity)
+                        .ignoreNulls(true)
+                        .build();
+        log.info("update stream entity={}", entity);
+        return Mono.fromFuture(table.updateItem(updateItemEnhancedRequest).thenApply(r -> entity));
     }
 
     @Override
@@ -69,9 +61,10 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
         UpdateItemRequest updateRequest = UpdateItemRequest.builder()
                 .tableName(table.tableName())
                 .key(key)
-                .updateExpression("ADD " + WebhookStatsEntity.COL_VALUE + " :v")
-                .expressionAttributeValues(Map.of(
-                        ":v", AttributeValue.builder().n(increment).build()))
+                .updateExpression("ADD #val :v")
+                //utilizzo e mappo #val come alias per l'attributo value nell'espressione di aggiornamento per evitare il conflitto
+                .expressionAttributeNames(Map.of("#val", WebhookStatsEntity.COL_VALUE))
+                .expressionAttributeValues(Map.of(":v", AttributeValue.builder().n(increment).build()))
                 .build();
 
         return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateRequest))
