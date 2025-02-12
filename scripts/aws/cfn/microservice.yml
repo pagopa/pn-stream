@@ -314,12 +314,12 @@ Parameters:
 
   StatsTimeUnit:
     Type: String
-    Description: 'Unità di tempo per la statistica'
+    Description: 'Time units for statistics'
     AllowedValues: [ DAYS, HOURS, MINUTES ]
 
   StatsSpanUnit:
     Type: Number
-    Description: 'Intervallo di tempo per la statistica'
+    Description: 'Time interval for statistics'
 
 Resources:
 
