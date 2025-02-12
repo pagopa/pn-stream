@@ -52,14 +52,12 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
         key.put(WebhookStatsEntity.COL_PK, AttributeValue.builder().s(pk).build());
         key.put(WebhookStatsEntity.COL_SK, AttributeValue.builder().s(sk).build());
 
-        Map<String, AttributeValue> attributeValue = new HashMap<>();
-        attributeValue.put(":v", AttributeValue.builder().n(increment).build());
-
         UpdateItemRequest updateRequest = UpdateItemRequest.builder()
                 .tableName(table.tableName())
                 .key(key)
-                .updateExpression("ADD "+ WebhookStatsEntity.COL_COUNTER + " :v")
-                .expressionAttributeValues(attributeValue)
+                .updateExpression("ADD #counterValue :value")
+                .expressionAttributeNames(Map.of("#counterValue", WebhookStatsEntity.COL_COUNTER))
+                .expressionAttributeValues(Map.of(":value", AttributeValue.builder().n(increment).build()))
                 .build();
 
         return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateRequest))

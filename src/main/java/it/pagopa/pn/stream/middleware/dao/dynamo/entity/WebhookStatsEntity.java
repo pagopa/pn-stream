@@ -26,7 +26,6 @@ public class WebhookStatsEntity {
     public WebhookStatsEntity(String pk, String sk) {
         this.pk = pk;
         this.sk = sk;
-        this.counter = 0L;
     }
 
     @Getter(onMethod = @__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_PK)}))
