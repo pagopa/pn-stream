@@ -312,6 +312,15 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
+  StatsTimeUnit:
+    Type: String
+    Description: 'Unità di tempo per la statistica'
+    AllowedValues: [ DAYS, HOURS, MINUTES ]
+
+  StatsSpanUnit:
+    Type: Number
+    Description: 'Intervallo di tempo per la statistica'
+
 Resources:
 
   # pn-stream microservice
@@ -337,6 +346,8 @@ Resources:
         EfsFilesystem: !Ref FargateEFSFileSystemID
         MountEfs: !Ref MountEfs
         WireTapLogActivation: !Ref WireTapLogActivation
+        StatsTimeUnit: !Ref StatsTimeUnit
+        StatsSpanUnit: !Ref StatsSpanUnit
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub "AWS_REGIONCODE=${AWS::Region}"
         ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLE=${StreamNotificationTableName}'
@@ -354,6 +365,8 @@ Resources:
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
+        ContainerEnvEntry18: !Sub 'PN_STATS_TIME_UNIT=${StatsTimeUnit}'
+        ContainerEnvEntry19: !Sub 'PN_STATS_SPAN_UNIT=${StatsSpanUnit}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
