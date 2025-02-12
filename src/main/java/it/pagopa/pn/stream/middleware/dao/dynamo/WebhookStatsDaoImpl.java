@@ -9,10 +9,10 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.UpdateItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,36 +40,30 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
     @Override
     public Mono<WebhookStatsEntity> updateAtomicCounterStats(WebhookStatsEntity entity) {
         log.info("update webhook stats entity={}", entity);
-
-        UpdateItemEnhancedRequest<WebhookStatsEntity> updateItemEnhancedRequest =
-                UpdateItemEnhancedRequest.builder(WebhookStatsEntity.class)
-                        .item(entity)
-                        .ignoreNulls(true)
-                        .build();
         log.info("update stream entity={}", entity);
-        return Mono.fromFuture(table.updateItem(updateItemEnhancedRequest).thenApply(r -> entity));
+        return Mono.fromFuture(table.updateItem(entity));
     }
 
     @Override
-    public Mono<WebhookStatsEntity> updateCustomCounterStats(String pk, String sk, String increment) {
+    public Mono<UpdateItemResponse> updateCustomCounterStats(String pk, String sk, String increment) {
         log.info("update custom counter stats for pk={}, sk={}, increment={}", pk, sk, increment);
 
         Map<String, AttributeValue> key = new HashMap<>();
         key.put(WebhookStatsEntity.COL_PK, AttributeValue.builder().s(pk).build());
         key.put(WebhookStatsEntity.COL_SK, AttributeValue.builder().s(sk).build());
 
+        Map<String, AttributeValue> attributeValue = new HashMap<>();
+        attributeValue.put(":v", AttributeValue.builder().n(increment).build());
+
         UpdateItemRequest updateRequest = UpdateItemRequest.builder()
                 .tableName(table.tableName())
                 .key(key)
-                .updateExpression("ADD #counter :v")
-                .expressionAttributeNames(Map.of("#counter", WebhookStatsEntity.COL_VALUE_COUNTER))
-                .expressionAttributeValues(Map.of(":v", AttributeValue.builder().n(increment).build()))
-                .conditionExpression("attribute_exists(" + WebhookStatsEntity.COL_PK + ")")
+                .updateExpression("ADD "+ WebhookStatsEntity.COL_COUNTER + " :v")
+                .expressionAttributeValues(attributeValue)
                 .build();
 
         return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateRequest))
                 .doOnSuccess(response -> log.info("Successfully updated custom counter stats for pk={}, sk={}", pk, sk))
-                .doOnError(error -> log.error("Failed to update custom counter stats for pk={}, sk={}", pk, sk, error))
-                .then(Mono.just(new WebhookStatsEntity(pk, sk)));
+                .doOnError(error -> log.error("Failed to update custom counter stats for pk={}, sk={}", pk, sk, error));
     }
 }

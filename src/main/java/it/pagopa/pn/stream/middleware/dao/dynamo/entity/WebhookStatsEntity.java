@@ -20,13 +20,13 @@ public class WebhookStatsEntity {
 
     public static final String COL_PK = "pk";
     public static final String COL_SK = "sk";
-    public static final String COL_VALUE_COUNTER = "valueCounter";
+    public static final String COL_COUNTER = "counter";
     public static final String COL_TTL = "ttl";
 
     public WebhookStatsEntity(String pk, String sk) {
         this.pk = pk;
         this.sk = sk;
-        this.valueCounter = 0L;
+        this.counter = 0L;
     }
 
     @Getter(onMethod = @__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_PK)}))
@@ -36,8 +36,8 @@ public class WebhookStatsEntity {
     private String sk;
 
     @Setter
-    @Getter(onMethod = @__({@DynamoDbAtomicCounter(startValue = 1), @DynamoDbAttribute(COL_VALUE_COUNTER)}))
-    private Long valueCounter;
+    @Getter(onMethod = @__({@DynamoDbAtomicCounter(startValue = 1), @DynamoDbAttribute(COL_COUNTER)}))
+    private Long counter;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_TTL)}))
     private long ttl;
