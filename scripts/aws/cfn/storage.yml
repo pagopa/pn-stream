@@ -114,6 +114,26 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  # Notification Unlocked Table
+  NotificationUnlockedTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-NotificationUnlocked'
+      AttributeDefinitions:
+        - AttributeName: "pk"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "pk"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
   PnStreamLogGroup:
     Type: AWS::CloudFormation::Stack
     UpdateReplacePolicy: Retain
@@ -158,6 +178,13 @@ Outputs:
   StreamNotificationTableArn:
     Description: ARN of dynamodb table containing
     Value: !Sub '${StreamNotificationTable.Arn}'
+
+  NotificationUnlockedTableName:
+    Description: Name of dynamodb table containing the unlocked notification
+    Value: !Ref NotificationUnlockedTable
+  NotificationUnlockedTableArn:
+    Description: ARN of dynamodb table containing the unlocked notification
+    Value: !Sub '${NotificationUnlockedTable.Arn}'
 
   # Event queue
   EventQueueName:

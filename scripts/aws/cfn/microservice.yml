@@ -312,6 +312,14 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
+  NotificationUnlockedTableName:
+    Type: String
+    Description: Name of dynamodb table containing the unlocked notification
+
+  NotificationUnlockedTableArn:
+    Type: String
+    Description: ARN of dynamodb table containing the unlocked notification
+
 Resources:
 
   # pn-stream microservice
@@ -354,6 +362,7 @@ Resources:
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
+        ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -389,6 +398,8 @@ Resources:
               - !Sub "${EventsTableArn}/*"
               - !Sub "${StreamNotificationTableArn}"
               - !Sub "${StreamNotificationTableArn}/*"
+              - !Sub "${NotificationUnlockedTableArn}"
+              - !Sub "${NotificationUnlockedTableArn}/*"
           - Effect: Allow
             Action:
               - sqs:ChangeMessageVisibility
@@ -648,6 +659,7 @@ Resources:
           - - !Ref StreamNotificationTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
+            - !Ref NotificationUnlockedTableName
 
 Outputs:
   #
