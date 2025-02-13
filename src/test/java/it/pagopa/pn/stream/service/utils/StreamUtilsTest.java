@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
+import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV20;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
@@ -15,14 +16,18 @@ import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.Webh
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 class StreamUtilsTest {
 
@@ -143,15 +148,16 @@ class StreamUtilsTest {
     }
 
     @Test
-    void getVersionV1 (){
+    void getVersionV1() {
         String streamVersion = "v10";
         int version = streamUtils.getVersion(streamVersion);
 
         assertEquals(10, version);
 
     }
+
     @Test
-    void getVersionNull (){
+    void getVersionNull() {
 
         int version = streamUtils.getVersion(null);
 
@@ -159,14 +165,14 @@ class StreamUtilsTest {
 
     }
 
-    private List<TimelineElementInternal> generateTimeline(String iun, String paId){
+    private List<TimelineElementInternal> generateTimeline(String iun, String paId) {
         List<TimelineElementInternal> res = new ArrayList<>();
         Instant t0 = Instant.now();
 
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.REQUEST_ACCEPTED.name())
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.REQUEST_ACCEPTED )
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.REQUEST_ACCEPTED)
                 .timestamp(t0)
                 .paId(paId)
                 .build());
@@ -174,16 +180,16 @@ class StreamUtilsTest {
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
                 .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY1").build(), LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY2").build()))
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION)
                 .timestamp(t0.plusMillis(1000))
-                        .details("{\"recIndex\":\"0\"}")
+                .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
                 .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE )
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
@@ -192,7 +198,7 @@ class StreamUtilsTest {
                 .category(TimelineElementCategoryInt.SEND_ANALOG_DOMICILE.name())
                 .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_ANALOG_DOMICILE )
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_ANALOG_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
@@ -201,7 +207,7 @@ class StreamUtilsTest {
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_SIMPLE_REGISTERED_LETTER.name())
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_SIMPLE_REGISTERED_LETTER )
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_SIMPLE_REGISTERED_LETTER)
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
@@ -210,13 +216,82 @@ class StreamUtilsTest {
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name())
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE )
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE)
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\", \"digitalAddress\":{\"address\":\"\",\"type\":\"MAIL\"}}")
                 .paId(paId)
                 .build());
 
         return res;
+    }
+
+    @Test
+    void testRetrieveCurrentIntervalWhenTimeUnitIsDays() {
+        // Configura i mock
+        PnStreamConfigs pnStreamConfigs = Mockito.mock(PnStreamConfigs.class);
+        PnStreamConfigs.Stats stats = Mockito.mock(PnStreamConfigs.Stats.class);
+        when(pnStreamConfigs.getStats()).thenReturn(stats);
+        when(stats.getSpanUnit()).thenReturn(1);
+        when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.DAYS);
+
+         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+
+        // Calcola l'intervallo corrente
+        Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long spanInSeconds = 86400L; // 1 giorno in secondi
+        long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
+        long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
+        Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
+
+        // Esegui il metodo e verifica il risultato
+        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        assertEquals(expectedInterval, actualInterval);
+    }
+
+    @Test
+    void testRetrieveCurrentIntervalWhenTimeUnitIsHours() {
+        // Configura i mock
+        PnStreamConfigs pnStreamConfigs = Mockito.mock(PnStreamConfigs.class);
+        PnStreamConfigs.Stats stats = Mockito.mock(PnStreamConfigs.Stats.class);
+        when(pnStreamConfigs.getStats()).thenReturn(stats);
+        when(stats.getSpanUnit()).thenReturn(1);
+        when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.HOURS);
+
+         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+
+        // Calcola l'intervallo corrente
+        Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long spanInSeconds = 3600L; // 1 ora in secondi
+        long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
+        long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
+        Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
+
+        // Esegui il metodo e verifica il risultato
+        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        assertEquals(expectedInterval, actualInterval);
+    }
+
+    @Test
+    void testRetrieveCurrentIntervalWhenTimeUnitIsMinutes() {
+        // Configura i mock
+        PnStreamConfigs pnStreamConfigs = Mockito.mock(PnStreamConfigs.class);
+        PnStreamConfigs.Stats stats = Mockito.mock(PnStreamConfigs.Stats.class);
+        when(pnStreamConfigs.getStats()).thenReturn(stats);
+        when(stats.getSpanUnit()).thenReturn(1);
+        when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.MINUTES);
+
+         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+
+        // Calcola l'intervallo corrente
+        Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long spanInSeconds = 60L; // 1 minuto in secondi
+        long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
+        long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
+        Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
+
+        // Esegui il metodo e verifica il risultato
+        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        assertEquals(expectedInterval, actualInterval);
     }
 
 }

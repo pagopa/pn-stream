@@ -211,6 +211,11 @@ Parameters:
     Description: 'TTL offset for stream notifications'
     Default: 7889400
 
+  StatsTtl:
+    Type: Number
+    Description: 'TTL in days offset for Webhook Stats'
+    Default: 365
+
   StreamNotificationTableArn:
     Type: String
     Description: 'ARN of dynamodb table containing stream notifications'
@@ -353,7 +358,8 @@ Resources:
         ContainerEnvEntry13: !Sub 'PN_STREAM_TOPICS_EVENT=${EventQueueName}'
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
-        ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
+        ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StatsTtl}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_WEBHOOKSTATSTTL=${StreamNotificationTtl}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
