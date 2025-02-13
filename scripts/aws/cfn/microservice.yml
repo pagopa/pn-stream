@@ -315,7 +315,7 @@ Parameters:
   StreamStatsTimeUnit:
     Type: String
     Description: 'Time units for statistics'
-    Default: HOURS
+    Default: 'HOURS'
     AllowedValues: [ DAYS, HOURS, MINUTES ]
 
   StreamStatsSpanUnit:
