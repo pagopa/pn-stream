@@ -315,11 +315,13 @@ Parameters:
   StreamStatsTimeUnit:
     Type: String
     Description: 'Time units for statistics'
+    Default: HOURS
     AllowedValues: [ DAYS, HOURS, MINUTES ]
 
   StreamStatsSpanUnit:
     Type: Number
     Description: 'Time interval for statistics'
+    Default: 1
 
   StreamStatsTtl:
     Type: Number
@@ -351,8 +353,6 @@ Resources:
         EfsFilesystem: !Ref FargateEFSFileSystemID
         MountEfs: !Ref MountEfs
         WireTapLogActivation: !Ref WireTapLogActivation
-        StatsTimeUnit: !Ref StatsTimeUnit
-        StatsSpanUnit: !Ref StatsSpanUnit
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub "AWS_REGIONCODE=${AWS::Region}"
         ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLE=${StreamNotificationTableName}'
@@ -370,9 +370,9 @@ Resources:
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
-        ContainerEnvEntry18: !Sub 'PN_STATS_TIME_UNIT=${StreamStatsTimeUnit}'
-        ContainerEnvEntry19: !Sub 'PN_STATS_SPAN_UNIT=${StreamStatsSpanUnit}'
-        ContainerEnvEntry20: !Sub 'PN_STREAM_STREAMSTATSTTL=${StreamStatsTtl}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
