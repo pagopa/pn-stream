@@ -16,14 +16,14 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 @DynamoDbBean
 @Data
 @NoArgsConstructor
-public class WebhookStatsEntity {
+public class StreamStatsEntity {
 
     public static final String COL_PK = "pk";
     public static final String COL_SK = "sk";
     public static final String COL_COUNTER = "counter";
     public static final String COL_TTL = "ttl";
 
-    public WebhookStatsEntity(String pk, String sk) {
+    public StreamStatsEntity(String pk, String sk) {
         this.pk = pk;
         this.sk = sk;
     }

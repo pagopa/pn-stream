@@ -114,12 +114,12 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
-  WebhookStatsTable:
+  StreamStatsTable:
     Type: AWS::DynamoDB::Table
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-WebhookStats'
+      TableName: !Sub '${ProjectName}-StreamStats'
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"
@@ -170,12 +170,12 @@ Outputs:
   StreamNotificationTableArn:
     Description: ARN of dynamodb table containing
     Value: !Sub '${StreamNotificationTable.Arn}'
-  WebhookStatsTableName:
+  StreamStatsTableName:
     Description: Name of dynamodb table containing
-    Value: !Ref WebhookStatsTable
-  WebhookStatsTableArn:
+    Value: !Ref StreamStatsTable
+  StreamStatsTableArn:
     Description: ARN of dynamodb table containing
-    Value: !Sub '${WebhookStatsTable.Arn}'
+    Value: !Sub '${StreamStatsTable.Arn}'
 
   # Event queue
   EventQueueName:

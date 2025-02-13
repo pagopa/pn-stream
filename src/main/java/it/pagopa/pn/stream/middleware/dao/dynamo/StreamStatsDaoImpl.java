@@ -1,7 +1,7 @@
 package it.pagopa.pn.stream.middleware.dao.dynamo;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.WebhookStatsEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
@@ -19,18 +19,18 @@ import java.util.Map;
 
 @Slf4j
 @Repository
-public class WebhookStatsDaoImpl implements WebhookStatsDao {
-    private final DynamoDbAsyncTable<WebhookStatsEntity> table;
+public class StreamStatsDaoImpl implements StreamStatsDao {
+    private final DynamoDbAsyncTable<StreamStatsEntity> table;
     private final DynamoDbAsyncClient dynamoDbAsyncClient;
 
-    public WebhookStatsDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg, DynamoDbAsyncClient dynamoDbAsyncClient) {
+    public StreamStatsDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg, DynamoDbAsyncClient dynamoDbAsyncClient) {
         this.dynamoDbAsyncClient = dynamoDbAsyncClient;
-        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getWebhookStatsTable(), TableSchema.fromBean(WebhookStatsEntity.class));
+        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getStreamStatsTable(), TableSchema.fromBean(StreamStatsEntity.class));
     }
 
 
     @Override
-    public Mono<WebhookStatsEntity> getItem(Key key) {
+    public Mono<StreamStatsEntity> getItem(Key key) {
         log.info("get key={}", key);
         return Mono.fromFuture(table.getItem(key))
                 .doOnSuccess(item -> log.info("Retrieved item: {}", item))
@@ -38,7 +38,7 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
     }
 
     @Override
-    public Mono<WebhookStatsEntity> updateAtomicCounterStats(WebhookStatsEntity entity) {
+    public Mono<StreamStatsEntity> updateAtomicCounterStats(StreamStatsEntity entity) {
         log.info("update webhook stats entity={}", entity);
         log.info("update stream entity={}", entity);
         return Mono.fromFuture(table.updateItem(entity));
@@ -49,14 +49,14 @@ public class WebhookStatsDaoImpl implements WebhookStatsDao {
         log.info("update custom counter stats for pk={}, sk={}, increment={}", pk, sk, increment);
 
         Map<String, AttributeValue> key = new HashMap<>();
-        key.put(WebhookStatsEntity.COL_PK, AttributeValue.builder().s(pk).build());
-        key.put(WebhookStatsEntity.COL_SK, AttributeValue.builder().s(sk).build());
+        key.put(StreamStatsEntity.COL_PK, AttributeValue.builder().s(pk).build());
+        key.put(StreamStatsEntity.COL_SK, AttributeValue.builder().s(sk).build());
 
         UpdateItemRequest updateRequest = UpdateItemRequest.builder()
                 .tableName(table.tableName())
                 .key(key)
                 .updateExpression("ADD #counterValue :value")
-                .expressionAttributeNames(Map.of("#counterValue", WebhookStatsEntity.COL_COUNTER))
+                .expressionAttributeNames(Map.of("#counterValue", StreamStatsEntity.COL_COUNTER))
                 .expressionAttributeValues(Map.of(":value", AttributeValue.builder().n(increment).build()))
                 .build();
 

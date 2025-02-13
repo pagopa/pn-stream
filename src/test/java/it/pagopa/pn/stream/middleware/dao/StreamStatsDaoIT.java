@@ -1,23 +1,23 @@
 package it.pagopa.pn.stream.middleware.dao;
 
 import it.pagopa.pn.stream.BaseTest;
-import it.pagopa.pn.stream.middleware.dao.dynamo.WebhookStatsDaoImpl;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.WebhookStatsEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.StreamStatsDaoImpl;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 
-class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
+class StreamStatsDaoIT extends BaseTest.WithLocalStack {
 
     @Autowired
-    WebhookStatsDaoImpl webhookStatsDao;
+    StreamStatsDaoImpl webhookStatsDao;
 
     @Test
     void getItem() {
-        WebhookStatsEntity entity = new WebhookStatsEntity("pk1", "sk1");
+        StreamStatsEntity entity = new StreamStatsEntity("pk1", "sk1");
         webhookStatsDao.updateAtomicCounterStats(entity).block();
-        WebhookStatsEntity retrievedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk1").sortValue("sk1").build()).block();
+        StreamStatsEntity retrievedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk1").sortValue("sk1").build()).block();
         assert retrievedEntity != null;
         Assertions.assertEquals("pk1", retrievedEntity.getPk());
         Assertions.assertEquals("sk1", retrievedEntity.getSk());
@@ -27,10 +27,10 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
 
     @Test
     void updateAtomicCounterStats() {
-        WebhookStatsEntity entity = new WebhookStatsEntity("pk2", "sk2");
+        StreamStatsEntity entity = new StreamStatsEntity("pk2", "sk2");
         webhookStatsDao.updateAtomicCounterStats(entity).block();
         webhookStatsDao.updateAtomicCounterStats(entity).block();
-        WebhookStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk2").sortValue("sk2").build()).block();
+        StreamStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk2").sortValue("sk2").build()).block();
         assert updatedEntity != null;
         Assertions.assertEquals("pk2", updatedEntity.getPk());
         Assertions.assertEquals("sk2", updatedEntity.getSk());
@@ -39,10 +39,10 @@ class WebhookStatsDaoIT extends BaseTest.WithLocalStack {
 
     @Test
     void updateCustomCounterStats() {
-        WebhookStatsEntity entity = new WebhookStatsEntity("pk3", "sk3");
+        StreamStatsEntity entity = new StreamStatsEntity("pk3", "sk3");
         webhookStatsDao.updateAtomicCounterStats(entity).block();
         webhookStatsDao.updateCustomCounterStats("pk3", "sk3", "5").block();
-        WebhookStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk3").sortValue("sk3").build()).block();
+        StreamStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("pk3").sortValue("sk3").build()).block();
         assert updatedEntity != null;
         Assertions.assertEquals("pk3", updatedEntity.getPk());
         Assertions.assertEquals("sk3", updatedEntity.getSk());
