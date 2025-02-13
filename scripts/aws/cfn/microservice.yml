@@ -211,9 +211,9 @@ Parameters:
     Description: 'TTL offset for stream notifications'
     Default: 7889400
 
-  StatsTtl:
+  StreamStatsTtl:
     Type: Number
-    Description: 'TTL in days offset for Webhook Stats'
+    Description: 'TTL in days offset for Stream Stats'
     Default: 365
 
   StreamNotificationTableArn:
@@ -358,8 +358,8 @@ Resources:
         ContainerEnvEntry13: !Sub 'PN_STREAM_TOPICS_EVENT=${EventQueueName}'
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
-        ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StatsTtl}'
-        ContainerEnvEntry20: !Sub 'PN_STREAM_WEBHOOKSTATSTTL=${StreamNotificationTtl}'
+        ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_STREAMSTATSTTL=${StatsTtl}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
