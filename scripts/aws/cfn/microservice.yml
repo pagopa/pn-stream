@@ -312,14 +312,19 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
-  StatsTimeUnit:
+  StreamStatsTimeUnit:
     Type: String
     Description: 'Time units for statistics'
     AllowedValues: [ DAYS, HOURS, MINUTES ]
 
-  StatsSpanUnit:
+  StreamStatsSpanUnit:
     Type: Number
     Description: 'Time interval for statistics'
+
+  StreamStatsTtl:
+    Type: Number
+    Description: 'TTL in days offset for Stream Stats'
+    Default: 365
 
 Resources:
 
@@ -365,8 +370,9 @@ Resources:
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
-        ContainerEnvEntry18: !Sub 'PN_STATS_TIME_UNIT=${StatsTimeUnit}'
-        ContainerEnvEntry19: !Sub 'PN_STATS_SPAN_UNIT=${StatsSpanUnit}'
+        ContainerEnvEntry18: !Sub 'PN_STATS_TIME_UNIT=${StreamStatsTimeUnit}'
+        ContainerEnvEntry19: !Sub 'PN_STATS_SPAN_UNIT=${StreamStatsSpanUnit}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_STREAMSTATSTTL=${StreamStatsTtl}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName

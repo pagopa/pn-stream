@@ -3,7 +3,7 @@ package it.pagopa.pn.stream.dto.stats;
 import lombok.Getter;
 
 @Getter
-public enum WebhookStatsEnum {
+public enum StreamStatsEnum {
 
     NUMBER_OF_REQUESTS,
     RETRY_AFTER_VIOLATION,

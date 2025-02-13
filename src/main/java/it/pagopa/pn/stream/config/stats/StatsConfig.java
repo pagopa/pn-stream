@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 @Configuration
 @Data
 public class StatsConfig {
@@ -15,4 +17,6 @@ public class StatsConfig {
     @Value("${pn.stream.stats.span-unit}")
     private int statsSpanUnit;
 
+    @Value("${pn.stream.stats.ttl}")
+    private Duration ttl;
 }
