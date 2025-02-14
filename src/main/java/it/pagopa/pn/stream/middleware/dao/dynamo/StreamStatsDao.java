@@ -10,6 +10,6 @@ public interface StreamStatsDao {
 
     Mono<StreamStatsEntity> updateAtomicCounterStats(StreamStatsEntity entity);
 
-    Mono<UpdateItemResponse> updateCustomCounterStats(String pk, String sk, String increment);
+    Mono<UpdateItemResponse> updateCustomCounterStats(String pk, String sk, Integer increment);
 
 }
