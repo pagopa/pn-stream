@@ -30,6 +30,7 @@ class StreamStatsDaoIT extends BaseTest.WithLocalStack {
         pnStreamConfigs.setStats(pnStreamConfigsStats);
 
         StreamStatsEntity entity = new StreamStatsEntity("paId", "streamId", StreamStatsEnum.NUMBER_OF_REQUESTS);
+        entity.setSk("sk1");
         webhookStatsDao.updateAtomicCounterStats(entity).block();
         StreamStatsEntity retrievedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("paId#streamId#NUMBER_OF_REQUESTS").sortValue("sk1").build()).block();
         assert retrievedEntity != null;
@@ -50,6 +51,7 @@ class StreamStatsDaoIT extends BaseTest.WithLocalStack {
         pnStreamConfigs.setStats(pnStreamConfigsStats);
 
         StreamStatsEntity entity = new StreamStatsEntity("paId", "streamId", StreamStatsEnum.NUMBER_OF_REQUESTS);
+        entity.setSk("sk2");
         webhookStatsDao.updateAtomicCounterStats(entity).block();
         webhookStatsDao.updateAtomicCounterStats(entity).block();
         StreamStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("paId#streamId#NUMBER_OF_REQUESTS").sortValue("sk2").build()).block();
@@ -61,20 +63,12 @@ class StreamStatsDaoIT extends BaseTest.WithLocalStack {
 
     @Test
     void updateCustomCounterStats() {
-        PnStreamConfigs.Stats pnStreamConfigsStats = new PnStreamConfigs.Stats();
-
-        pnStreamConfigsStats.setTtl(Duration.ofDays(30));
-        pnStreamConfigsStats.setTimeUnit(StatsTimeUnit.DAYS);
-        pnStreamConfigsStats.setSpanUnit(1);
-
-        PnStreamConfigs pnStreamConfigs = new PnStreamConfigs();
-        pnStreamConfigs.setStats(pnStreamConfigsStats);
-
         webhookStatsDao.updateCustomCounterStats("paId#streamId#NUMBER_OF_READINGS", "sk3", 5).block();
         StreamStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("paId#streamId#NUMBER_OF_READINGS").sortValue("sk3").build()).block();
         assert updatedEntity != null;
         Assertions.assertEquals("paId#streamId#NUMBER_OF_READINGS", updatedEntity.getPk());
         Assertions.assertEquals("sk3", updatedEntity.getSk());
         Assertions.assertEquals(5L, updatedEntity.getCounter());
+        Assertions.assertNotEquals(0L, updatedEntity.getTtl());
     }
 }

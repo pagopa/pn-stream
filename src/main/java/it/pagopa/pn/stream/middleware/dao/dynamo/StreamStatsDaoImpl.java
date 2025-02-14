@@ -38,7 +38,7 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
     public Mono<StreamStatsEntity> getItem(Key key) {
         log.info("get key={}", key);
         return Mono.fromFuture(table.getItem(key))
-                .doOnSuccess(item -> log.info("Retrieved item: {}", item))
+                .doOnNext(item -> log.info("Retrieved item: {}", item.getPk()))
                 .doOnError(error -> log.error("Failed to retrieve item with key={}", key, error));
     }
 
@@ -46,7 +46,9 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
     public Mono<StreamStatsEntity> updateAtomicCounterStats(StreamStatsEntity entity) {
         log.info("update webhook stats entity={}", entity);
         log.info("update stream entity={}", entity);
-        return Mono.fromFuture(table.updateItem(entity));
+        return Mono.fromFuture(table.updateItem(entity))
+                .doOnNext(response -> log.info("Successfully updated atomic counter stats for pk={}, sk={}", entity.getPk(), entity.getSk()))
+                .doOnError(error -> log.error("Failed to update atomic counter stats for pk={}, sk={}",entity.getPk(), entity.getSk(), error));
     }
 
     @Override
@@ -62,20 +64,31 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
         key.put(StreamStatsEntity.COL_SK, AttributeValue.builder().s(sk).build());
 
         Map<String, AttributeValue> attributeValue = new HashMap<>();
-        attributeValue.put(":v", AttributeValue.builder().n(String.valueOf(increment)).build());
+        attributeValue.put(":counter", AttributeValue.builder().n(String.valueOf(increment)).build());
+
+        Map<String, String> attributeName = new HashMap<>();
+        attributeName.put("#counter", StreamStatsEntity.COL_COUNTER);
+
+        String updateExpression = "ADD #counter :counter";
 
         UpdateItemRequest.Builder updateRequestBuilder = UpdateItemRequest.builder()
                 .tableName(table.tableName())
-                .key(key)
-                .updateExpression("ADD "+ StreamStatsEntity.COL_COUNTER + " :v");
+                .key(key);
+
         if (Objects.nonNull(ttl)){
-            updateRequestBuilder
-                    .updateExpression("SET "+ StreamStatsEntity.COL_TTL + " = :t");
+            attributeName.put("#ttl", StreamStatsEntity.COL_TTL);
             attributeValue.put(":t", AttributeValue.builder().n(String.valueOf(ttl)).build());
+            updateExpression += " SET #ttl = :t";
         }
 
-        return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateRequestBuilder.expressionAttributeValues(attributeValue).build()))
-                .doOnSuccess(response -> log.info("Successfully updated custom counter stats for pk={}, sk={}", pk, sk))
+        UpdateItemRequest updateItemRequest = updateRequestBuilder
+                .updateExpression(updateExpression)
+                .expressionAttributeNames(attributeName)
+                .expressionAttributeValues(attributeValue)
+                .build();
+
+        return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateItemRequest))
+                .doOnNext(response -> log.info("Successfully updated custom counter stats for pk={}, sk={}", pk, sk))
                 .doOnError(error -> log.error("Failed to update custom counter stats for pk={}, sk={}", pk, sk, error));
     }
 
