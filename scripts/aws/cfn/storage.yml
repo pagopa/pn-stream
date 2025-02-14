@@ -162,7 +162,7 @@ Resources:
         AlarmSNSTopicName: !Ref AlarmSNSTopicName
         VisibilityTimeout: 60
         MaxReceiveCount: 10
-        DelaySeconds: 30
+        DelaySeconds: 1
 
 Outputs:
 
