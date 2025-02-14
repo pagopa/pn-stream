@@ -3,6 +3,7 @@ package it.pagopa.pn.stream.middleware.dao.dynamo.entity;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbAtomicCounter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
@@ -14,6 +15,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
  * Entity WebhookStats
  */
 @DynamoDbBean
+@NoArgsConstructor
 @Data
 public class StreamStatsEntity {
 
