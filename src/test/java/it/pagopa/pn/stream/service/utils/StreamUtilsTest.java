@@ -150,16 +150,15 @@ class StreamUtilsTest {
     }
 
     @Test
-    void getVersionV1() {
+    void getVersionV1 (){
         String streamVersion = "v10";
         int version = streamUtils.getVersion(streamVersion);
 
         assertEquals(10, version);
 
     }
-
     @Test
-    void getVersionNull() {
+    void getVersionNull (){
 
         int version = streamUtils.getVersion(null);
 
@@ -167,14 +166,14 @@ class StreamUtilsTest {
 
     }
 
-    private List<TimelineElementInternal> generateTimeline(String iun, String paId) {
+    private List<TimelineElementInternal> generateTimeline(String iun, String paId){
         List<TimelineElementInternal> res = new ArrayList<>();
         Instant t0 = Instant.now();
 
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.REQUEST_ACCEPTED.name())
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.REQUEST_ACCEPTED)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.REQUEST_ACCEPTED )
                 .timestamp(t0)
                 .paId(paId)
                 .build());
@@ -182,16 +181,16 @@ class StreamUtilsTest {
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
                 .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY1").build(), LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY2").build()))
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .timestamp(t0.plusMillis(1000))
-                .details("{\"recIndex\":\"0\"}")
+                        .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
                 .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE )
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
@@ -200,7 +199,7 @@ class StreamUtilsTest {
                 .category(TimelineElementCategoryInt.SEND_ANALOG_DOMICILE.name())
                 .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_ANALOG_DOMICILE)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_ANALOG_DOMICILE )
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
@@ -209,7 +208,7 @@ class StreamUtilsTest {
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_SIMPLE_REGISTERED_LETTER.name())
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_SIMPLE_REGISTERED_LETTER)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_SIMPLE_REGISTERED_LETTER )
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\"}")
                 .paId(paId)
@@ -218,7 +217,7 @@ class StreamUtilsTest {
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name())
                 .iun(iun)
-                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE )
                 .timestamp(t0.plusMillis(1000))
                 .details("{\"recIndex\":\"0\", \"digitalAddress\":{\"address\":\"\",\"type\":\"MAIL\"}}")
                 .paId(paId)
