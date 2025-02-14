@@ -5,9 +5,11 @@ import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
+import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
@@ -118,11 +120,26 @@ public class StreamUtils {
         return startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
     }
 
+
     private static long convertToSeconds(int spanUnit, StatsTimeUnit timeUnit) {
         return switch (timeUnit) {
             case HOURS -> spanUnit * SECONDS_IN_HOUR;
             case MINUTES -> spanUnit * SECONDS_IN_MINUTE;
             case DAYS -> spanUnit * SECONDS_IN_DAY;
         };
+    }
+
+    public StreamStatsEntity buildEntity(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
+        log.info("Build entity for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
+        StreamStatsEntity streamStatsEntity = new StreamStatsEntity(paId, streamId, streamStatsEnum);
+        streamStatsEntity.setSk(buildSk());
+        if (!pnStreamConfigs.getStats().getTtl().isZero())
+            streamStatsEntity.setTtl(LocalDateTime.now().plus(pnStreamConfigs.getStats().getTtl()).atZone(ZoneOffset.UTC).toEpochSecond());
+        log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
+        return streamStatsEntity;
+    }
+
+    public String buildSk() {
+        return retrieveCurrentInterval()+ "#" + pnStreamConfigs.getStats().getTimeUnit() + "#" + pnStreamConfigs.getStats().getSpanUnit();
     }
 }

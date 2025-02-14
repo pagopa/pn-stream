@@ -1,43 +1,38 @@
 package it.pagopa.pn.stream.service.impl;
 
-import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamStatsDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import it.pagopa.pn.stream.service.StreamStatsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class StreamStatsServiceImpl implements StreamStatsService {
+    private static final String UPDATE_STREAM_STATS_LOG = "Update stream stats: {} for paId: {} and streamId: {}";
+
     private final StreamUtils streamUtils;
     private final StreamStatsDao streamStatsDao;
-    private final PnStreamConfigs pnStreamConfigs;
 
     @Override
-    public void updateStreamStats(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
-        log.info("Update stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
-        streamUtils.retrieveCurrentInterval();
-        StreamStatsEntity streamStatsEntity = buildEntity(streamStatsEnum, paId, streamId);
-        streamStatsDao.updateAtomicCounterStats(streamStatsEntity);
-        log.info("Stream stats updated: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
+    public Mono<Void> updateStreamStats(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
+        log.info(UPDATE_STREAM_STATS_LOG, streamStatsEnum, paId, streamId);
+        StreamStatsEntity streamStatsEntity = streamUtils.buildEntity(streamStatsEnum, paId, streamId);
+        return streamStatsDao.updateAtomicCounterStats(streamStatsEntity)
+                .then();
     }
 
-    private StreamStatsEntity buildEntity(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
-        log.info("Build entity for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
-        StreamStatsEntity streamStatsEntity = new StreamStatsEntity();
-        streamStatsEntity.setPk(paId + "_" + streamId + "_" + streamStatsEnum.toString());
-        streamStatsEntity.setSk(streamUtils.retrieveCurrentInterval() + "#" + pnStreamConfigs.getStats().getTimeUnit() + "#" + pnStreamConfigs.getStats().getSpanUnit());
-        if (!pnStreamConfigs.getStats().getTtl().isZero())
-            streamStatsEntity.setTtl(LocalDateTime.now().plus(pnStreamConfigs.getStats().getTtl()).atZone(ZoneId.systemDefault()).toEpochSecond());
-        log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
-        return streamStatsEntity;
+    @Override
+    public Mono<Void> updateNumberOfReadingStreamStats(String paId, String streamId, Integer increment) {
+        log.info(UPDATE_STREAM_STATS_LOG, StreamStatsEnum.NUMBER_OF_READINGS, paId, streamId);
+        String pk = StreamStatsEntity.buildPk(paId, streamId, StreamStatsEnum.NUMBER_OF_READINGS);
+        String sk = streamUtils.buildSk();
+        return streamStatsDao.updateCustomCounterStats(pk, sk, increment)
+                .then();
     }
 }
