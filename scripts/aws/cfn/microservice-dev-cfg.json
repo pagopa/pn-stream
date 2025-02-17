@@ -18,6 +18,7 @@
     "RetryAfterEnabled": "false",
     "StreamNotificationTtl": "7889400",
     "MaximumRetryAttemptsValueStream": "5",
-    "MaximumRetryAttemptsValueNotification": "5"
+    "MaximumRetryAttemptsValueNotification": "5",
+    "SortEventDelaySeconds": "30"
   }
 }

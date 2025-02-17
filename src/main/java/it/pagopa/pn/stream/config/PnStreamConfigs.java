@@ -34,17 +34,21 @@ public class PnStreamConfigs {
     private Boolean retryAfterEnabled;
     private Long streamNotificationTtl;
     private List<String> listCategoriesPa;
+    private Integer sortEventDelaySeconds;
 
     @Data
     public static class Dao {
         private String streamsTableName;
         private String eventsTableName;
-        private String streamNotificationTable;
+        private String streamNotificationTableName;
+        private String notificationUnlockedTableName;
+        private String eventsQuarantineTableName;
     }
 
     @Data
     public static class Topics {
         private String scheduledActions;
         private String event;
+        private String eventSchedule;
     }
 }
