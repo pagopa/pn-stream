@@ -320,6 +320,24 @@ Parameters:
     Type: String
     Description: ARN of dynamodb table containing quarantined events
 
+  # Event schedule queue
+  EventScheduleQueueName:
+    Type: String
+    Description: 'pn-stream_schedule queue name'
+
+  EventScheduleQueueARN:
+    Type: String
+    Description: 'pn-stream_schedule queue ARN'
+
+  EventScheduleQueueAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue dlq alarm ARN'
+
+  EventScheduleQueueAgeAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue age alarm ARN'
+
+
 Resources:
 
   # pn-stream microservice
@@ -359,10 +377,11 @@ Resources:
         ContainerEnvEntry11: !Sub 'PN_STREAM_RETRYPARAMETERPREFIX=${RetryParameterPrefix}'
         ContainerEnvEntry12: !Sub 'PN_STREAM_RETRYAFTERENABLED=${RetryAfterEnabled}'
         ContainerEnvEntry13: !Sub 'PN_STREAM_TOPICS_EVENT=${EventQueueName}'
-        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
+        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName},${EventScheduleQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
-        ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
+        ContainerEnvEntry17: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -414,6 +433,7 @@ Resources:
             Resource:
               - !Ref EventQueueARN
               - !Ref ScheduledActionsQueueARN
+              - !Ref EventScheduleQueueARN
 
 
 
@@ -645,10 +665,13 @@ Resources:
             - !Ref EventQueueAgeAlarmARN
             - !Ref ScheduledActionsQueueAlarmARN
             - !Ref ScheduledActionsQueueAgeAlarmARN
+            - !Ref EventScheduleQueueAlarmARN
+            - !Ref EventScheduleQueueAgeAlarmARN
         QueueArns: !Join
           - ','
           - - !Ref EventQueueARN
             - !Ref ScheduledActionsQueueARN
+            - !Ref EventScheduleQueueARN
         LogGroupsNames: !Join
           - ','
           - - !Sub '/aws/ecs/${ProjectName}-stream'

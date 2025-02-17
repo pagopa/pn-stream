@@ -47,5 +47,6 @@ public class PnStreamConfigs {
     public static class Topics {
         private String scheduledActions;
         private String event;
+        private String eventSchedule;
     }
 }
