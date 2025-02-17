@@ -4,9 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
+import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
+import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
@@ -17,10 +20,7 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,6 +30,10 @@ import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GE
 @Slf4j
 @Component
 public class StreamUtils {
+    private static final long SECONDS_IN_HOUR = 3600L;
+    private static final long SECONDS_IN_MINUTE = 60L;
+    private static final long SECONDS_IN_DAY = 86400L;
+
     private final EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper;
     private final WebhookTimelineElementJsonConverter timelineElementJsonConverter;
     private final Duration ttl;
@@ -104,5 +108,37 @@ public class StreamUtils {
         }
         return Integer.parseInt(pnStreamConfigs.getCurrentVersion().replace("v", ""));
 
+    }
+    public Instant retrieveCurrentInterval() {
+        Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+
+        long spanInSeconds = convertToSeconds(pnStreamConfigs.getStats().getSpanUnit(), pnStreamConfigs.getStats().getTimeUnit());
+        long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
+        long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
+
+        return startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
+    }
+
+
+    private static long convertToSeconds(int spanUnit, StatsTimeUnit timeUnit) {
+        return switch (timeUnit) {
+            case HOURS -> spanUnit * SECONDS_IN_HOUR;
+            case MINUTES -> spanUnit * SECONDS_IN_MINUTE;
+            case DAYS -> spanUnit * SECONDS_IN_DAY;
+        };
+    }
+
+    public StreamStatsEntity buildEntity(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
+        log.info("Build entity for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
+        StreamStatsEntity streamStatsEntity = new StreamStatsEntity(paId, streamId, streamStatsEnum);
+        streamStatsEntity.setSk(buildSk());
+        if (!pnStreamConfigs.getStats().getTtl().isZero())
+            streamStatsEntity.setTtl(LocalDateTime.now().plus(pnStreamConfigs.getStats().getTtl()).atZone(ZoneOffset.UTC).toEpochSecond());
+        log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
+        return streamStatsEntity;
+    }
+
+    public String buildSk() {
+        return retrieveCurrentInterval()+ "#" + pnStreamConfigs.getStats().getTimeUnit() + "#" + pnStreamConfigs.getStats().getSpanUnit();
     }
 }
