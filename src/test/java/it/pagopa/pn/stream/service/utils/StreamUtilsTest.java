@@ -4,25 +4,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
+import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
+import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV20;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.WebhookTimelineElementJsonConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 class StreamUtilsTest {
 
@@ -217,6 +224,87 @@ class StreamUtilsTest {
                 .build());
 
         return res;
+    }
+
+    @Test
+    void testRetrieveCurrentIntervalWhenTimeUnitIsDays() {
+        PnStreamConfigs pnStreamConfigs = Mockito.mock(PnStreamConfigs.class);
+        PnStreamConfigs.Stats stats = Mockito.mock(PnStreamConfigs.Stats.class);
+        when(pnStreamConfigs.getStats()).thenReturn(stats);
+        when(stats.getSpanUnit()).thenReturn(1);
+        when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.DAYS);
+
+         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+
+        Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long spanInSeconds = 86400L; // 1 giorno in secondi
+        long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
+        long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
+        Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
+
+        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        assertEquals(expectedInterval, actualInterval);
+    }
+
+    @Test
+    void testRetrieveCurrentIntervalWhenTimeUnitIsHours() {
+        PnStreamConfigs pnStreamConfigs = Mockito.mock(PnStreamConfigs.class);
+        PnStreamConfigs.Stats stats = Mockito.mock(PnStreamConfigs.Stats.class);
+        when(pnStreamConfigs.getStats()).thenReturn(stats);
+        when(stats.getSpanUnit()).thenReturn(1);
+        when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.HOURS);
+
+         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+
+        Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long spanInSeconds = 3600L;
+        long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
+        long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
+        Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
+
+        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        assertEquals(expectedInterval, actualInterval);
+    }
+
+    @Test
+    void testRetrieveCurrentIntervalWhenTimeUnitIsMinutes() {
+        PnStreamConfigs pnStreamConfigs = Mockito.mock(PnStreamConfigs.class);
+        PnStreamConfigs.Stats stats = Mockito.mock(PnStreamConfigs.Stats.class);
+        when(pnStreamConfigs.getStats()).thenReturn(stats);
+        when(stats.getSpanUnit()).thenReturn(1);
+        when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.MINUTES);
+
+         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+
+
+        Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        long spanInSeconds = 60L;
+        long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
+        long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
+        Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
+
+        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        assertEquals(expectedInterval, actualInterval);
+    }
+
+    @Test
+    void buildEntityWithValidInputs() {
+        PnStreamConfigs.Stats pnStreamConfigsStats = new PnStreamConfigs.Stats();
+
+        pnStreamConfigsStats.setTtl(Duration.ofDays(30));
+        pnStreamConfigsStats.setTimeUnit(StatsTimeUnit.DAYS);
+        pnStreamConfigsStats.setSpanUnit(1);
+
+        PnStreamConfigs pnStreamConfigs = new PnStreamConfigs();
+        pnStreamConfigs.setStats(pnStreamConfigsStats);
+
+        streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+
+
+        StreamStatsEntity entity = streamUtils.buildEntity(StreamStatsEnum.NUMBER_OF_REQUESTS, "paId", "streamId");
+
+        assertNotNull(entity);
+        assertNotNull(entity.getSk());
     }
 
 }
