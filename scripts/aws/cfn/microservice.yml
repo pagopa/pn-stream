@@ -320,6 +320,22 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
+  StreamStatsTimeUnit:
+    Type: String
+    Description: 'Time units for statistics'
+    Default: 'HOURS'
+    AllowedValues: [ DAYS, HOURS, MINUTES ]
+
+  StreamStatsSpanUnit:
+    Type: Number
+    Description: 'Time interval for statistics'
+    Default: 1
+
+  StreamStatsTtl:
+    Type: Number
+    Description: 'TTL in days offset for Stream Stats'
+    Default: 365
+
 Resources:
 
   # pn-stream microservice
@@ -363,6 +379,9 @@ Resources:
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
         ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLE=${StreamStatsTableName}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
