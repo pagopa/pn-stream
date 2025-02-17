@@ -53,13 +53,6 @@ public class PnStreamConfigs {
     }
 
     @Data
-    public static class Stats{
-        private int spanUnit;
-        private StatsTimeUnit timeUnit;
-        private Duration ttl;
-    }
-
-    @Data
     public static class Topics {
         private String scheduledActions;
         private String event;
