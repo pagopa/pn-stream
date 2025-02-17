@@ -338,6 +338,14 @@ Parameters:
     Description: 'pn-stream_schedule queue age alarm ARN'
 
 
+  NotificationUnlockedTableName:
+    Type: String
+    Description: Name of dynamodb table containing the unlocked notification
+
+  NotificationUnlockedTableArn:
+    Type: String
+    Description: ARN of dynamodb table containing the unlocked notification
+
 Resources:
 
   # pn-stream microservice
@@ -365,7 +373,7 @@ Resources:
         WireTapLogActivation: !Ref WireTapLogActivation
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub "AWS_REGIONCODE=${AWS::Region}"
-        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLE=${StreamNotificationTableName}'
+        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLENAME=${StreamNotificationTableName}'
         ContainerEnvEntry3: !Sub 'PN_STREAM_SCHEDULEINTERVAL=${ScheduleInterval}'
         ContainerEnvEntry4: !Sub 'PN_STREAM_TOPICS_SCHEDULEDACTIONS=${ScheduledActionsQueueName}'
         ContainerEnvEntry5: !Sub 'PN_STREAM_MAXSTREAMS=${MaxStreams}'
@@ -382,6 +390,7 @@ Resources:
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
         ContainerEnvEntry17: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
         ContainerEnvEntry18: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -419,6 +428,8 @@ Resources:
               - !Sub "${StreamNotificationTableArn}/*"
               - !Sub "${EventsQuarantineTableArn}"
               - !Sub "${EventsQuarantineTableArn}/*"
+              - !Sub "${NotificationUnlockedTableArn}"
+              - !Sub "${NotificationUnlockedTableArn}/*"
           - Effect: Allow
             Action:
               - sqs:ChangeMessageVisibility
@@ -683,6 +694,7 @@ Resources:
             - !Ref StreamsTableName
             - !Ref EventsTableName
             - !Ref EventsQuarantineTableName
+            - !Ref NotificationUnlockedTableName
 
 Outputs:
   #
