@@ -41,11 +41,13 @@ public class PnStreamConfigs {
         private String eventsTableName;
         private String streamNotificationTable;
         private String notificationUnlockedTableName;
+        private String eventsQuarantineTableName;
     }
 
     @Data
     public static class Topics {
         private String scheduledActions;
         private String event;
+        private String eventSchedule;
     }
 }

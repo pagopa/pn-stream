@@ -312,6 +312,32 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
+  EventsQuarantineTableName:
+    Type: String
+    Description: Name of dynamodb table containing quarantined events
+
+  EventsQuarantineTableArn:
+    Type: String
+    Description: ARN of dynamodb table containing quarantined events
+
+  # Event schedule queue
+  EventScheduleQueueName:
+    Type: String
+    Description: 'pn-stream_schedule queue name'
+
+  EventScheduleQueueARN:
+    Type: String
+    Description: 'pn-stream_schedule queue ARN'
+
+  EventScheduleQueueAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue dlq alarm ARN'
+
+  EventScheduleQueueAgeAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue age alarm ARN'
+
+
   NotificationUnlockedTableName:
     Type: String
     Description: Name of dynamodb table containing the unlocked notification
@@ -359,10 +385,12 @@ Resources:
         ContainerEnvEntry11: !Sub 'PN_STREAM_RETRYPARAMETERPREFIX=${RetryParameterPrefix}'
         ContainerEnvEntry12: !Sub 'PN_STREAM_RETRYAFTERENABLED=${RetryAfterEnabled}'
         ContainerEnvEntry13: !Sub 'PN_STREAM_TOPICS_EVENT=${EventQueueName}'
-        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
+        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName},${EventScheduleQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
-        ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
+        ContainerEnvEntry17: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -398,6 +426,8 @@ Resources:
               - !Sub "${EventsTableArn}/*"
               - !Sub "${StreamNotificationTableArn}"
               - !Sub "${StreamNotificationTableArn}/*"
+              - !Sub "${EventsQuarantineTableArn}"
+              - !Sub "${EventsQuarantineTableArn}/*"
               - !Sub "${NotificationUnlockedTableArn}"
               - !Sub "${NotificationUnlockedTableArn}/*"
           - Effect: Allow
@@ -414,6 +444,7 @@ Resources:
             Resource:
               - !Ref EventQueueARN
               - !Ref ScheduledActionsQueueARN
+              - !Ref EventScheduleQueueARN
 
 
 
@@ -645,10 +676,13 @@ Resources:
             - !Ref EventQueueAgeAlarmARN
             - !Ref ScheduledActionsQueueAlarmARN
             - !Ref ScheduledActionsQueueAgeAlarmARN
+            - !Ref EventScheduleQueueAlarmARN
+            - !Ref EventScheduleQueueAgeAlarmARN
         QueueArns: !Join
           - ','
           - - !Ref EventQueueARN
             - !Ref ScheduledActionsQueueARN
+            - !Ref EventScheduleQueueARN
         LogGroupsNames: !Join
           - ','
           - - !Sub '/aws/ecs/${ProjectName}-stream'
@@ -659,6 +693,7 @@ Resources:
           - - !Ref StreamNotificationTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
+            - !Ref EventsQuarantineTableName
             - !Ref NotificationUnlockedTableName
 
 Outputs:

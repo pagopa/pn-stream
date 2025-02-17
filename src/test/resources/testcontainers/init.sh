@@ -2,7 +2,7 @@
 
 echo "### CREATE QUEUES ###"
 
-queues="pn-stream_actions pn-delivery_push_to_stream"
+queues="pn-stream_actions pn-delivery_push_to_stream pn-stream_schedule"
 for qn in  $( echo $queues | tr " " "\n" ) ; do
 
     echo creating queue $qn ...
@@ -48,6 +48,18 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
         AttributeName=hashKey,AttributeType=S \
     --key-schema \
         AttributeName=hashKey,KeyType=HASH \
+    --provisioned-throughput \
+        ReadCapacityUnits=10,WriteCapacityUnits=5
+
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    dynamodb create-table \
+    --table-name pn-EventsQuarantine  \
+    --attribute-definitions \
+        AttributeName=pk,AttributeType=S \
+        AttributeName=eventId,AttributeType=S \
+    --key-schema \
+        AttributeName=pk,KeyType=HASH \
+        AttributeName=eventId,KeyType=RANGE \
     --provisioned-throughput \
         ReadCapacityUnits=10,WriteCapacityUnits=5
 
