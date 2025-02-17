@@ -56,10 +56,10 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     --table-name pn-EventsQuarantine  \
     --attribute-definitions \
         AttributeName=pk,AttributeType=S \
-        AttributeName=sk,AttributeType=S \
+        AttributeName=eventId,AttributeType=S \
     --key-schema \
         AttributeName=pk,KeyType=HASH \
-        AttributeName=sk,KeyType=RANGE \
+        AttributeName=eventId,KeyType=RANGE \
     --provisioned-throughput \
         ReadCapacityUnits=10,WriteCapacityUnits=5
 

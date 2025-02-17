@@ -2,12 +2,12 @@ package it.pagopa.pn.stream.middleware.dao.dynamo;
 
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 
 public interface EventsQuarantineEntityDao {
 
-    Flux<EventsQuarantineEntity> findByPk(String pk);
+    Mono<Page<EventsQuarantineEntity>> findByPk(String pk);
 
     Mono<EventsQuarantineEntity> putItem(EventsQuarantineEntity streamNotification);
 

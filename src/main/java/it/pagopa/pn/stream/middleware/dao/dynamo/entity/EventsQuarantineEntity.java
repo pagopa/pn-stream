@@ -14,11 +14,11 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortK
 public class EventsQuarantineEntity {
 
     private static final String COL_PK = "pk";
-    private static final String COL_SK = "sk";
-    private static final String COL_ELEMENT = "element";
+    private static final String COL_EVENTID = "eventId";
+    private static final String COL_EVENT = "event";
 
     @Getter(onMethod=@__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_PK)})) private String pk;
-    @Getter(onMethod=@__({@DynamoDbSortKey, @DynamoDbAttribute(COL_SK)}))  private String sk;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_ELEMENT)})) private String element;
+    @Getter(onMethod=@__({@DynamoDbSortKey, @DynamoDbAttribute(COL_EVENTID)}))  private String eventId;
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_EVENT)})) private String event;
 
 }
