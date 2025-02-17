@@ -234,7 +234,7 @@ class StreamUtilsTest {
         when(stats.getSpanUnit()).thenReturn(1);
         when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.DAYS);
 
-         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+        streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
 
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         long spanInSeconds = 86400L; // 1 giorno in secondi
@@ -254,7 +254,7 @@ class StreamUtilsTest {
         when(stats.getSpanUnit()).thenReturn(1);
         when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.HOURS);
 
-         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+        streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
 
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
         long spanInSeconds = 3600L;
@@ -274,7 +274,7 @@ class StreamUtilsTest {
         when(stats.getSpanUnit()).thenReturn(1);
         when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.MINUTES);
 
-         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
+        streamUtils = new StreamUtils(null, null, null, pnStreamConfigs);
 
 
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);

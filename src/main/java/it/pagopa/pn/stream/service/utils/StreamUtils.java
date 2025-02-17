@@ -109,7 +109,6 @@ public class StreamUtils {
         return Integer.parseInt(pnStreamConfigs.getCurrentVersion().replace("v", ""));
 
     }
-
     public Instant retrieveCurrentInterval() {
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 

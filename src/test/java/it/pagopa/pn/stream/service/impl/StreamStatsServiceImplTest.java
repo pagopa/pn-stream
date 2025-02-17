@@ -62,7 +62,7 @@ class StreamStatsServiceImplTest {
 
     @Test
     @Disabled
-    //Test da rivedere
+        //Test da rivedere
     void updateStreamStatsShouldUpdateCustomAtomicCounterStats() {
         Instant currentInterval = Instant.now();
         when(streamUtils.retrieveCurrentInterval()).thenReturn(currentInterval);
@@ -74,11 +74,11 @@ class StreamStatsServiceImplTest {
         streamStatsEntity.setTtl(LocalDateTime.now().plus(Duration.ofDays(30)).atZone(ZoneOffset.UTC).toEpochSecond());
 
         when(streamUtils.buildEntity(StreamStatsEnum.NUMBER_OF_READINGS, "paId", "streamId")).thenReturn(streamStatsEntity);
-        when(streamStatsDao.updateCustomCounterStats(streamStatsEntity.getPk(),streamStatsEntity.getSk(), 3)).thenReturn(Mono.empty());
+        when(streamStatsDao.updateCustomCounterStats(streamStatsEntity.getPk(), streamStatsEntity.getSk(), 3)).thenReturn(Mono.empty());
 
         streamStatsService.updateNumberOfReadingStreamStats("paId", "streamId", 3).block();
 
-        Mockito.verify(streamStatsDao).updateCustomCounterStats(streamStatsEntity.getPk(),streamStatsEntity.getSk(), 3);
+        Mockito.verify(streamStatsDao).updateCustomCounterStats(streamStatsEntity.getPk(), streamStatsEntity.getSk(), 3);
     }
 
 }
