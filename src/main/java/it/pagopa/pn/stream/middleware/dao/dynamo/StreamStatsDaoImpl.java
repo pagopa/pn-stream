@@ -48,7 +48,8 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
         log.info("update stream entity={}", entity);
         return Mono.fromFuture(table.updateItem(entity))
                 .doOnNext(response -> log.info("Successfully updated atomic counter stats for pk={}, sk={}", entity.getPk(), entity.getSk()))
-                .doOnError(error -> log.error("Failed to update atomic counter stats for pk={}, sk={}",entity.getPk(), entity.getSk(), error));
+                .doOnError(error -> log.warn("Failed to update atomic counter stats for pk={}, sk={}",entity.getPk(), entity.getSk(), error))
+                .onErrorResume(error -> Mono.empty());
     }
 
     @Override
@@ -89,7 +90,8 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
 
         return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateItemRequest))
                 .doOnNext(response -> log.info("Successfully updated custom counter stats for pk={}, sk={}", pk, sk))
-                .doOnError(error -> log.error("Failed to update custom counter stats for pk={}, sk={}", pk, sk, error));
+                .doOnError(error -> log.warn("Failed to update custom counter stats for pk={}, sk={}", pk, sk, error))
+                .onErrorResume(error -> Mono.empty());
     }
 
 
