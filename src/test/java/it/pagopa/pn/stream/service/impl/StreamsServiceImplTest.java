@@ -51,6 +51,7 @@ class StreamsServiceImplTest {
         schedulerService = Mockito.mock(SchedulerService.class);
         Mockito.mock(StreamUtils.class);
         pnExternalRegistryClient = Mockito.mock(PnExternalRegistryClient.class);
+        streamStatsService = Mockito.mock(StreamStatsService.class);
 
         when(pnStreamConfigs.getScheduleInterval()).thenReturn(1000L);
         when(pnStreamConfigs.getMaxLength()).thenReturn(10);
@@ -63,7 +64,7 @@ class StreamsServiceImplTest {
         when(pnStreamConfigs.getDeltaCounter()).thenReturn(1000);
 
         webhookService = new StreamsServiceImpl(streamEntityDao, schedulerService, pnStreamConfigs
-            ,pnExternalRegistryClient,streamStatsService);
+            ,pnExternalRegistryClient, streamStatsService);
 
         new DtoToEntityStreamMapper(pnStreamConfigs);
     }

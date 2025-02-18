@@ -37,7 +37,6 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     public static final String ERROR_CREATING_STREAM = "error creating stream";
     private final SchedulerService schedulerService;
     private final PnExternalRegistryClient pnExternalRegistryClient;
-    private final StreamStatsService streamStatsService;
 
     private final int purgeDeletionWaittime;
 
@@ -47,7 +46,6 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
         this.schedulerService = schedulerService;
         this.pnExternalRegistryClient = pnExternalRegistryClient;
         this.purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
-        this.streamStatsService = streamStatsService;
     }
 
     @Override

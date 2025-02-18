@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.helpers.MessageFormatter;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 import java.time.Instant;
 import java.util.List;
@@ -54,8 +53,7 @@ public abstract class PnStreamServiceImpl {
         return streamEntityDao.getWithRetryAfter(xPagopaPnCxId, streamId.toString())
                 .flatMap(tuple -> {
                     if (checkRetryAfter && tuple.getT2().isPresent()) {
-                        return checkRetryAfter(xPagopaPnCxId, xPagopaPnApiVersion, streamId, tuple.getT2().get())
-                                .then(Mono.just(tuple.getT1()));
+                        return checkRetryAfter(xPagopaPnCxId, xPagopaPnApiVersion, streamId, tuple.getT2().get(), tuple.getT1());
                     }
                     return Mono.just(tuple.getT1());
                 })
@@ -74,21 +72,19 @@ public abstract class PnStreamServiceImpl {
                 )
                 .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Pa " + xPagopaPnCxId + " version " + apiVersion(xPagopaPnApiVersion) + " is trying to access streamId " + streamId + ": api version mismatch")));
     }
-    private Mono<Void> checkRetryAfter(String xPagopaPnCxId, String xPagopaPnApiVersion, UUID streamId, StreamRetryAfter entityRetry) {
+
+    private Mono<StreamEntity> checkRetryAfter(String xPagopaPnCxId, String xPagopaPnApiVersion, UUID streamId, StreamRetryAfter entityRetry, StreamEntity streamEntity) {
         if (Instant.now().isBefore(entityRetry.getRetryAfter())) {
-            log.warn("Pa {} version {} is trying to access streamId {}: retry after not expired",
-                    xPagopaPnCxId, apiVersion(xPagopaPnApiVersion), streamId);
+            log.warn("Pa {} version {} is trying to access streamId {}: retry after not expired", xPagopaPnCxId, apiVersion(xPagopaPnApiVersion), streamId);
             return streamStatsService.updateStreamStats(StreamStatsEnum.RETRY_AFTER_VIOLATION, xPagopaPnCxId, streamId.toString())
                     .then(Mono.defer(() -> {
-                        Boolean retryAfterEnabled = pnStreamConfigs.getRetryAfterEnabled();
-                        log.debug("RetryAfterEnabled config value: {}", retryAfterEnabled);
-                        if (Boolean.TRUE.equals(retryAfterEnabled)) {
+                        if (Boolean.TRUE.equals(pnStreamConfigs.getRetryAfterEnabled())) {
                             return Mono.error(new PnTooManyRequestException("Pa " + xPagopaPnCxId + " version " + apiVersion(xPagopaPnApiVersion) + " is trying to access streamId " + streamId + ": retry after not expired"));
                         }
-                        return Mono.empty();
+                        return Mono.just(streamEntity);
                     }));
         }
-        return Mono.empty();
+        return Mono.just(streamEntity);
     }
 
     private Predicate<StreamEntity> filterMasterRequest(boolean ignoreVersion, String apiV10, String xPagopaPnApiVersion, StreamEntityAccessMode mode, List<String> xPagopaPnCxGroups ) {
