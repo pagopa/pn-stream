@@ -120,14 +120,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .map(this::getProgressResponseFromEventTimeline)
                                 .sort(Comparator.comparing(ProgressResponseElementV26::getEventId))
                                 .collectList()
-                                .flatMap(eventList -> {
-                                    if (eventList.isEmpty()) {
-                                        return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId))
-                                                .thenReturn(eventList);
-                                    }
-                                    return streamStatsService.updateNumberOfReadingStreamStats(xPagopaPnCxId, streamId.toString(), eventList.size())
-                                            .thenReturn(eventList);
-                                })
+                                .flatMap(eventList -> updateStreamRetryAfter(xPagopaPnCxId, streamId, eventList).thenReturn(eventList))
+                                .flatMap(eventList -> updateStats(xPagopaPnCxId, streamId, eventList).thenReturn(eventList))
                                 .map(eventList -> {
                                     var retryAfter = pnStreamConfigs.getScheduleInterval().intValue();
                                     int currentRetryAfter = res.getLastEventIdRead() == null ? retryAfter : 0;
@@ -144,6 +138,20 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={}", progressResponseElementDto.getProgressResponseElementList().size()).log())
                                 .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream").log())
                 );
+    }
+
+    private Mono<Void> updateStreamRetryAfter(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV26> eventList) {
+        if (eventList.isEmpty()) {
+            return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
+        }
+        return Mono.empty();
+    }
+
+    private Mono<Void> updateStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV26> eventList) {
+        if (eventList.isEmpty()) {
+            return streamStatsService.updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xPagopaPnCxId, streamId.toString());
+        }
+        return streamStatsService.updateNumberOfReadingStreamStats(xPagopaPnCxId, streamId.toString(), eventList.size());
     }
 
     private String createAuditLogOfElementsId(List<EventTimelineInternalDto> items) {

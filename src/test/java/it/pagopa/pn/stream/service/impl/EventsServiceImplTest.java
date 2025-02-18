@@ -225,6 +225,7 @@ class EventsServiceImplTest {
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
+        Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
     }
 
     @Test
@@ -317,6 +318,7 @@ class EventsServiceImplTest {
         Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid,uuid);
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
     }
 
     @Test
@@ -435,6 +437,7 @@ class EventsServiceImplTest {
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid,uuid);
+        Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
     }
 
 
@@ -508,7 +511,10 @@ class EventsServiceImplTest {
         Assertions.assertEquals(0, res.getProgressResponseElementList().size());
         Assertions.assertEquals(1000, res.getRetryAfter());
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(streamStatsService).updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
+        Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
+        Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_READINGS, xpagopacxid, uuid);
+        Mockito.verify(streamStatsService, Mockito.never()).updateNumberOfReadingStreamStats(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -597,6 +603,7 @@ class EventsServiceImplTest {
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid,uuid);
+        Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
     }
 
     @Test
@@ -699,6 +706,8 @@ class EventsServiceImplTest {
         //THEN
         Mockito.verify(eventEntityDao, Mockito.never()).findByStreamId(Mockito.anyString(), Mockito.any());
         Mockito.verify(schedulerService, Mockito.never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(streamStatsService, Mockito.never()).updateNumberOfReadingStreamStats(Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
