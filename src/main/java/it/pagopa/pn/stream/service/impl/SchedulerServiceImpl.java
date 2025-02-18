@@ -27,14 +27,13 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public void scheduleSortEvent(String streamId, String iun, Integer delay, Integer writtenCounter, SortEventType actionType) {
+    public void scheduleSortEvent(String streamId, String iun, Integer delay, Integer writtenCounter, SortEventType sortEventType) {
         SortEventAction action = SortEventAction.builder()
-                .eventKey(streamId+"_"+iun)
+                .eventKey(streamId + "_" + iun)
                 .writtenCounter(writtenCounter)
                 .delaySeconds(delay)
-                .type(actionType)
                 .build();
 
-        this.sortEventPool.scheduleFutureAction(action);
+        this.sortEventPool.scheduleFutureAction(action, sortEventType);
     }
 }

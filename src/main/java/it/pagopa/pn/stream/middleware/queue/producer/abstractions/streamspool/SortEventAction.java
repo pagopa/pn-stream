@@ -13,5 +13,4 @@ public class SortEventAction {
     private String eventKey;
     private Integer delaySeconds;
     private Integer writtenCounter;
-    private SortEventType type;
 }

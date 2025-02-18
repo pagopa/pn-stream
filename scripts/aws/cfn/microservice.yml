@@ -351,6 +351,11 @@ Parameters:
     Description: 'Sort event delay seconds'
     Default: 30
 
+  UnlockedEventTtl:
+    Type: String
+    Description: 'Period for TTL of unlocked events'
+    Default: 1d
+
 Resources:
 
   # pn-stream microservice
@@ -397,6 +402,7 @@ Resources:
         ContainerEnvEntry18: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
         ContainerEnvEntry19: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         ContainerEnvEntry20: !Sub 'PN_STREAM_SORTEVENTDELAYSECONDS=${SortEventDelaySeconds}'
+        ContainerEnvEntry21: !Sub 'PN_STREAM_UNLOCKEDEVENTTTL=${UnlockedEventTtl}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName

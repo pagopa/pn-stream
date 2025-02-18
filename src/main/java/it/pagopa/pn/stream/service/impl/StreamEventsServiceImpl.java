@@ -1,10 +1,8 @@
 package it.pagopa.pn.stream.service.impl;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
@@ -38,7 +36,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +51,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private final EventEntityDao eventEntityDao;
     private final StreamNotificationDao streamNotificationDao;
     private final EventsQuarantineEntityDao eventsQuarantineEntityDao;
-    private final NotificationUnlockedEntityDao notificationUnlockedEntityDao;
+    private final UnlockedNotificationEntityDao notificationUnlockedEntityDao;
     private final PnDeliveryClientReactive pnDeliveryClientReactive;
     private final SchedulerService schedulerService;
     private final StreamUtils streamUtils;
@@ -71,7 +68,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    ConfidentialInformationService confidentialInformationService,
                                    AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation,
                                    StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive,
-                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, NotificationUnlockedEntityDao notificationUnlockedEntityDao) {
+                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao){
         super(streamEntityDao, pnStreamConfigs);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
@@ -224,69 +221,50 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                     }
                 })
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
-                        .flatMap(stream -> sortStream(stream, res.getT2()))
+                        .flatMap(stream -> checkEventToSort(stream, res.getT2()))
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))).collectList().then();
     }
 
-    private Mono<StreamEntity> sortStream(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
+    private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
         log.debug("sortStream streamId={} timelineElementId={} category={}", streamEntity.getStreamId(), timelineElement.getTimelineElementId(), timelineElement.getCategory());
-        return Mono.just(streamEntity)
-                .flatMap(stream -> {
-                    //Se IN_VALIDATION allora proseguire direttamente
-                    if (Arrays.stream(SkipSortCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
-                        log.info("Event in validation, ignoring sorting flow");
-                        return Mono.just(stream);
-                    }
 
-                    //Se sorting non enabled allora proseguo con il flusso normale e mando un evento di sblocco per tutti gli eventi in quarantena
-                    if (!stream.isSorting()) {
-                        log.info("Stream is not enabled for sorting, saving event directly and sending UNLOCK_ALL_EVENTS message");
-                        schedulerService.scheduleSortEvent(stream.getStreamId(), timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_ALL_EVENTS);
-                        return Mono.just(stream);
-                    }
+        if (Arrays.stream(SkipSortCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+            log.info("Event in validation, ignoring sorting flow");
+            return Mono.just(streamEntity);
+        }
 
-                    return notificationUnlockedEntityDao.findByPk(stream.getStreamId()+"_"+timelineElement.getIun())
-                            .switchIfEmpty(Mono.just(new NotificationUnlockedEntity()))
-                            .flatMap(unlock -> manageUnlockEvent(stream, timelineElement, unlock));
-                });
+        if (Boolean.FALSE.equals(streamEntity.isSorting())) {
+            log.info("Stream is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message");
+            schedulerService.scheduleSortEvent(streamEntity.getStreamId(), timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_ALL_EVENTS);
+            return Mono.just(streamEntity);
+        }
+
+        return manageUnlockEvent(streamEntity, timelineElement);
     }
 
-    public Mono<StreamEntity> manageUnlockEvent(StreamEntity stream, TimelineElementInternal timelineElement, NotificationUnlockedEntity unlockEvent) {
-        return Mono.just(stream)
-                .flatMap(s -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                    objectMapper.registerModule(new JavaTimeModule());
-
-                    if (StringUtils.hasText(unlockEvent.getPk()) || (timelineElement.getNotificationSentAt().plus(24, ChronoUnit.HOURS).isBefore(Instant.now()))) {
-                        return Mono.just(stream);
-                    }
-
-                    if (Arrays.stream(UnlockCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
-                        //Se l'evento è di sblocco allora fare put su pn-NotificationUnlocked e mandare evento UNLOCK_EVENTS su coda
-                        log.info("Event is an unlock event, saving unlock item and sending message UNLOCK_EVENTS");
-                        NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity();
-                        notificationUnlockedEntity.setPk(stream.getStreamId()+"_"+timelineElement.getIun());
-                        return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
-                                .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId(), timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_EVENTS))
-                                .then(Mono.empty());
-                    } else {
-                        //Se non è un evento di sblocco allora lo salvo sulla tabella di quarantena
+    private Mono<StreamEntity> manageUnlockEvent(StreamEntity stream, TimelineElementInternal timelineElement) {
+        if (Arrays.stream(UnlockCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+            log.info("Event is an unlock event, saving unlock item and sending message UNLOCK_EVENTS");
+            NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun());
+            notificationUnlockedEntity.setTtl(Instant.now().plus(pnStreamConfigs.getUnlockedEventTtl()).toEpochMilli());
+            return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
+                    .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId(), timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_EVENTS))
+                    .map(entity -> stream);
+        } else {
+            if (timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getUnlockedEventTtl()).isBefore(Instant.now())) {
+                return Mono.just(stream);
+            }
+            return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
+                    .switchIfEmpty(Mono.defer(() -> {
                         log.info("Event is not an unlock event, saving in quarantine");
-                        EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity();
-                        eventsQuarantineEntity.setPk(stream.getStreamId()+"_"+timelineElement.getIun());
-                        eventsQuarantineEntity.setEventId(timelineElement.getTimelineElementId());
-                        try {
-                            eventsQuarantineEntity.setEvent(objectMapper.writeValueAsString(timelineElement));
-                        } catch (JsonProcessingException e) {
-                            return Mono.error(e);
-                        }
-                        return eventsQuarantineEntityDao.putItem(eventsQuarantineEntity)
-                                .then(Mono.empty());
-                    }
-                })
-                .doOnError(ex -> log.error("Error in manageUnlockEvent, event id {}", timelineElement.getTimelineElementId(), ex));
+                        return eventsQuarantineEntityDao.putItem(streamUtils.buildEventQuarantineEntity(stream, timelineElement))
+                                .flatMap(eventsQuarantineEntity -> Mono.empty());
+                    }))
+                    .map(notificationUnlockedEntity -> stream);
+        }
     }
+
+
 
     public Mono<StreamNotificationEntity> getNotification(String iun) {
         return streamNotificationDao.findByIun(iun)

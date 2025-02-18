@@ -28,22 +28,37 @@ class SortEventPoolImplTest {
     }
 
     @Test
-    void scheduleFutureAction() {
+    void scheduleFutureActionUnlockEvents() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
 
         Mockito.when(clock.instant()).thenReturn(instant);
 
-        sortEventPool.scheduleFutureAction(buildSortEventAction());
+        sortEventPool.scheduleFutureAction(buildSortEventAction(), SortEventType.UNLOCK_EVENTS);
 
-        Mockito.verify(sortActionsQueue).push(Mockito.argThat(matches((SortEvent tmp) -> tmp.getHeader().getIun().equalsIgnoreCase("streamId_IUN"))));
+        Mockito.verify(sortActionsQueue).push(Mockito.argThat(matches((SortEvent tmp) ->
+                tmp.getHeader().getEventType().equalsIgnoreCase("UNLOCK_EVENTS") &&
+                tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))));
     }
+
+    @Test
+    void scheduleFutureActionUnlockAllEvents() {
+        Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
+
+        Mockito.when(clock.instant()).thenReturn(instant);
+
+        sortEventPool.scheduleFutureAction(buildSortEventAction(), SortEventType.UNLOCK_ALL_EVENTS);
+
+        Mockito.verify(sortActionsQueue).push(Mockito.argThat(matches((SortEvent tmp) ->
+                tmp.getHeader().getEventType().equalsIgnoreCase("UNLOCK_ALL_EVENTS") &&
+                        tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))));
+    }
+
 
     private SortEventAction buildSortEventAction() {
         return SortEventAction.builder()
                 .eventKey("streamId_IUN")
                 .delaySeconds(30)
                 .writtenCounter(0)
-                .type(SortEventType.UNLOCK_EVENTS)
                 .build();
     }
 

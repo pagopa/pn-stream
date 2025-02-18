@@ -19,6 +19,7 @@
     "StreamNotificationTtl": "7889400",
     "MaximumRetryAttemptsValueStream": "5",
     "MaximumRetryAttemptsValueNotification": "5",
-    "SortEventDelaySeconds": "30"
+    "SortEventDelaySeconds": "30",
+    "UnlockedEventTtl": "10d"
   }
 }

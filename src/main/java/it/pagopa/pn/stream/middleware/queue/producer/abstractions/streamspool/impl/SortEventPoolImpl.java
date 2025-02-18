@@ -4,6 +4,7 @@ import it.pagopa.pn.api.dto.events.MomProducer;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventPool;
+import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,19 +28,18 @@ public class SortEventPoolImpl implements SortEventPool {
 
 
     @Override
-    public void scheduleFutureAction(SortEventAction action) {
+    public void scheduleFutureAction(SortEventAction action, SortEventType sortEventType) {
         // prevedere la gestione del delay passato nella action in fase di inserimento
-        addSortEventAction(action);
+        addSortEventAction(action, sortEventType);
     }
 
-    private void addSortEventAction(SortEventAction action ) {
+    private void addSortEventAction(SortEventAction action, SortEventType sortEventType) {
         sortActionsQueue.push( SortEvent.builder()
                 .header( StandardEventHeader.builder()
-                        .publisher("stream")
-                        .iun( action.getEventKey() )
+                        .publisher("pn-stream")
                         .eventId(UUID.randomUUID().toString())
                         .createdAt( clock.instant() )
-                        .eventType( SortEventActionType.SORT_ACTION_GENERIC.name())
+                        .eventType(sortEventType.name())
                         .build()
                 )
                 .payload( action )

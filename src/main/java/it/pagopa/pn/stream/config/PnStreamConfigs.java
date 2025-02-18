@@ -35,6 +35,7 @@ public class PnStreamConfigs {
     private Long streamNotificationTtl;
     private List<String> listCategoriesPa;
     private Integer sortEventDelaySeconds;
+    private Duration unlockedEventTtl;
 
     @Data
     public static class Dao {

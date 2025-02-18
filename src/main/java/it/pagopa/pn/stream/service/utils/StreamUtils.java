@@ -5,7 +5,9 @@ import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
+import it.pagopa.pn.stream.exceptions.PnStreamException;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
@@ -25,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
+import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_EVENT_CONVERSION;
 
 
 @Slf4j
@@ -103,6 +106,16 @@ public class StreamUtils {
             return Integer.parseInt(versionNumberString);
         }
         return Integer.parseInt(pnStreamConfigs.getCurrentVersion().replace("v", ""));
+    }
 
+    public EventsQuarantineEntity buildEventQuarantineEntity(StreamEntity stream, TimelineElementInternal timelineElement) {
+       try {
+           EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getTimelineElementId());
+           eventsQuarantineEntity.setEvent(this.timelineElementJsonConverter.entityToJson(mapperTimeline.dtoToEntity(timelineElement)));
+           return eventsQuarantineEntity;
+       } catch (JsonProcessingException e) {
+           log.warn("Error while converting timeline element into JSON", e);
+           throw new PnStreamException("Error while converting timeline element into JSON", 500, ERROR_EVENT_CONVERSION);
+       }
     }
 }
