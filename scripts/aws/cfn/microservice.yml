@@ -206,6 +206,14 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing stream notifications'
 
+  StreamStatsTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing stream stats'
+
+  StreamStatsTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing stream stats'
+
   StreamNotificationTtl:
     Type: Number
     Description: 'TTL offset for stream notifications'
@@ -312,6 +320,22 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
+  StreamStatsTimeUnit:
+    Type: String
+    Description: 'Time units for statistics'
+    Default: 'HOURS'
+    AllowedValues: [ DAYS, HOURS, MINUTES ]
+
+  StreamStatsSpanUnit:
+    Type: Number
+    Description: 'Time interval for statistics'
+    Default: 1
+
+  StreamStatsTtl:
+    Type: Number
+    Description: 'TTL in days offset for Stream Stats'
+    Default: 365
+
 Resources:
 
   # pn-stream microservice
@@ -354,6 +378,10 @@ Resources:
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
+        ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLE=${StreamStatsTableName}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -389,6 +417,8 @@ Resources:
               - !Sub "${EventsTableArn}/*"
               - !Sub "${StreamNotificationTableArn}"
               - !Sub "${StreamNotificationTableArn}/*"
+              - !Sub "${StreamStatsTableArn}"
+              - !Sub "${StreamStatsTableArn}/*"
           - Effect: Allow
             Action:
               - sqs:ChangeMessageVisibility
@@ -646,6 +676,7 @@ Resources:
         DynamoDBTableNames: !Join
           - ','
           - - !Ref StreamNotificationTableName
+            - !Ref StreamStatsTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
 
