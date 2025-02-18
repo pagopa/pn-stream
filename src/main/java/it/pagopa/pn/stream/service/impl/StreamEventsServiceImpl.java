@@ -11,6 +11,7 @@ import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsum
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
+import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
@@ -27,10 +28,7 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamNotificationEntity
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
-import it.pagopa.pn.stream.service.ConfidentialInformationService;
-import it.pagopa.pn.stream.service.SchedulerService;
-import it.pagopa.pn.stream.service.StreamEventsService;
-import it.pagopa.pn.stream.service.TimelineService;
+import it.pagopa.pn.stream.service.*;
 import it.pagopa.pn.stream.service.mapper.ProgressResponseElementMapper;
 import it.pagopa.pn.stream.service.mapper.TimelineElementStreamMapper;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
@@ -62,6 +60,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private final StreamUtils streamUtils;
     private final TimelineService timelineService;
     private final ConfidentialInformationService confidentialInformationService;
+    private final StreamStatsService streamStatsService;
 
     private final AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation;
     private static final String LOG_MSG_JSON_COMPRESSION = "Error while compressing timeline elements into JSON for the audit";
@@ -72,7 +71,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    PnStreamConfigs pnStreamConfigs, TimelineService timeLineService,
                                    ConfidentialInformationService confidentialInformationService,
                                    AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation,
-                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive) {
+                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive, StreamStatsService streamStatsService) {
         super(streamEntityDao, pnStreamConfigs);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
@@ -82,6 +81,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         this.ssmParameterConsumerActivation = ssmParameterConsumerActivation;
         this.streamNotificationDao = streamNotificationDao;
         this.pnDeliveryClientReactive = pnDeliveryClientReactive;
+        this.streamStatsService = streamStatsService;
     }
 
     @Override
@@ -120,6 +120,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .flatMap(eventList -> {
                                     if (eventList.isEmpty()) {
                                         return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId))
+                                                .then(Mono.defer(() -> {
+                                                    streamStatsService.updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xPagopaPnCxId, streamId.toString());
+                                                    return Mono.empty();
+                                                }))
                                                 .thenReturn(eventList);
                                     }
                                     return Mono.just(eventList);
