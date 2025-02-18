@@ -229,7 +229,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.debug("sortStream streamId={} timelineElementId={} category={}", streamEntity.getStreamId(), timelineElement.getTimelineElementId(), timelineElement.getCategory());
 
         if (Arrays.stream(SkipSortCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
-            log.info("Event in validation, ignoring sorting flow");
+            log.info("Event {} in validation, ignoring sorting flow for stream with id={}", timelineElement.getTimelineElementId(), streamEntity.getStreamId());
             return Mono.just(streamEntity);
         }
 
