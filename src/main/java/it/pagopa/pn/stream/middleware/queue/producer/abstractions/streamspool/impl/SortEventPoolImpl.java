@@ -1,7 +1,7 @@
 package it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl;
 
+import it.pagopa.pn.api.dto.events.GenericEventHeader;
 import it.pagopa.pn.api.dto.events.MomProducer;
-import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventPool;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
@@ -35,7 +35,7 @@ public class SortEventPoolImpl implements SortEventPool {
 
     private void addSortEventAction(SortEventAction action, SortEventType sortEventType) {
         sortActionsQueue.push( SortEvent.builder()
-                .header( StandardEventHeader.builder()
+                .header( GenericEventHeader.builder()
                         .publisher("pn-stream")
                         .eventId(UUID.randomUUID().toString())
                         .createdAt( clock.instant() )
