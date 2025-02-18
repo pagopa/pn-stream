@@ -235,7 +235,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         if (Boolean.FALSE.equals(streamEntity.isSorting())) {
             log.info("Stream is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message");
-            schedulerService.scheduleSortEvent(streamEntity.getStreamId(), timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_ALL_EVENTS);
+            schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_ALL_EVENTS);
             return Mono.just(streamEntity);
         }
 
@@ -248,7 +248,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun());
             notificationUnlockedEntity.setTtl(Instant.now().plus(pnStreamConfigs.getUnlockedEventTtl()).toEpochMilli());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
-                    .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId(), timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_EVENTS))
+                    .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_EVENTS))
                     .map(entity -> stream);
         } else {
             if (timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getUnlockedEventTtl()).isBefore(Instant.now())) {

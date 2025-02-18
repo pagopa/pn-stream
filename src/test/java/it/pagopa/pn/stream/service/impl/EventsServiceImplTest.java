@@ -1536,14 +1536,14 @@ class EventsServiceImplTest {
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
         Mockito.when(notificationUnlockedEntityDao.findByPk(uuid+"_"+iun)).thenReturn(Mono.empty());
         Mockito.when(notificationUnlockedEntityDao.putItem(Mockito.any())).thenReturn(Mono.just(new NotificationUnlockedEntity()));
-        Mockito.doNothing().when(schedulerService).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.doNothing().when(schedulerService).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
         Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
         Mockito.verify(notificationUnlockedEntityDao, Mockito.times(1)).putItem(Mockito.any());
-        Mockito.verify(schedulerService, Mockito.times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(schedulerService, Mockito.times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(eventEntityDao, Mockito.times(1)).saveWithCondition(Mockito.any(EventEntity.class));
 
     }
@@ -1607,7 +1607,7 @@ class EventsServiceImplTest {
         Mockito.verify(eventsQuarantineEntityDao, Mockito.times(1)).putItem(Mockito.any());
 
         Mockito.verify(notificationUnlockedEntityDao, Mockito.times(0)).putItem(Mockito.any());
-        Mockito.verify(schedulerService, Mockito.times(0)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(schedulerService, Mockito.times(0)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(eventEntityDao, Mockito.times(0)).saveWithCondition(Mockito.any(EventEntity.class));
 
     }

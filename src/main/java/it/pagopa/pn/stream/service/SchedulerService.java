@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.service;
 
+import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 
 public interface SchedulerService {
