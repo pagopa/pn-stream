@@ -17,6 +17,7 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.EntityToStreamListDtoStr
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.externalregistry.PnExternalRegistryClient;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.SchedulerService;
+import it.pagopa.pn.stream.service.StreamStatsService;
 import it.pagopa.pn.stream.service.StreamsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -36,15 +37,17 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     public static final String ERROR_CREATING_STREAM = "error creating stream";
     private final SchedulerService schedulerService;
     private final PnExternalRegistryClient pnExternalRegistryClient;
+    private final StreamStatsService streamStatsService;
 
     private final int purgeDeletionWaittime;
 
     public StreamsServiceImpl(StreamEntityDao streamEntityDao, SchedulerService schedulerService
-            , PnStreamConfigs pnStreamConfigs, PnExternalRegistryClient pnExternalRegistryClient) {
-        super(streamEntityDao, pnStreamConfigs);
+            , PnStreamConfigs pnStreamConfigs, PnExternalRegistryClient pnExternalRegistryClient, StreamStatsService streamStatsService) {
+        super(streamEntityDao, pnStreamConfigs,streamStatsService);
         this.schedulerService = schedulerService;
         this.pnExternalRegistryClient = pnExternalRegistryClient;
         this.purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
+        this.streamStatsService = streamStatsService;
     }
 
     @Override

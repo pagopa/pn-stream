@@ -27,10 +27,7 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamNotificationEntity
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
-import it.pagopa.pn.stream.service.ConfidentialInformationService;
-import it.pagopa.pn.stream.service.SchedulerService;
-import it.pagopa.pn.stream.service.StreamEventsService;
-import it.pagopa.pn.stream.service.TimelineService;
+import it.pagopa.pn.stream.service.*;
 import it.pagopa.pn.stream.service.mapper.ProgressResponseElementMapper;
 import it.pagopa.pn.stream.service.mapper.TimelineElementStreamMapper;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
@@ -61,6 +58,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private final SchedulerService schedulerService;
     private final StreamUtils streamUtils;
     private final TimelineService timelineService;
+    private final StreamStatsService streamStatsService;
     private final ConfidentialInformationService confidentialInformationService;
 
     private final AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation;
@@ -72,8 +70,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    PnStreamConfigs pnStreamConfigs, TimelineService timeLineService,
                                    ConfidentialInformationService confidentialInformationService,
                                    AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation,
-                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive) {
-        super(streamEntityDao, pnStreamConfigs);
+                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive, StreamStatsService streamStatsService) {
+        super(streamEntityDao, pnStreamConfigs,streamStatsService);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
         this.streamUtils = streamUtils;
@@ -82,6 +80,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         this.ssmParameterConsumerActivation = ssmParameterConsumerActivation;
         this.streamNotificationDao = streamNotificationDao;
         this.pnDeliveryClientReactive = pnDeliveryClientReactive;
+        this.streamStatsService = streamStatsService;
     }
 
     @Override

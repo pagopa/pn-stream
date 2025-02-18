@@ -13,6 +13,7 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.DtoToEntityStreamMapper;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.externalregistry.PnExternalRegistryClient;
 import it.pagopa.pn.stream.service.SchedulerService;
+import it.pagopa.pn.stream.service.StreamStatsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,7 @@ class StreamsServiceImplTest {
     private SchedulerService schedulerService;
     private StreamsServiceImpl webhookService;
     private PnExternalRegistryClient pnExternalRegistryClient;
+    private StreamStatsService streamStatsService;
 
     private final int maxStreams = 5;
 
@@ -61,7 +63,7 @@ class StreamsServiceImplTest {
         when(pnStreamConfigs.getDeltaCounter()).thenReturn(1000);
 
         webhookService = new StreamsServiceImpl(streamEntityDao, schedulerService, pnStreamConfigs
-            ,pnExternalRegistryClient);
+            ,pnExternalRegistryClient,streamStatsService);
 
         new DtoToEntityStreamMapper(pnStreamConfigs);
     }
