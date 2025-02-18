@@ -1,8 +1,6 @@
 package it.pagopa.pn.stream.service.impl;
 
-import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamAction;
-import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
-import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamsPool;
+import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +15,7 @@ import java.time.Clock;
 class SchedulerServiceImplTest {
 
     private StreamsPool streamsPool;
+    private SortEventPool sortEventPool;
 
     @Mock
     private Clock clock;
@@ -27,9 +26,10 @@ class SchedulerServiceImplTest {
     @BeforeEach
     void setup() {
         streamsPool = Mockito.mock(StreamsPool.class);
+        sortEventPool = Mockito.mock(SortEventPool.class);
         clock = Mockito.mock(Clock.class);
 
-        schedulerService = new SchedulerServiceImpl(streamsPool);
+        schedulerService = new SchedulerServiceImpl(streamsPool, sortEventPool);
     }
 
 
@@ -46,5 +46,18 @@ class SchedulerServiceImplTest {
         schedulerService.scheduleStreamEvent("01", "02", 4, StreamEventType.REGISTER_EVENT);
 
         Mockito.verify(streamsPool, Mockito.times(1)).scheduleFutureAction(action);
+    }
+
+    @Test
+    void testSortActionEvent() {
+        SortEventAction action = SortEventAction.builder()
+                .eventKey("streamId_iun")
+                .delaySeconds(30)
+                .writtenCounter(0)
+                .build();
+
+        schedulerService.scheduleSortEvent("streamId", "iun", 30, 0, SortEventType.UNLOCK_EVENTS);
+
+        Mockito.verify(sortEventPool, Mockito.times(1)).scheduleFutureAction(action, SortEventType.UNLOCK_EVENTS);
     }
 }

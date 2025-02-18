@@ -17,7 +17,7 @@ public class StreamNotificationDaoImpl implements StreamNotificationDao {
     private final DynamoDbAsyncTable<StreamNotificationEntity> table;
 
     public StreamNotificationDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg) {
-        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getStreamNotificationTable(), TableSchema.fromBean(StreamNotificationEntity.class));
+        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getStreamNotificationTableName(), TableSchema.fromBean(StreamNotificationEntity.class));
     }
 
     @Override
