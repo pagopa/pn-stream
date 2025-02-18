@@ -125,7 +125,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                         return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId))
                                                 .thenReturn(eventList);
                                     }
-                                    return Mono.just(eventList);
+                                    return streamStatsService.updateNumberOfReadingStreamStats(xPagopaPnCxId, streamId.toString(), eventList.size())
+                                            .thenReturn(eventList);
                                 })
                                 .flatMap(eventList -> updateStats(xPagopaPnCxId, streamId, eventList).thenReturn(eventList))
                                 .map(eventList -> {
