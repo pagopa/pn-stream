@@ -27,9 +27,9 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public void scheduleSortEvent(String streamId, String iun, Integer delay, Integer writtenCounter, SortEventType sortEventType) {
+    public void scheduleSortEvent(String eventKey, Integer delay, Integer writtenCounter, SortEventType sortEventType) {
         SortEventAction action = SortEventAction.builder()
-                .eventKey(streamId + "_" + iun)
+                .eventKey(eventKey)
                 .writtenCounter(writtenCounter)
                 .delaySeconds(delay)
                 .build();

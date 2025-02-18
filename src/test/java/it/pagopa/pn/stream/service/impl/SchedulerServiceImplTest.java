@@ -56,7 +56,7 @@ class SchedulerServiceImplTest {
                 .writtenCounter(0)
                 .build();
 
-        schedulerService.scheduleSortEvent("streamId", "iun", 30, 0, SortEventType.UNLOCK_EVENTS);
+        schedulerService.scheduleSortEvent("streamId_iun", 30, 0, SortEventType.UNLOCK_EVENTS);
 
         Mockito.verify(sortEventPool, Mockito.times(1)).scheduleFutureAction(action, SortEventType.UNLOCK_EVENTS);
     }
