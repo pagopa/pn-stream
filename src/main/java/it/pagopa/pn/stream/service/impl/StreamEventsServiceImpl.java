@@ -234,7 +234,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         }
 
         if (Boolean.FALSE.equals(streamEntity.isSorting())) {
-            log.info("Stream is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message");
+            log.info("Stream streamId={} is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message", streamEntity.getStreamId());
             schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_ALL_EVENTS);
             return Mono.just(streamEntity);
         }
@@ -244,7 +244,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     private Mono<StreamEntity> manageUnlockEvent(StreamEntity stream, TimelineElementInternal timelineElement) {
         if (Arrays.stream(UnlockCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
-            log.info("Event is an unlock event, saving unlock item and sending message UNLOCK_EVENTS");
+            log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
             NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun());
             notificationUnlockedEntity.setTtl(Instant.now().plus(pnStreamConfigs.getUnlockedEventTtl()).toEpochMilli());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
@@ -256,7 +256,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             }
             return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
                     .switchIfEmpty(Mono.defer(() -> {
-                        log.info("Event is not an unlock event, saving in quarantine");
+                        log.info("Event with id={} is not an unlock event, saving in quarantine", timelineElement.getTimelineElementId());
                         return eventsQuarantineEntityDao.putItem(streamUtils.buildEventQuarantineEntity(stream, timelineElement))
                                 .flatMap(eventsQuarantineEntity -> Mono.empty());
                     }))
