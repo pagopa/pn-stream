@@ -196,11 +196,6 @@ class EventsServiceImplTest {
         timelineElementInternal.setLegalFactsIds(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
-        StreamStatsEntity streamStatsEntity = new StreamStatsEntity();
-        streamStatsEntity.setPk(xpagopacxid + "#" + uuid + "#" + StreamStatsEnum.NUMBER_OF_REQUESTS);
-        streamStatsEntity.setSk(Instant.now() + "#" + 1 + "#" + StatsTimeUnit.DAYS);
-        streamStatsEntity.setTtl(Duration.ofDays(30).getSeconds());
-
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
                 .timelineElementId("id")
@@ -212,6 +207,7 @@ class EventsServiceImplTest {
                 .build();
 
         when(webhookUtils.getVersion("v10")).thenReturn(10);
+        when(streamStatsService.updateNumberOfReadingStreamStats(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
         when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
         when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
         Mockito.doNothing().when(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -227,7 +223,8 @@ class EventsServiceImplTest {
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
         Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(streamStatsService).updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
+        Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
     }
 
     @Test
@@ -291,11 +288,6 @@ class EventsServiceImplTest {
         timelineElementInternal.setLegalFactsIds(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
-        StreamStatsEntity streamStatsEntity = new StreamStatsEntity();
-        streamStatsEntity.setPk(xpagopacxid + "#" + uuid + "#" + StreamStatsEnum.NUMBER_OF_REQUESTS);
-        streamStatsEntity.setSk(Instant.now() + "#" + 1 + "#" + StatsTimeUnit.DAYS);
-        streamStatsEntity.setTtl(Duration.ofDays(30).getSeconds());
-
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
                 .timelineElementId("id")
@@ -309,6 +301,7 @@ class EventsServiceImplTest {
         when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
         when(webhookUtils.getVersion("v10")).thenReturn(10);
         when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
+        when(streamStatsService.updateNumberOfReadingStreamStats(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
         when(webhookUtils.getTimelineInternalFromEvent(any())).thenReturn(timelineElementInternal);
         Mockito.doNothing().when(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         when(eventEntityDao.findByStreamId(uuid, null)).thenReturn(Mono.just(eventEntityBatch));
@@ -321,6 +314,8 @@ class EventsServiceImplTest {
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
         Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
+        Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid,uuid);
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -426,6 +421,7 @@ class EventsServiceImplTest {
         Mockito.doNothing().when(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
         when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        when(streamStatsService.updateNumberOfReadingStreamStats(Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(Mono.empty());
         when(eventEntityDao.findByStreamId(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(eventEntityBatch));
         when(webhookUtils.getVersion(xPagopaPnApiVersion)).thenReturn(10);
 
@@ -437,7 +433,8 @@ class EventsServiceImplTest {
         assertNotNull(res);
         Assertions.assertEquals(2, res.getProgressResponseElementList().size());
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(streamStatsService).updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
+        Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid,uuid);
     }
 
 
@@ -586,6 +583,7 @@ class EventsServiceImplTest {
         when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.of(streamRetryAfter))));
         Mockito.doNothing().when(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         when(webhookUtils.getTimelineInternalFromEvent(any())).thenReturn(timelineElementInternal);
+        when(streamStatsService.updateNumberOfReadingStreamStats(Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(Mono.empty());
         when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
         when(eventEntityDao.findByStreamId(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(eventEntityBatch));
         when(webhookUtils.getVersion(xPagopaPnApiVersion)).thenReturn(10);
@@ -597,7 +595,8 @@ class EventsServiceImplTest {
         assertNotNull(res);
         Assertions.assertEquals(2, res.getProgressResponseElementList().size());
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(streamStatsService).updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(xpagopacxid,uuid, list.size());
+        Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid,uuid);
     }
 
     @Test
