@@ -11,7 +11,6 @@ import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCatego
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementDetailsV26;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV26;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -43,7 +42,7 @@ public class TimelineElementMapper {
                     .ingestionTimestamp(internalDto.getIngestionTimestamp())
                     .eventTimestamp(internalDto.getEventTimestamp())
                     .details(timelineElement)
-                    .legalFactsIds(internalDto.getLegalFactsIds());
+                    .legalFactsIds(internalDto.getLegalFactId());
 
         } catch (JsonProcessingException e) {
             throw new PnStreamException(e.getMessage(), 500, ERROR_CODE_GENERIC);

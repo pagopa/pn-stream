@@ -189,7 +189,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
         timelineElementInternal.setCategory(AAR_GENERATION.name());
         timelineElementInternal.setPaId("PaId");
-        timelineElementInternal.setLegalFactsIds(new ArrayList<>());
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
@@ -277,7 +277,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
         timelineElementInternal.setCategory(AAR_GENERATION.name());
         timelineElementInternal.setPaId("PaId");
-        timelineElementInternal.setLegalFactsIds(new ArrayList<>());
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
@@ -400,7 +400,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
         timelineElementInternal.setCategory(AAR_GENERATION.name());
         timelineElementInternal.setPaId("PaId");
-        timelineElementInternal.setLegalFactsIds(new ArrayList<>());
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
         lasteventid = list.get(0).getEventId();
@@ -551,7 +551,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
         timelineElementInternal.setCategory(AAR_GENERATION.name());
         timelineElementInternal.setPaId("PaId");
-        timelineElementInternal.setLegalFactsIds(new ArrayList<>());
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
         StreamRetryAfter streamRetryAfter = new StreamRetryAfter();
@@ -699,7 +699,7 @@ class EventsServiceImplTest {
                 .timestamp(Instant.now())
                 .paId("paId")
                 .statusInfo(StatusInfoInternal.builder().actual("actual").statusChanged(true).build())
-                .legalFactsIds(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
                 .build();
 
         EventTimelineInternalDto eventTimelineInternalDto = EventTimelineInternalDto.builder()
@@ -760,7 +760,7 @@ class EventsServiceImplTest {
                 .timestamp(Instant.now())
                 .paId("paId")
                 .statusInfo(StatusInfoInternal.builder().actual("actual").statusChanged(true).build())
-                .legalFactsIds(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
                 .build();
 
         EventTimelineInternalDto eventTimelineInternalDto = EventTimelineInternalDto.builder()
