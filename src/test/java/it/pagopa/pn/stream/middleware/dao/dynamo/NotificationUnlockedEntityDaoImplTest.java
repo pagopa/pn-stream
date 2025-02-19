@@ -13,13 +13,12 @@ class UnlockedNotificationEntityDaoImplTest extends BaseTest.WithLocalStack {
 
     @Test
     void putAndGetItem() {
-        NotificationUnlockedEntity entity = new NotificationUnlockedEntity();
-        entity.setPk("pkTest");
+        NotificationUnlockedEntity entity = new NotificationUnlockedEntity("streamId", "iun");
         unlockedNotificationEntityDao.putItem(entity).block();
 
-        NotificationUnlockedEntity result = unlockedNotificationEntityDao.findByPk("pkTest").block();
+        NotificationUnlockedEntity result = unlockedNotificationEntityDao.findByPk("streamId_iun").block();
 
         assert result != null;
-        Assertions.assertEquals("pkTest", result.getPk());
+        Assertions.assertEquals("streamId_iun", result.getPk());
     }
 }
