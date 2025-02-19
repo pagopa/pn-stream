@@ -246,19 +246,19 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         if (Arrays.stream(UnlockCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
             log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
             NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun());
-            notificationUnlockedEntity.setTtl(Instant.now().plus(pnStreamConfigs.getUnlockedEventTtl()).toEpochMilli());
+            notificationUnlockedEntity.setTtl(timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getMaxTtl()).toEpochMilli());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
                     .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_EVENTS))
                     .map(entity -> stream);
         } else {
-            if (timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getUnlockedEventTtl()).isBefore(Instant.now())) {
+            if (timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now())) {
                 return Mono.just(stream);
             }
             return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
                     .switchIfEmpty(Mono.defer(() -> {
                         log.info("Event with id={} is not an unlock event, saving in quarantine", timelineElement.getTimelineElementId());
                         return eventsQuarantineEntityDao.putItem(streamUtils.buildEventQuarantineEntity(stream, timelineElement))
-                                .flatMap(eventsQuarantineEntity -> Mono.empty());
+                                .then(Mono.empty());
                     }))
                     .map(notificationUnlockedEntity -> stream);
         }

@@ -36,6 +36,7 @@ public class PnStreamConfigs {
     private List<String> listCategoriesPa;
     private Integer sortEventDelaySeconds;
     private Duration unlockedEventTtl;
+    private Duration notificationSla;
 
     @Data
     public static class Dao {
@@ -51,5 +52,9 @@ public class PnStreamConfigs {
         private String scheduledActions;
         private String event;
         private String eventSchedule;
+    }
+
+    public Duration getMaxTtl() {
+        return notificationSla.compareTo(unlockedEventTtl) >=0 ? notificationSla : unlockedEventTtl;
     }
 }
