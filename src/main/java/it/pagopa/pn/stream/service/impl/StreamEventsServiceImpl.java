@@ -321,7 +321,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                     return eventEntityDao.saveWithCondition(eventEntity)
                             .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
                             .doOnSuccess(event -> log.info("saved webhookevent={}", event))
-                            .then();
+                            .flatMap(entity -> streamStatsService.updateStreamStats(StreamStatsEnum.NUMBER_OF_WRITINGS, streamEntity.getPaId(), streamEntity.getStreamId()));
                 });
     }
 
