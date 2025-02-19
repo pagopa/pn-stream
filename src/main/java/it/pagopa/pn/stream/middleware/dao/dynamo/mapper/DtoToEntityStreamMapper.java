@@ -28,6 +28,7 @@ public class DtoToEntityStreamMapper {
             streamEntity.setFilterValues(Set.copyOf(dto.getFilterValues()));
         else
             streamEntity.setFilterValues(null);
+        streamEntity.setSorting(dto.getWaitForAccepted());
         return streamEntity;
     }
 
