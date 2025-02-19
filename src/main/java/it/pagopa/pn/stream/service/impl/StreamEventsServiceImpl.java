@@ -72,7 +72,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    ConfidentialInformationService confidentialInformationService,
                                    AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation,
                                    StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive, StreamStatsService streamStatsService) {
-        super(streamEntityDao, pnStreamConfigs);
+        super(streamEntityDao, pnStreamConfigs,streamStatsService);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
         this.streamUtils = streamUtils;
