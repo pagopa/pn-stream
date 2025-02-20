@@ -78,7 +78,7 @@ public enum TimelineElementCategoryInt {
 
     @Getter
     public enum StreamVersions {
-        STREAM_V26(VERSION_26, VERSION_26,VERSION_10),
+        STREAM_V26(VERSION_26, VERSION_26,VERSION_26),
         STREAM_V25(VERSION_25, VERSION_25,VERSION_10),
         STREAM_V23(VERSION_23, VERSION_23,VERSION_10),
         STREAM_V20(VERSION_20, VERSION_20,VERSION_10),
