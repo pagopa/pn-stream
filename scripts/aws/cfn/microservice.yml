@@ -346,6 +346,20 @@ Parameters:
     Type: String
     Description: ARN of dynamodb table containing the unlocked notification
 
+  MaxWrittenCounter:
+    Type: Number
+    Description: 'Max written counter for schedule unlock events'
+
+  SortEventDelaySeconds:
+    Type: Number
+    Description: 'Sort event delay seconds'
+    Default: 30
+
+  QueryEventQuarantineLimit:
+    Type: Number
+    Description: 'Limit for query on event quarantine table'
+    Default: 100
+
 Resources:
 
   # pn-stream microservice
@@ -391,6 +405,9 @@ Resources:
         ContainerEnvEntry17: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
         ContainerEnvEntry18: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
         ContainerEnvEntry19: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_SORTEVENTDELAYSECONDS=${SortEventDelaySeconds}'
+        ContainerEnvEntry21: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
+        ContainerEnvEntry22: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName

@@ -6,18 +6,18 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class UnlockedNotificationEntityDaoImplTest extends BaseTest.WithLocalStack {
+class NotificationUnlockedEntityDaoImplTest extends BaseTest.WithLocalStack {
 
     @Autowired
-    UnlockedNotificationEntityDao unlockedNotificationEntityDao;
+    NotificationUnlockedEntityDao notificationUnlockedEntityDao;
 
     @Test
     void putAndGetItem() {
         NotificationUnlockedEntity entity = new NotificationUnlockedEntity();
         entity.setPk("pkTest");
-        unlockedNotificationEntityDao.putItem(entity).block();
+        notificationUnlockedEntityDao.putItem(entity).block();
 
-        NotificationUnlockedEntity result = unlockedNotificationEntityDao.findByPk("pkTest").block();
+        NotificationUnlockedEntity result = notificationUnlockedEntityDao.findByPk("pkTest").block();
 
         assert result != null;
         Assertions.assertEquals("pkTest", result.getPk());

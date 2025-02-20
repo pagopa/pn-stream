@@ -18,4 +18,7 @@ public class NotificationUnlockedEntity {
     @Getter(onMethod=@__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_PK)})) private String pk;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_TTL)})) private long ttl;
 
+    public NotificationUnlockedEntity(String streamId, String iun) {
+        this.pk = streamId + "_" + iun;
+    }
 }

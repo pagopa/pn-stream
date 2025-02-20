@@ -1,4 +1,4 @@
-package it.pagopa.pn.stream.dto.timeline;
+package it.pagopa.pn.stream.middleware.dao.dynamo.entity;
 
 import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;

@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
@@ -27,12 +30,23 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
         entity.setPk("pkTest");
         entity.setEventId("skTest");
         entity.setEvent("elementTest");
+
         eventsQuarantineEntityDao.putItem(entity).block();
 
-        Mono<Page<EventsQuarantineEntity>> result = eventsQuarantineEntityDao.findByPk("pkTest");
+        entity = new EventsQuarantineEntity();
+        entity.setPk("pkTest2");
+        entity.setEventId("skTest2");
+        entity.setEvent("elementTest2");
+
+        eventsQuarantineEntityDao.putItem(entity).block();
+
+        Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
+
+        Mono<Page<EventsQuarantineEntity>> result = eventsQuarantineEntityDao.findByPk("pkTest", lastEvaluateKey, 1);
         Page<EventsQuarantineEntity> foundEntity = result.block();
 
         assert foundEntity != null;
+        Assertions.assertEquals(1, foundEntity.items().size());
         Assertions.assertEquals("pkTest", foundEntity.items().get(0).getPk());
         Assertions.assertEquals("skTest", foundEntity.items().get(0).getEventId());
         Assertions.assertEquals("elementTest", foundEntity.items().get(0).getEvent());
@@ -51,7 +65,9 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
         entity.setEvent("elementTest2");
         eventsQuarantineEntityDao.putItem(entity).block();
 
-        Page<EventsQuarantineEntity> result = eventsQuarantineEntityDao.findByPk("pkTest").block();
+        Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
+
+        Page<EventsQuarantineEntity> result = eventsQuarantineEntityDao.findByPk("pkTest", lastEvaluateKey, 100).block();
 
         assert result != null;
 
@@ -62,7 +78,9 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
             eventsQuarantineEntityDao.saveAndClearElement(resultEntity, eventEntity).block();
         });
 
-        List<EventsQuarantineEntity> finalResult = Objects.requireNonNull(eventsQuarantineEntityDao.findByPk("pkTest").block()).items();
+        lastEvaluateKey = new HashMap<>();
+
+        List<EventsQuarantineEntity> finalResult = Objects.requireNonNull(eventsQuarantineEntityDao.findByPk("pkTest", lastEvaluateKey, 100).block()).items();
         EventEntityBatch resultEvent = eventEntityDao.findByStreamId("streamIdTest", null).block();
 
 

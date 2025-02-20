@@ -21,4 +21,8 @@ public class EventsQuarantineEntity {
     @Getter(onMethod=@__({@DynamoDbSortKey, @DynamoDbAttribute(COL_EVENTID)}))  private String eventId;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_EVENT)})) private String event;
 
+    public EventsQuarantineEntity(String streamId, String iun, String eventId) {
+        this.pk = streamId + "_" + iun;
+        this.eventId = eventId;
+    }
 }

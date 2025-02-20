@@ -12,11 +12,11 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 @Slf4j
 @Repository
-public class UnlockedNotificationEntityDaoImpl implements UnlockedNotificationEntityDao {
+public class NotificationUnlockedEntityDaoImpl implements NotificationUnlockedEntityDao {
 
     private final DynamoDbAsyncTable<NotificationUnlockedEntity> table;
 
-    public UnlockedNotificationEntityDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg) {
+    public NotificationUnlockedEntityDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg) {
         this.table = dynamoDbEnhancedClient.table(cfg.getDao().getNotificationUnlockedTableName(), TableSchema.fromBean(NotificationUnlockedEntity.class));
     }
 
