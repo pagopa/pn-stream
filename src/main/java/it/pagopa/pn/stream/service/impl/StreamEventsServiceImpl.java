@@ -16,7 +16,7 @@ import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV26;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV26;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV27;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV26;
 import it.pagopa.pn.stream.middleware.dao.dynamo.EventEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
@@ -253,8 +253,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             return Mono.empty();
         }
 
-        StreamCreationRequestV26.EventTypeEnum eventType = StreamCreationRequestV26.EventTypeEnum.fromValue(stream.getEventType());
-        if (eventType == StreamCreationRequestV26.EventTypeEnum.STATUS && !timelineElementInternal.getStatusInfo().isStatusChanged()) {
+        StreamCreationRequestV27.EventTypeEnum eventType = StreamCreationRequestV27.EventTypeEnum.fromValue(stream.getEventType());
+        if (eventType == StreamCreationRequestV27.EventTypeEnum.STATUS && !timelineElementInternal.getStatusInfo().isStatusChanged()) {
             log.info("skipping saving webhook event for stream={} because there was no change in status iun={}", stream.getStreamId(), timelineElementInternal.getIun());
             return Mono.empty();
         }
@@ -268,8 +268,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         Set<String> filteredValues = retrieveFilteredValues(stream, eventType);
 
         log.info("timelineEventCategory={} for stream={}", stream.getStreamId(), timelineEventCategory);
-        if ((eventType == StreamCreationRequestV26.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
-                || (eventType == StreamCreationRequestV26.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
+        if ((eventType == StreamCreationRequestV27.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
+                || (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
             return saveEventWithAtomicIncrement(stream, timelineElementInternal.getStatusInfo().getActual(), timelineElementInternal);
         } else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
@@ -277,10 +277,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return Mono.empty();
     }
 
-    private Set<String> retrieveFilteredValues(StreamEntity stream, StreamCreationRequestV26.EventTypeEnum eventType) {
-        if (eventType == StreamCreationRequestV26.EventTypeEnum.TIMELINE) {
+    private Set<String> retrieveFilteredValues(StreamEntity stream, StreamCreationRequestV27.EventTypeEnum eventType) {
+        if (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE) {
             return categoriesByFilter(stream);
-        } else if (eventType == StreamCreationRequestV26.EventTypeEnum.STATUS) {
+        } else if (eventType == StreamCreationRequestV27.EventTypeEnum.STATUS) {
             return statusByFilter(stream);
         }
         return Collections.emptySet();

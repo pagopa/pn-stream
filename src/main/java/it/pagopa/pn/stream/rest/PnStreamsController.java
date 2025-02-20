@@ -26,7 +26,7 @@ public class PnStreamsController implements StreamsApi {
     private final StreamsService streamsService;
 
     @Override
-    public Mono<ResponseEntity<StreamMetadataResponseV26>> createEventStreamV26(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, Mono<StreamCreationRequestV26> streamCreationRequest, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<StreamMetadataResponseV26>> createEventStreamV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, Mono<StreamCreationRequestV27> streamCreationRequest, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
         log.info("[enter] createEventStream xPagopaPnCxId={} xPagopaPnCxGroups={}", xPagopaPnCxId, xPagopaPnCxGroups);
 

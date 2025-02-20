@@ -10,10 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -29,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_CODE_STREAM_STREAMNOTFOUND;
+import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
 import static software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo;
 
 @Component
@@ -54,7 +52,9 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
         log.debug("findByPa paId={}", paId);
         Key hashKey = Key.builder().partitionValue(paId).build();
         QueryConditional queryByHashKey = keyEqualTo(hashKey);
-        return Flux.from(table.query(queryByHashKey).flatMapIterable(Page::items));
+        return Flux.from(table.query(queryByHashKey)
+                .flatMapIterable(Page::items))
+                .filter(entity -> !entity.getStreamId().startsWith(RETRY_PREFIX));
     }
 
     @Override
@@ -68,7 +68,7 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
     public Mono<Tuple2<StreamEntity, Optional<StreamRetryAfter>>> getWithRetryAfter(String paId, String streamId) {
         log.info("getWithRetryAfter paId={} streamId={}", paId, streamId);
         Key hashKey = Key.builder().partitionValue(paId).sortValue(streamId).build();
-        Key retryHashKey = Key.builder().partitionValue(paId).sortValue(StreamRetryAfter.RETRY_PREFIX + streamId).build();
+        Key retryHashKey = Key.builder().partitionValue(paId).sortValue(RETRY_PREFIX + streamId).build();
 
         ReadBatch streamEntityBatch = ReadBatch.builder(StreamEntity.class)
                 .mappedTableResource(table)
@@ -85,13 +85,13 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
                 .map(batchGetResultPage ->
                         Tuples.of(
                                 batchGetResultPage.resultsForTable(table).stream()
-                                        .filter(entity -> !entity.getStreamId().startsWith(StreamRetryAfter.RETRY_PREFIX))
+                                        .filter(entity -> !entity.getStreamId().startsWith(RETRY_PREFIX))
                                         .findFirst()
                                         .orElseThrow(() -> new PnNotFoundException("Not found"
                                                 , String.format("Stream %s non found for Pa %s", streamId, paId)
                                                 , ERROR_CODE_STREAM_STREAMNOTFOUND)),
                                 batchGetResultPage.resultsForTable(tableRetry).stream()
-                                        .filter(entity -> entity.getStreamId().startsWith(StreamRetryAfter.RETRY_PREFIX) && Objects.nonNull(entity.getRetryAfter()))
+                                        .filter(entity -> entity.getStreamId().startsWith(RETRY_PREFIX) && Objects.nonNull(entity.getRetryAfter()))
                                         .findFirst())));
     }
 
@@ -99,7 +99,9 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
     public Mono<Void> delete(String paId, String streamId) {
         log.info("delete paId={} streamId={}", paId, streamId);
         Key hashKey = Key.builder().partitionValue(paId).sortValue(streamId).build();
-        return Mono.fromFuture(table.deleteItem(hashKey)).then();
+        return Mono.fromFuture(table.deleteItem(hashKey))
+                .flatMap(entity -> Mono.fromFuture(table.deleteItem(Key.builder().partitionValue(paId).sortValue(RETRY_PREFIX + streamId).build())))
+                .then();
     }
 
     @Override
