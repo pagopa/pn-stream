@@ -37,7 +37,7 @@ class SortEventPoolImplTest {
 
         Mockito.verify(sortActionsQueue).push(Mockito.argThat(matches((SortEvent tmp) ->
                 tmp.getHeader().getEventType().equalsIgnoreCase("UNLOCK_EVENTS") &&
-                tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))), Mockito.eq(30));
+                tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))));
     }
 
     @Test
@@ -50,7 +50,7 @@ class SortEventPoolImplTest {
 
         Mockito.verify(sortActionsQueue).push(Mockito.argThat(matches((SortEvent tmp) ->
                 tmp.getHeader().getEventType().equalsIgnoreCase("UNLOCK_ALL_EVENTS") &&
-                        tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))), Mockito.eq(30));
+                        tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))));
     }
 
 

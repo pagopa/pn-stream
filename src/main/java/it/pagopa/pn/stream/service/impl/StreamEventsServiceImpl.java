@@ -8,24 +8,17 @@ import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
-import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
+import it.pagopa.pn.stream.dto.*;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
-import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
-import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
-import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV26;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV26;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV26;
-import it.pagopa.pn.stream.middleware.dao.dynamo.EventEntityDao;
-import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
-import it.pagopa.pn.stream.middleware.dao.dynamo.StreamNotificationDao;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamNotificationEntity;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter;
+import it.pagopa.pn.stream.middleware.dao.dynamo.*;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
+import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.ConfidentialInformationService;
 import it.pagopa.pn.stream.service.SchedulerService;
@@ -57,6 +50,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private static final String DEFAULT_CATEGORIES = "DEFAULT";
     private final EventEntityDao eventEntityDao;
     private final StreamNotificationDao streamNotificationDao;
+    private final EventsQuarantineEntityDao eventsQuarantineEntityDao;
+    private final UnlockedNotificationEntityDao notificationUnlockedEntityDao;
     private final PnDeliveryClientReactive pnDeliveryClientReactive;
     private final SchedulerService schedulerService;
     private final StreamUtils streamUtils;
@@ -72,7 +67,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    PnStreamConfigs pnStreamConfigs, TimelineService timeLineService,
                                    ConfidentialInformationService confidentialInformationService,
                                    AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation,
-                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive) {
+                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive,
+                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao){
         super(streamEntityDao, pnStreamConfigs);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
@@ -82,6 +78,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         this.ssmParameterConsumerActivation = ssmParameterConsumerActivation;
         this.streamNotificationDao = streamNotificationDao;
         this.pnDeliveryClientReactive = pnDeliveryClientReactive;
+        this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
+        this.notificationUnlockedEntityDao = notificationUnlockedEntityDao;
     }
 
     @Override
@@ -223,8 +221,50 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                     }
                 })
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
+                        .flatMap(stream -> checkEventToSort(stream, res.getT2()))
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))).collectList().then();
     }
+
+    private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
+        log.debug("sortStream streamId={} timelineElementId={} category={}", streamEntity.getStreamId(), timelineElement.getTimelineElementId(), timelineElement.getCategory());
+
+        if (Arrays.stream(SkipSortCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+            log.info("Event {} in validation, ignoring sorting flow for stream with id={}", timelineElement.getTimelineElementId(), streamEntity.getStreamId());
+            return Mono.just(streamEntity);
+        }
+
+        if (Boolean.FALSE.equals(streamEntity.isSorting())) {
+            log.info("Stream streamId={} is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message", streamEntity.getStreamId());
+            schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_ALL_EVENTS);
+            return Mono.just(streamEntity);
+        }
+
+        return manageUnlockEvent(streamEntity, timelineElement);
+    }
+
+    private Mono<StreamEntity> manageUnlockEvent(StreamEntity stream, TimelineElementInternal timelineElement) {
+        if (Arrays.stream(UnlockCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+            log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
+            NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun());
+            notificationUnlockedEntity.setTtl(timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getMaxTtl()).toEpochMilli());
+            return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
+                    .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), pnStreamConfigs.getSortEventDelaySeconds(), 0, SortEventType.UNLOCK_EVENTS))
+                    .map(entity -> stream);
+        } else {
+            if (timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now())) {
+                return Mono.just(stream);
+            }
+            return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
+                    .switchIfEmpty(Mono.defer(() -> {
+                        log.info("Event with id={} is not an unlock event, saving in quarantine", timelineElement.getTimelineElementId());
+                        return eventsQuarantineEntityDao.putItem(streamUtils.buildEventQuarantineEntity(stream, timelineElement))
+                                .then(Mono.empty());
+                    }))
+                    .map(notificationUnlockedEntity -> stream);
+        }
+    }
+
+
 
     public Mono<StreamNotificationEntity> getNotification(String iun) {
         return streamNotificationDao.findByIun(iun)

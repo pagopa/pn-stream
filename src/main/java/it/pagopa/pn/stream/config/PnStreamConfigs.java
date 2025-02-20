@@ -35,6 +35,8 @@ public class PnStreamConfigs {
     private Long streamNotificationTtl;
     private List<String> listCategoriesPa;
     private Integer sortEventDelaySeconds;
+    private Duration unlockedEventTtl;
+    private Duration notificationSla;
     private Integer maxWrittenCounter;
     private Integer queryEventQuarantineLimit;
 
@@ -52,5 +54,9 @@ public class PnStreamConfigs {
         private String scheduledActions;
         private String event;
         private String eventSchedule;
+    }
+
+    public Duration getMaxTtl() {
+        return notificationSla.compareTo(unlockedEventTtl) >=0 ? notificationSla : unlockedEventTtl;
     }
 }

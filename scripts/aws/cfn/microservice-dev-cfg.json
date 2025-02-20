@@ -20,6 +20,8 @@
     "MaximumRetryAttemptsValueStream": "5",
     "MaximumRetryAttemptsValueNotification": "5",
     "SortEventDelaySeconds": "30",
+    "UnlockedEventTtl": "2d",
+    "notificationSla": "1d",
     "MaxWrittenCounter": "5",
     "QueryEventQuarantineLimit": 100
   }
