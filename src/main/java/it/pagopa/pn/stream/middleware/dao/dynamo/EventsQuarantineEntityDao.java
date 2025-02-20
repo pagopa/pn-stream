@@ -14,6 +14,6 @@ public interface EventsQuarantineEntityDao {
 
     Mono<EventsQuarantineEntity> putItem(EventsQuarantineEntity streamNotification);
 
-    Mono<Void> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity);
+    Mono<EventEntity> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity);
 
 }

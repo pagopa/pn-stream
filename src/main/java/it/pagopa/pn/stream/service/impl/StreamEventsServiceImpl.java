@@ -221,8 +221,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                     }
                 })
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
+                        .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()))
-                        .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))).collectList().then();
+                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()))).collectList().then();
     }
 
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
@@ -282,7 +283,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .thenReturn(streamNotificationEntity);
     }
 
-    private Mono<Void> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
+    private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
 
         if (!CollectionUtils.isEmpty(stream.getGroups()) && !checkGroups(Collections.singletonList(groups), stream.getGroups())) {
             log.info("skipping saving webhook event for stream={} because stream groups are different", stream.getStreamId());
@@ -310,7 +311,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.info("timelineEventCategory={} for stream={}", stream.getStreamId(), timelineEventCategory);
         if ((eventType == StreamCreationRequestV26.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
                 || (eventType == StreamCreationRequestV26.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
-            return saveEventWithAtomicIncrement(stream, timelineElementInternal.getStatusInfo().getActual(), timelineElementInternal);
+            return Mono.just(stream);
         } else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
         }

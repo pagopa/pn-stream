@@ -61,7 +61,7 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
     }
 
     @Override
-    public Mono<Void> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity) {
+    public Mono<EventEntity> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity) {
         log.info("save and delete items entity={} eventEntity={}", entity, eventEntity);
 
         if (Objects.isNull(entity) || Objects.isNull(eventEntity)) {
@@ -71,6 +71,7 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
         TransactWriteItemsEnhancedRequest.Builder transactWriteItemsEnhancedRequest = TransactWriteItemsEnhancedRequest.builder();
         transactWriteItemsEnhancedRequest.addPutItem(tableEvents, eventEntity);
         transactWriteItemsEnhancedRequest.addDeleteItem(tableQuarantine, entity);
-        return Mono.fromFuture(dynamoDbEnhancedClient.transactWriteItems(transactWriteItemsEnhancedRequest.build()));
+        return Mono.fromFuture(dynamoDbEnhancedClient.transactWriteItems(transactWriteItemsEnhancedRequest.build()))
+                .thenReturn(eventEntity);
     }
 }

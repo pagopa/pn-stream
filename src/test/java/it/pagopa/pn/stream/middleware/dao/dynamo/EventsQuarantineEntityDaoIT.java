@@ -42,7 +42,7 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
         entity.setEvent(objectMapper.writeValueAsString(objectHashMap));
         eventsQuarantineEntityDao.putItem(entity).block();
 
-        Mono<Page<EventsQuarantineEntity>> result = eventsQuarantineEntityDao.findByPk("streamId_iun");
+        Mono<Page<EventsQuarantineEntity>> result = eventsQuarantineEntityDao.findByPk("streamId_iun", new HashMap<>(), 5);
         Page<EventsQuarantineEntity> foundEntity = result.block();
 
         assert foundEntity != null;
@@ -65,7 +65,7 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
 
         Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
 
-        Page<EventsQuarantineEntity> result = eventsQuarantineEntityDao.findByPk("pkTest", lastEvaluateKey, 100).block();
+        Page<EventsQuarantineEntity> result = eventsQuarantineEntityDao.findByPk("streamId2_iun2", lastEvaluateKey, 100).block();
 
         assert result != null;
 
@@ -78,8 +78,8 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
 
         lastEvaluateKey = new HashMap<>();
 
-        List<EventsQuarantineEntity> finalResult = Objects.requireNonNull(eventsQuarantineEntityDao.findByPk("pkTest", lastEvaluateKey, 100).block()).items();
-        EventEntityBatch resultEvent = eventEntityDao.findByStreamId("streamIdTest", null).block();
+        List<EventsQuarantineEntity> finalResult = Objects.requireNonNull(eventsQuarantineEntityDao.findByPk("streamId2_iun2", lastEvaluateKey, 100).block()).items();
+        EventEntityBatch resultEvent = eventEntityDao.findByStreamId("streamId2", null).block();
 
 
         assert CollectionUtils.isEmpty(finalResult);

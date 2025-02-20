@@ -1564,9 +1564,8 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV26.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV26.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
-        entity.getFilterValues().add(NotificationStatusInt.ACCEPTED.getValue());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
@@ -1587,7 +1586,7 @@ class EventsServiceImplTest {
                 .iun(iun)
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
-                .statusInfo(StatusInfoInternal.builder().actual("REQUEST_ACCEPTED").statusChanged(false).build())
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());

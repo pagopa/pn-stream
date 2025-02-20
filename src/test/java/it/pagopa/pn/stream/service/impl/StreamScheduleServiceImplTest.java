@@ -49,20 +49,14 @@ class StreamScheduleServiceImplTest {
     private EventsQuarantineEntityDao eventsQuarantineEntityDao;
     @InjectMocks
     private StreamUtils streamUtils;
-    private final EntityToDtoWebhookTimelineMapper entityToDtoWebhookTimelineMapper = new EntityToDtoWebhookTimelineMapper();
-    private final DtoToEntityWebhookTimelineMapper mapperTimeline = new DtoToEntityWebhookTimelineMapper();
+
+
     @BeforeEach
     void setup() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        WebhookTimelineElementJsonConverter timelineElementJsonConverter = new WebhookTimelineElementJsonConverter(objectMapper);
         when(pnStreamConfigs.getMaxWrittenCounter()).thenReturn(5);
         when(pnStreamConfigs.getTtl()).thenReturn(java.time.Duration.ofSeconds(30));
-        ReflectionTestUtils.setField(streamUtils,"mapperTimeline", mapperTimeline);
-        ReflectionTestUtils.setField(streamUtils,"timelineElementJsonConverter", timelineElementJsonConverter);
-        ReflectionTestUtils.setField(streamScheduleService,"streamUtils", streamUtils);
-        ReflectionTestUtils.setField(streamScheduleService,"entityToDtoWebhookTimelineMapper", entityToDtoWebhookTimelineMapper);
-        ReflectionTestUtils.setField(streamScheduleService,"timelineElementJsonConverter", timelineElementJsonConverter);
     }
 
     @Test

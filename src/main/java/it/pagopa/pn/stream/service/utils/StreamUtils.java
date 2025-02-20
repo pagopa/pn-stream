@@ -91,6 +91,17 @@ public class StreamUtils {
         }
     }
 
+    public TimelineElementInternal getTimelineInternalFromQuarantineAndSetTimestamp(EventsQuarantineEntity entity) throws PnInternalException{
+        try {
+            TimelineElementInternal timelineElementInternal = entityToDtoTimelineMapper.entityToDto(timelineElementJsonConverter.jsonToEntity(entity.getEvent()));
+            timelineElementInternal.setBusinessTimestamp(timelineElementInternal.getTimestamp());
+            timelineElementInternal.setTimestamp(timelineElementInternal.getIngestionTimestamp());
+            return timelineElementInternal;
+        } catch (JsonProcessingException e) {
+            throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
+        }
+    }
+
 
     public static boolean checkGroups(List<String> toCheckGroups, List<String> allowedGroups){
         List<String> safeToCheck = toCheckGroups != null ? toCheckGroups : Collections.emptyList();
