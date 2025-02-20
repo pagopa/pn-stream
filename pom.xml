@@ -18,23 +18,9 @@
 	  <tag>HEAD</tag>
   </scm>
 	<properties>
-		<java.version>11</java.version>
-		<awspring.version>2.3.2</awspring.version>
 		<jacoco.min.line.cover.ratio>0.70</jacoco.min.line.cover.ratio>
 		<pagopa.codegen.version>v01.06.01</pagopa.codegen.version>
 	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>io.awspring.cloud</groupId>
-				<artifactId>spring-cloud-aws-dependencies</artifactId>
-				<version>${awspring.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -61,7 +47,6 @@
 			<artifactId>regions</artifactId>
 			<version>2.30.11</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
