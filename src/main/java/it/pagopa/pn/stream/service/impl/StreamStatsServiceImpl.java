@@ -33,8 +33,8 @@ public class StreamStatsServiceImpl implements StreamStatsService {
     public Mono<Void> updateNumberOfReadingStreamStats(String paId, String streamId, Integer increment) {
         log.info(UPDATE_STREAM_STATS_LOG, StreamStatsEnum.NUMBER_OF_READINGS, paId, streamId);
         String pk = StreamStatsEntity.buildPk(paId, streamId, StreamStatsEnum.NUMBER_OF_READINGS);
-        String sk = streamUtils.buildSk();
-        Duration ttl = streamUtils.retrieveStatsTtl(StreamStatsEnum.NUMBER_OF_READINGS);
+        String sk = streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_READINGS);
+        Duration ttl = streamUtils.retrieveCustomTtl(streamUtils.retrieveStatsConfig(StreamStatsEnum.NUMBER_OF_READINGS));
         return streamStatsDao.updateCustomCounterStats(pk, sk, increment, ttl)
                 .then();
     }

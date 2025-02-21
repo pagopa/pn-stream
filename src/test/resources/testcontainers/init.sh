@@ -74,8 +74,14 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 	ssm put-parameter \
 	--name "/pn-stream/stats/custom-ttl" \
-	--value "{\"NUMBER_OF_REQUESTS\":\"10d\",\"RETRY_AFTER_VIOLATION\":\"20d\",\"NUMBER_OF_READINGS\":\"30d\",\"NUMBER_OF_WRITINGS\":\"40d\",\"NUMBER_OF_EMPTY_READINGS\":\"50d\"}"\
+	--value "{\"config\":{\"NUMBER_OF_REQUESTS\":{\"ttl\":\"10d\",\"spanUnit\":\"1\",\"timeUnit\":\"HOURS\"},
+	\"RETRY_AFTER_VIOLATION\":{\"ttl\":\"20d\",\"spanUnit\":\"2\",\"timeUnit\":\"HOURS\"},
+	\"NUMBER_OF_READINGS\":{\"ttl\":\"30d\",\"spanUnit\":\"3\",\"timeUnit\":\"HOURS\"},
+	\"NUMBER_OF_WRITINGS\":{\"ttl\":\"40d\",\"spanUnit\":\"4\",\"timeUnit\":\"HOURS\"},
+	\"NUMBER_OF_EMPTY_READINGS\":{\"ttl\":\"50d\",\"spanUnit\":\"5\",\"timeUnit\":\"HOURS\"}}}"\
 	--type String \
 
 
 echo "Initialization terminated"
+
+

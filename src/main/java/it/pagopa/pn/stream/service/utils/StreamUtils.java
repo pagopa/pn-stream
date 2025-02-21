@@ -5,6 +5,8 @@ import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
+import it.pagopa.pn.stream.dto.CustomStatsConfig;
+import it.pagopa.pn.stream.dto.StatConfig;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
@@ -24,9 +26,7 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.*;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
 
@@ -46,18 +46,20 @@ public class StreamUtils {
     private final AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation;
 
     private final DtoToEntityWebhookTimelineMapper mapperTimeline;
-   public StreamUtils(DtoToEntityWebhookTimelineMapper mapperTimeline, EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper,
-                      WebhookTimelineElementJsonConverter timelineElementJsonConverter, PnStreamConfigs pnStreamConfigs,
-                      AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation) {
+
+    public StreamUtils(DtoToEntityWebhookTimelineMapper mapperTimeline, EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper,
+                       WebhookTimelineElementJsonConverter timelineElementJsonConverter, PnStreamConfigs pnStreamConfigs,
+                       AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation) {
         this.entityToDtoTimelineMapper = entityToDtoTimelineMapper;
         this.pnStreamConfigs = pnStreamConfigs;
         this.timelineElementJsonConverter = timelineElementJsonConverter;
         this.ttl = pnStreamConfigs.getTtl();
         this.mapperTimeline = mapperTimeline;
-       this.ssmParameterConsumerActivation = ssmParameterConsumerActivation;
-   }
+        this.ssmParameterConsumerActivation = ssmParameterConsumerActivation;
+    }
+
     public EventEntity buildEventEntity(Long atomicCounterUpdated, StreamEntity streamEntity,
-                                        String newStatus, TimelineElementInternal timelineElementInternal) throws PnInternalException{
+                                        String newStatus, TimelineElementInternal timelineElementInternal) throws PnInternalException {
 
         Instant timestamp = timelineElementInternal.getTimestamp();
 
@@ -117,10 +119,10 @@ public class StreamUtils {
         return Integer.parseInt(pnStreamConfigs.getCurrentVersion().replace("v", ""));
 
     }
-    public Instant retrieveCurrentInterval() {
+    public Instant retrieveCurrentInterval(StatsTimeUnit timeUnit, Integer spanUnit) {
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
-        long spanInSeconds = convertToSeconds(pnStreamConfigs.getStats().getSpanUnit(), pnStreamConfigs.getStats().getTimeUnit());
+        long spanInSeconds = convertToSeconds(spanUnit, timeUnit);
         long elapsedTimeInSeconds = Duration.between(startOfYear, Instant.now()).getSeconds();
         long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
 
@@ -139,17 +141,28 @@ public class StreamUtils {
     public StreamStatsEntity buildEntity(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
         log.info("Build entity for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
         StreamStatsEntity streamStatsEntity = new StreamStatsEntity(paId, streamId, streamStatsEnum);
-        streamStatsEntity.setSk(buildSk());
-        streamStatsEntity.setTtl(LocalDateTime.now().plus(retrieveStatsTtl(streamStatsEnum)).atZone(ZoneOffset.UTC).toEpochSecond());
+        streamStatsEntity.setSk(buildSk(streamStatsEnum));
+        streamStatsEntity.setTtl(LocalDateTime.now().plus(retrieveCustomTtl(retrieveStatsConfig(streamStatsEnum))).atZone(ZoneOffset.UTC).toEpochSecond());
         log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
         return streamStatsEntity;
     }
 
-    public Duration retrieveStatsTtl(StreamStatsEnum streamStatsEnum) {
-        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getStats().getCustomTtlParameterName(), Map.class)
-                .map(map -> (String) map.get(streamStatsEnum.name()))
-                .map(DurationStyle.SIMPLE::parse)
+    public Duration retrieveCustomTtl(StatConfig config) {
+        log.info("Retrieve custom ttl for config: {}", config);
+        return Optional.ofNullable(config)
+                .map(config1 -> Optional.ofNullable(config.getTtl())
+                        .map(DurationStyle.SIMPLE::parse)
+                        .orElse(pnStreamConfigs.getStats().getTtl()))
                 .orElse(pnStreamConfigs.getStats().getTtl());
+    }
+
+    public StatConfig retrieveStatsConfig(StreamStatsEnum streamStatsEnum) {
+        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getStats().getCustomTtlParameterName(), CustomStatsConfig.class)
+                .map(configs -> {
+                    log.info("Retrieve custom stats config for stream stats: {}", configs.getConfig());
+                    return configs.getConfig().get(streamStatsEnum);
+                })
+                .orElse(null);
     }
 
     public Instant retrieveRetryAfter(String xPagopaPnCxId) {
@@ -158,7 +171,16 @@ public class StreamUtils {
                 .orElse(Instant.now().plusMillis(pnStreamConfigs.getScheduleInterval()));
     }
 
-    public String buildSk() {
-        return retrieveCurrentInterval()+ "#" + pnStreamConfigs.getStats().getTimeUnit() + "#" + pnStreamConfigs.getStats().getSpanUnit();
+    public String buildSk(StreamStatsEnum streamStatsEnum) {
+        StatConfig customStatsConfig = retrieveStatsConfig(streamStatsEnum);
+        StatsTimeUnit timeUnit = pnStreamConfigs.getStats().getTimeUnit();
+        Integer spanUnit = pnStreamConfigs.getStats().getSpanUnit();
+        if (Objects.nonNull(customStatsConfig)) {
+            if(Objects.nonNull(customStatsConfig.getTimeUnit()))
+                timeUnit = customStatsConfig.getTimeUnit();
+            if(Objects.nonNull(customStatsConfig.getSpanUnit()))
+                spanUnit = customStatsConfig.getSpanUnit();
+        }
+        return retrieveCurrentInterval(timeUnit, spanUnit) + "#" + timeUnit + "#" + spanUnit;
     }
 }

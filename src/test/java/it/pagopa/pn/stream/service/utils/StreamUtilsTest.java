@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
+import it.pagopa.pn.stream.dto.CustomStatsConfig;
+import it.pagopa.pn.stream.dto.StatConfig;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
@@ -27,11 +29,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import static it.pagopa.pn.stream.dto.stats.StatsTimeUnit.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -58,7 +58,7 @@ class StreamUtilsTest {
 
         PnStreamConfigs.Stats stats = new PnStreamConfigs.Stats();
         stats.setSpanUnit(1);
-        stats.setTimeUnit(StatsTimeUnit.DAYS);
+        stats.setTimeUnit(DAYS);
         stats.setTtl(Duration.ofDays(1));
         stats.setCustomTtlParameterName("customStatsTtl");
 
@@ -251,7 +251,7 @@ class StreamUtilsTest {
         PnStreamConfigs.Stats stats = Mockito.mock(PnStreamConfigs.Stats.class);
         when(pnStreamConfigs.getStats()).thenReturn(stats);
         when(stats.getSpanUnit()).thenReturn(1);
-        when(stats.getTimeUnit()).thenReturn(StatsTimeUnit.DAYS);
+        when(stats.getTimeUnit()).thenReturn(DAYS);
 
         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs, ssmParameterConsumerActivation);
 
@@ -261,7 +261,7 @@ class StreamUtilsTest {
         long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
         Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
 
-        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        Instant actualInterval = streamUtils.retrieveCurrentInterval(DAYS, 1);
         assertEquals(expectedInterval, actualInterval);
     }
 
@@ -281,7 +281,7 @@ class StreamUtilsTest {
         long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
         Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
 
-        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        Instant actualInterval = streamUtils.retrieveCurrentInterval(HOURS, 1);
         assertEquals(expectedInterval, actualInterval);
     }
 
@@ -302,7 +302,7 @@ class StreamUtilsTest {
         long currentIntervalIndex = elapsedTimeInSeconds / spanInSeconds;
         Instant expectedInterval = startOfYear.plusSeconds(currentIntervalIndex * spanInSeconds);
 
-        Instant actualInterval = streamUtils.retrieveCurrentInterval();
+        Instant actualInterval = streamUtils.retrieveCurrentInterval(MINUTES, 1);
         assertEquals(expectedInterval, actualInterval);
     }
 
@@ -311,7 +311,7 @@ class StreamUtilsTest {
         PnStreamConfigs.Stats pnStreamConfigsStats = new PnStreamConfigs.Stats();
 
         pnStreamConfigsStats.setTtl(Duration.ofDays(30));
-        pnStreamConfigsStats.setTimeUnit(StatsTimeUnit.DAYS);
+        pnStreamConfigsStats.setTimeUnit(DAYS);
         pnStreamConfigsStats.setSpanUnit(1);
 
         PnStreamConfigs pnStreamConfigs = new PnStreamConfigs();
@@ -328,33 +328,67 @@ class StreamUtilsTest {
 
     @Test
     void retrieveStatsTtlWithValidInputs() {
-        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", Map.class))
-                .thenReturn(Optional.of(Map.of(StreamStatsEnum.NUMBER_OF_REQUESTS.name(), "30d", StreamStatsEnum.NUMBER_OF_READINGS.name(), "20d")));
+        StatConfig statConfig = new StatConfig();
+        statConfig.setTtl("30d");
 
-        Duration statsTtl = streamUtils.retrieveStatsTtl(StreamStatsEnum.NUMBER_OF_REQUESTS);
+        Duration statsTtl = streamUtils.retrieveCustomTtl(statConfig);
         assertNotNull(statsTtl);
         Assertions.assertEquals(Duration.ofDays(30), statsTtl);
     }
 
     @Test
     void retrieveStatsTtlWithStatsNotFoundInMap() {
-        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", Map.class))
-                .thenReturn(Optional.of(Map.of(StreamStatsEnum.NUMBER_OF_REQUESTS.name(),"30d", StreamStatsEnum.NUMBER_OF_READINGS.name(), "20d")));
-
-
-        Duration statsTtl = streamUtils.retrieveStatsTtl(StreamStatsEnum.RETRY_AFTER_VIOLATION);
+        StatConfig statConfig = new StatConfig();
+        Duration statsTtl = streamUtils.retrieveCustomTtl(statConfig);
         assertNotNull(statsTtl);
         Assertions.assertEquals(Duration.ofDays(1), statsTtl);
     }
 
     @Test
     void retrieveStatsTtlWithParameterNotFound() {
-        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", Map.class))
-                .thenReturn(Optional.empty());
-
-        Duration statsTtl = streamUtils.retrieveStatsTtl(StreamStatsEnum.RETRY_AFTER_VIOLATION);
+        Duration statsTtl = streamUtils.retrieveCustomTtl(null);
         assertNotNull(statsTtl);
         Assertions.assertEquals(Duration.ofDays(1), statsTtl);
+    }
+
+    @Test
+    void retrieveStatsConfigFound(){
+        CustomStatsConfig customStatsConfig = new CustomStatsConfig();
+        StatConfig statConfig = new StatConfig();
+        statConfig.setSpanUnit(1);
+        statConfig.setTimeUnit(DAYS);
+        statConfig.setTtl("30d");
+        Map<StreamStatsEnum, StatConfig> map = new HashMap<>();
+        map.put(StreamStatsEnum.NUMBER_OF_REQUESTS, statConfig);
+        customStatsConfig.setConfig(map);
+        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
+                .thenReturn(Optional.of(customStatsConfig));
+        StatConfig response = streamUtils.retrieveStatsConfig(StreamStatsEnum.NUMBER_OF_REQUESTS);
+        Assertions.assertEquals(statConfig, response);
+    }
+
+    @Test
+    void retrieveStatsConfigNotFound(){
+        CustomStatsConfig customStatsConfig = new CustomStatsConfig();
+        StatConfig statConfig = new StatConfig();
+        statConfig.setSpanUnit(1);
+        statConfig.setTimeUnit(DAYS);
+        statConfig.setTtl("30d");
+        Map<StreamStatsEnum, StatConfig> map = new HashMap<>();
+        map.put(StreamStatsEnum.NUMBER_OF_REQUESTS, statConfig);
+        customStatsConfig.setConfig(map);
+        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
+                .thenReturn(Optional.of(customStatsConfig));
+        StatConfig response = streamUtils.retrieveStatsConfig(StreamStatsEnum.NUMBER_OF_WRITINGS);
+        Assertions.assertNull(response);
+    }
+
+    @Test
+    void retrieveStatsConfigParameterNotFound(){
+        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
+                .thenReturn(Optional.empty());
+        StatConfig response = streamUtils.retrieveStatsConfig(StreamStatsEnum.NUMBER_OF_WRITINGS);
+        Assertions.assertNull(response);
     }
 
     @Test
@@ -366,5 +400,54 @@ class StreamUtilsTest {
 
         Instant retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
         assertNotNull(retryAfter);
+    }
+
+    @Test
+    void buildSkCustomConfigFound(){
+        CustomStatsConfig customStatsConfig = new CustomStatsConfig();
+        StatConfig statConfig = new StatConfig();
+        statConfig.setSpanUnit(10);
+        statConfig.setTimeUnit(HOURS);
+        statConfig.setTtl("30d");
+        Map<StreamStatsEnum, StatConfig> map = new HashMap<>();
+        map.put(StreamStatsEnum.NUMBER_OF_REQUESTS, statConfig);
+        customStatsConfig.setConfig(map);
+        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
+                .thenReturn(Optional.of(customStatsConfig));
+        String sk = streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_REQUESTS);
+        Assertions.assertNotNull(sk);
+        String[] split = sk.split("#");
+        Assertions.assertEquals(split[1], "HOURS");
+        Assertions.assertEquals(split[2], "10");
+    }
+
+    @Test
+    void buildSkCustomConfigNotFound(){
+        CustomStatsConfig customStatsConfig = new CustomStatsConfig();
+        StatConfig statConfig = new StatConfig();
+        statConfig.setSpanUnit(10);
+        statConfig.setTimeUnit(HOURS);
+        statConfig.setTtl("30d");
+        Map<StreamStatsEnum, StatConfig> map = new HashMap<>();
+        map.put(StreamStatsEnum.NUMBER_OF_REQUESTS, statConfig);
+        customStatsConfig.setConfig(map);
+        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
+                .thenReturn(Optional.of(customStatsConfig));
+        String sk = streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_WRITINGS);
+        Assertions.assertNotNull(sk);
+        String[] split = sk.split("#");
+        Assertions.assertEquals(split[1], "DAYS");
+        Assertions.assertEquals(split[2], "1");
+    }
+
+    @Test
+    void buildSkCustomConfigParameterNotFound(){
+        when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
+                .thenReturn(Optional.empty());
+        String sk = streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_REQUESTS);
+        Assertions.assertNotNull(sk);
+        String[] split = sk.split("#");
+        Assertions.assertEquals(split[1], "DAYS");
+        Assertions.assertEquals(split[2], "1");
     }
 }
