@@ -60,7 +60,7 @@ class StreamUtilsTest {
         stats.setSpanUnit(1);
         stats.setTimeUnit(StatsTimeUnit.DAYS);
         stats.setTtl(Duration.ofDays(1));
-        stats.setCustomStatsTtlParameterName("customStatsTtl");
+        stats.setCustomTtlParameterName("customStatsTtl");
 
         PnStreamConfigs webhook = new PnStreamConfigs();
         webhook.setScheduleInterval(1000L);

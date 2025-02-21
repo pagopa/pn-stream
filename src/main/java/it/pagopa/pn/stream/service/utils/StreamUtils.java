@@ -146,7 +146,7 @@ public class StreamUtils {
     }
 
     public Duration retrieveStatsTtl(StreamStatsEnum streamStatsEnum) {
-        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getStats().getCustomStatsTtlParameterName(), Map.class)
+        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getStats().getCustomTtlParameterName(), Map.class)
                 .map(map -> (String) map.get(streamStatsEnum.name()))
                 .map(DurationStyle.SIMPLE::parse)
                 .orElse(pnStreamConfigs.getStats().getTtl());

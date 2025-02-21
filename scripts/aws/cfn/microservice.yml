@@ -386,7 +386,7 @@ Resources:
         ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
         ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
         ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
-        ContainerEnvEntry21: !Sub 'PN_STREAM_CUSTOMSTATSTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
+        ContainerEnvEntry21: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
