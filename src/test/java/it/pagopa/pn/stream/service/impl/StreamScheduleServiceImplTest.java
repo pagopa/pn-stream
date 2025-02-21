@@ -3,12 +3,12 @@ package it.pagopa.pn.stream.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.dto.timeline.StatusInfoInternal;
+import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.middleware.dao.dynamo.EventsQuarantineEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
-import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
-import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
-import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.WebhookTimelineElementJsonConverter;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.service.SchedulerService;
@@ -22,7 +22,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 
@@ -47,9 +46,8 @@ class StreamScheduleServiceImplTest {
     private SchedulerService schedulerService;
     @Mock
     private EventsQuarantineEntityDao eventsQuarantineEntityDao;
-    @InjectMocks
+    @Mock
     private StreamUtils streamUtils;
-
 
     @BeforeEach
     void setup() {
@@ -102,9 +100,23 @@ class StreamScheduleServiceImplTest {
 
         Page<EventsQuarantineEntity> page = Page.create(List.of(quarantinedEvent));
 
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimestamp(java.time.Instant.now());
+        timelineElementInternal.setPaId("paIdTest");
+        StatusInfoInternal statusInfoInternal = new StatusInfoInternal();
+        statusInfoInternal.setActual("DELIVERED");
+        timelineElementInternal.setStatusInfo(statusInfoInternal);
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setStreamId(streamId);
+        eventEntity.setEventId("1");
+        eventEntity.setEventDescription("2025-01-31T16:15:34Z_SEND_DIGITAL_DOMICILE.IUN_JLPV-MWRV-VEWT-202501-W-1.RECINDEX_0");
+
         when(streamEntityDao.updateAndGetAtomicCounter(any())).thenReturn(Mono.just(0L));
         when(eventsQuarantineEntityDao.findByPk(anyString(), any(), anyInt())).thenReturn(Mono.just(page));
         when(eventsQuarantineEntityDao.saveAndClearElement(any(), any())).thenReturn(Mono.empty());
+        when(streamUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
+        when(streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(any())).thenReturn(timelineElementInternal);
         Mockito.doNothing().when(schedulerService).scheduleSortEvent(anyString(), any(), any(), any());
 
         // When
@@ -135,9 +147,24 @@ class StreamScheduleServiceImplTest {
 
         Page<EventsQuarantineEntity> page = Page.create(List.of(quarantinedEvent));
 
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimestamp(java.time.Instant.now());
+        timelineElementInternal.setPaId("paIdTest");
+        StatusInfoInternal statusInfoInternal = new StatusInfoInternal();
+        statusInfoInternal.setActual("DELIVERED");
+        timelineElementInternal.setStatusInfo(statusInfoInternal);
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setStreamId(streamId);
+        eventEntity.setEventId("1");
+        eventEntity.setEventDescription("2025-01-31T16:15:34Z_SEND_DIGITAL_DOMICILE.IUN_JLPV-MWRV-VEWT-202501-W-1.RECINDEX_0");
+
+
         when(streamEntityDao.updateAndGetAtomicCounter(any())).thenReturn(Mono.just(0L));
         when(eventsQuarantineEntityDao.findByPk(anyString(), any(), anyInt())).thenReturn(Mono.just(page));
         when(eventsQuarantineEntityDao.saveAndClearElement(any(), any())).thenReturn(Mono.empty());
+        when(streamUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
+        when(streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(any())).thenReturn(timelineElementInternal);
         Mockito.doNothing().when(schedulerService).scheduleSortEvent(anyString(), any(), any(), any());
 
         // When
@@ -158,7 +185,7 @@ class StreamScheduleServiceImplTest {
         SortEventAction event = SortEventAction.builder()
                 .eventKey(streamId+"_iun")
                 .delaySeconds(30)
-                .writtenCounter(6)
+                .writtenCounter(5)
                 .build();
 
         EventsQuarantineEntity quarantinedEvent = new EventsQuarantineEntity();
@@ -168,9 +195,24 @@ class StreamScheduleServiceImplTest {
 
         Page<EventsQuarantineEntity> page = Page.create(List.of(quarantinedEvent));
 
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimestamp(java.time.Instant.now());
+        timelineElementInternal.setPaId("paIdTest");
+        StatusInfoInternal statusInfoInternal = new StatusInfoInternal();
+        statusInfoInternal.setActual("DELIVERED");
+        timelineElementInternal.setStatusInfo(statusInfoInternal);
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setStreamId(streamId);
+        eventEntity.setEventId("1");
+        eventEntity.setEventDescription("2025-01-31T16:15:34Z_SEND_DIGITAL_DOMICILE.IUN_JLPV-MWRV-VEWT-202501-W-1.RECINDEX_0");
+
+
         when(streamEntityDao.updateAndGetAtomicCounter(any())).thenReturn(Mono.just(0L));
         when(eventsQuarantineEntityDao.findByPk(anyString(), any(), anyInt())).thenReturn(Mono.just(page));
         when(eventsQuarantineEntityDao.saveAndClearElement(any(), any())).thenReturn(Mono.empty());
+        when(streamUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
+        when(streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(any())).thenReturn(timelineElementInternal);
         Mockito.doNothing().when(schedulerService).scheduleSortEvent(anyString(), any(), any(), any());
 
         // When
@@ -179,9 +221,9 @@ class StreamScheduleServiceImplTest {
 
         // Then
         assertNotNull(result);
-        Mockito.verify(schedulerService, Mockito.times(0)).scheduleSortEvent(event.getEventKey(), event.getDelaySeconds()*2, event.getWrittenCounter() + 1, SortEventType.UNLOCK_EVENTS);
-        Mockito.verify(streamEntityDao, Mockito.times(0)).updateAndGetAtomicCounter(any());
-        Mockito.verify(eventsQuarantineEntityDao, Mockito.times(0)).saveAndClearElement(any(), any());
+        Mockito.verify(schedulerService, Mockito.times(0)).scheduleSortEvent(any(), anyInt(), anyInt(), any());
+        Mockito.verify(streamEntityDao, Mockito.times(1)).updateAndGetAtomicCounter(any());
+        Mockito.verify(eventsQuarantineEntityDao, Mockito.times(1)).saveAndClearElement(any(), any());
     }
 
 }

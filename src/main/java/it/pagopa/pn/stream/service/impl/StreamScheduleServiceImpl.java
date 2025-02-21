@@ -76,6 +76,10 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                                 return Mono.just(event);
                             }));
                 })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.info("No events found in quarantine for eventKey: [{}]", event.getEventKey());
+                    return Mono.just(event);
+                }))
                 .flatMap(e -> computeNewValues(event));
 
     }
