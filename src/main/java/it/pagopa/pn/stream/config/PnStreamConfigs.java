@@ -50,6 +50,7 @@ public class PnStreamConfigs {
         private int spanUnit;
         private StatsTimeUnit timeUnit;
         private Duration ttl;
+        private String customStatsTtlParameterName;
     }
 
     @Data

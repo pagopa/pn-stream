@@ -334,7 +334,11 @@ Parameters:
   StreamStatsTtl:
     Type: Number
     Description: 'TTL in days offset for Stream Stats'
-    Default: 365
+    Default: 365d
+
+  CustomStatsTtlParameterName:
+    Type: String
+    Description: 'Custom parameter name for Stream Stats TTL'
 
 Resources:
 
@@ -382,6 +386,7 @@ Resources:
         ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
         ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
         ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
+        ContainerEnvEntry21: !Sub 'PN_STREAM_CUSTOMSTATSTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -433,6 +438,14 @@ Resources:
             Resource:
               - !Ref EventQueueARN
               - !Ref ScheduledActionsQueueARN
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${CustomStatsTtlParameterName}"
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${RetryParameterPrefix}*"
+
 
 
 

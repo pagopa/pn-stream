@@ -61,24 +61,24 @@ class StreamStatsServiceImplTest {
     }
 
     @Test
-    @Disabled
-    //Test da rivedere
     void updateStreamStatsShouldUpdateCustomAtomicCounterStats() {
         Instant currentInterval = Instant.now();
         when(streamUtils.retrieveCurrentInterval()).thenReturn(currentInterval);
         when(pnStreamConfigs.getStats()).thenReturn(pnStreamConfigsStats);
 
         StreamStatsEntity streamStatsEntity = new StreamStatsEntity("paId", "streamId", StreamStatsEnum.NUMBER_OF_READINGS);
-        streamStatsEntity.setPk("paId" + "_" + "streamId" + "_" + StreamStatsEnum.NUMBER_OF_READINGS);
+        streamStatsEntity.setPk("paId#streamId#" + StreamStatsEnum.NUMBER_OF_READINGS);
         streamStatsEntity.setSk(currentInterval.toString() + "#" + StatsTimeUnit.DAYS + "#" + 1);
         streamStatsEntity.setTtl(LocalDateTime.now().plus(Duration.ofDays(30)).atZone(ZoneOffset.UTC).toEpochSecond());
 
         when(streamUtils.buildEntity(StreamStatsEnum.NUMBER_OF_READINGS, "paId", "streamId")).thenReturn(streamStatsEntity);
-        when(streamStatsDao.updateCustomCounterStats(streamStatsEntity.getPk(),streamStatsEntity.getSk(), 3)).thenReturn(Mono.empty());
+        when(streamUtils.buildSk()).thenReturn(streamStatsEntity.getSk());
+        when(streamUtils.retrieveStatsTtl(StreamStatsEnum.NUMBER_OF_READINGS)).thenReturn(Duration.ofDays(30));
+        when(streamStatsDao.updateCustomCounterStats(streamStatsEntity.getPk(), streamStatsEntity.getSk(), 3, Duration.ofDays(30))).thenReturn(Mono.empty());
 
         streamStatsService.updateNumberOfReadingStreamStats("paId", "streamId", 3).block();
 
-        Mockito.verify(streamStatsDao).updateCustomCounterStats(streamStatsEntity.getPk(),streamStatsEntity.getSk(), 3);
+        Mockito.verify(streamStatsDao).updateCustomCounterStats(streamStatsEntity.getPk(), streamStatsEntity.getSk(), 3, Duration.ofDays(30));
     }
 
 }

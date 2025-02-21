@@ -172,14 +172,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         StreamRetryAfter retryAfterEntity = new StreamRetryAfter();
         retryAfterEntity.setPaId(xPagopaPnCxId);
         retryAfterEntity.setStreamId(streamId.toString());
-        retryAfterEntity.setRetryAfter(retrieveRetryAfter(xPagopaPnCxId));
+        retryAfterEntity.setRetryAfter(streamUtils.retrieveRetryAfter(xPagopaPnCxId));
         return retryAfterEntity;
-    }
-
-    private Instant retrieveRetryAfter(String xPagopaPnCxId) {
-        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getRetryParameterPrefix() + xPagopaPnCxId, CustomRetryAfterParameter.class)
-                .map(customRetryAfterParameter -> Instant.now().plusMillis(customRetryAfterParameter.getRetryAfter()))
-                .orElse(Instant.now().plusMillis(pnStreamConfigs.getScheduleInterval()));
     }
 
     private ProgressResponseElementV26 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {

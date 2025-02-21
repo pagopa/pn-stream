@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +34,8 @@ public class StreamStatsServiceImpl implements StreamStatsService {
         log.info(UPDATE_STREAM_STATS_LOG, StreamStatsEnum.NUMBER_OF_READINGS, paId, streamId);
         String pk = StreamStatsEntity.buildPk(paId, streamId, StreamStatsEnum.NUMBER_OF_READINGS);
         String sk = streamUtils.buildSk();
-        return streamStatsDao.updateCustomCounterStats(pk, sk, increment)
+        Duration ttl = streamUtils.retrieveStatsTtl(StreamStatsEnum.NUMBER_OF_READINGS);
+        return streamStatsDao.updateCustomCounterStats(pk, sk, increment, ttl)
                 .then();
     }
 }
