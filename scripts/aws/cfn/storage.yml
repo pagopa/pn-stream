@@ -214,3 +214,6 @@ Outputs:
 
   EcsLogGroup:
     Value: !GetAtt PnStreamLogGroup.Outputs.LogGroupName
+
+  VersioningV1V2WebhookLambdaName:
+    Value: !Sub "${ProjectName}-versioningV1V2WebhookLambda"
