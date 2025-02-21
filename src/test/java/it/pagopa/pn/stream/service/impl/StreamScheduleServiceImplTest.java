@@ -25,6 +25,7 @@ import org.mockito.quality.Strictness;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,7 +69,7 @@ class StreamScheduleServiceImplTest {
                 .build();
 
         when(streamEntityDao.updateAndGetAtomicCounter(any())).thenReturn(Mono.just(0L));
-        when(eventsQuarantineEntityDao.findByPk(anyString(), any(), anyInt())).thenReturn(Mono.empty());
+        when(eventsQuarantineEntityDao.findByPk(anyString(), any(), anyInt())).thenReturn(Mono.just(Page.create(Collections.emptyList())));
         Mockito.doNothing().when(schedulerService).scheduleSortEvent(anyString(), any(), any(), any());
 
         // When

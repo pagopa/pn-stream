@@ -55,7 +55,7 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                 .doOnNext(sortEventAction -> {
                     if (resendMessage && sortEventAction.getWrittenCounter() <= pnStreamConfigs.getMaxWrittenCounter()) {
                         log.info("Resend message for eventKey: [{}] to unlock with delay: [{}] and writtenCounter: [{}]", event.getEventKey(), event.getDelaySeconds(), event.getWrittenCounter());
-                        schedulerService.scheduleSortEvent(event.getEventKey(), event.getDelaySeconds(), event.getWrittenCounter(), SortEventType.UNLOCK_EVENTS);
+                        schedulerService.scheduleSortEvent(event.getEventKey(), sortEventAction.getDelaySeconds(), sortEventAction.getWrittenCounter(), SortEventType.UNLOCK_EVENTS);
                     }
                 })
                 .then();
@@ -65,22 +65,22 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
         return eventsQuarantineEntityDao.findByPk(event.getEventKey(), lastEvaluateKey, pnStreamConfigs.getQueryEventQuarantineLimit())
                 .flatMap(quarantinedEventsList -> {
                     if (CollectionUtils.isEmpty(quarantinedEventsList.items())) {
+                        log.info("No element to retrieve for eventKey={}", event.getEventKey());
                         return computeNewValues(event);
                     }
                     return saveEventAndRemoveFromQuarantine(event, quarantinedEventsList)
                             .then(Mono.defer(() -> {
                                 if (!CollectionUtils.isEmpty(quarantinedEventsList.lastEvaluatedKey())) {
-                                    log.info("Recursive call to findByPk to get all remaining items, lastEvaluateKey={}", quarantinedEventsList.lastEvaluatedKey());
+                                    log.info("There are more element to retrieve for eventKey={},start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
                                     return callToUnlockEvents(event, new HashMap<>(quarantinedEventsList.lastEvaluatedKey()));
                                 }
-                                return Mono.just(event);
+                                log.info("No more element to retrieve for eventKey={}", event.getEventKey());
+                                return Mono.just(event)
+                                        .flatMap(this::computeNewValues);
                             }));
                 })
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.info("No events found in quarantine for eventKey: [{}]", event.getEventKey());
-                    return Mono.just(event);
-                }))
-                .flatMap(e -> computeNewValues(event));
+                .doOnError(throwable -> log.error("Error in callToUnlockEvents", throwable))
+                .onErrorResume(throwable -> computeNewValues(event));
 
     }
 
@@ -99,7 +99,7 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                                 EventEntity eventEntity = streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity, timelineElementInternal.getStatusInfo().getActual(), timelineElementInternal);
                                 return eventsQuarantineEntityDao.saveAndClearElement(quarantinedEvent, eventEntity)
                                         .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
-                                        .doOnNext(entity -> log.info("saved webhookevent={}", entity))
+                                        .doOnNext(entity -> log.info("saved event={}", entity))
                                         .then();
                             });
                 })
@@ -107,9 +107,6 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
     }
 
     private void checkInitalValues(SortEventAction event) {
-        if (Objects.isNull(event.getDelaySeconds())) {
-            event.setDelaySeconds(pnStreamConfigs.getSortEventDelaySeconds());
-        }
         if (Objects.isNull(event.getWrittenCounter())) {
             event.setWrittenCounter(0);
         }
@@ -117,7 +114,7 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
 
     private Mono<SortEventAction> computeNewValues(SortEventAction event) {
         event.setWrittenCounter(event.getWrittenCounter() + 1);
-        event.setDelaySeconds(event.getDelaySeconds() * 2);
+        event.setDelaySeconds(Objects.isNull(event.getDelaySeconds()) ? pnStreamConfigs.getSortEventDelaySeconds() : event.getDelaySeconds() * 2);
         return Mono.just(event);
     }
 
