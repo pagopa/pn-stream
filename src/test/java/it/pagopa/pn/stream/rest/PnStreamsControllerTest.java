@@ -25,8 +25,7 @@ import java.util.UUID;
 @WebFluxTest(PnStreamsController.class)
 class PnStreamsControllerTest {
 
-    public static final String API_VERSION = "v2.6";
-    public static final String CREATION_API_VERSION = "v2.7";
+    public static final String API_VERSION = "v2.7";
     @Autowired
     WebTestClient webTestClient;
 
@@ -39,13 +38,13 @@ class PnStreamsControllerTest {
     @Test
     void createEventStreamOk() {
         Mockito.when(service.createEventStream(Mockito.anyString(),Mockito.anyString(), Mockito.any(),Mockito.any(), Mockito.any()))
-                .thenReturn(Mono.just(new StreamMetadataResponseV26()));
+                .thenReturn(Mono.just(new StreamMetadataResponseV27()));
         StreamCreationRequestV27 request = StreamCreationRequestV27.builder()
                 .eventType(StreamCreationRequestV27.EventTypeEnum.STATUS)
                 .build();
 
         webTestClient.post()
-                .uri("/delivery-progresses-2/" + CREATION_API_VERSION + "/streams")
+                .uri("/delivery-progresses-2/" + API_VERSION + "/streams")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.ACCEPT, "application/json")
                 .body(Mono.just(request), StreamCreationRequestV27.class)
@@ -57,7 +56,7 @@ class PnStreamsControllerTest {
                 })
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(StreamMetadataResponseV26.class);
+                .expectBody(StreamMetadataResponseV27.class);
 
         Mockito.verify(service).createEventStream(Mockito.anyString(),Mockito.anyString(), Mockito.any(),Mockito.any(), Mockito.any());
     }
@@ -68,7 +67,7 @@ class PnStreamsControllerTest {
                 .thenThrow(new RuntimeException());
 
         webTestClient.post()
-                .uri("/delivery-progresses-2/" + CREATION_API_VERSION + "/streams")
+                .uri("/delivery-progresses-2/" + API_VERSION + "/streams")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.ACCEPT, "application/json")
                 .headers(httpHeaders -> {
@@ -189,7 +188,7 @@ class PnStreamsControllerTest {
     void getEventStream() {
         String streamId = UUID.randomUUID().toString();
         Mockito.when(service.getEventStream(Mockito.anyString(),Mockito.anyString(), Mockito.any(),Mockito.any(), Mockito.any(UUID.class)))
-                .thenReturn(Mono.just(new StreamMetadataResponseV26()));
+                .thenReturn(Mono.just(new StreamMetadataResponseV27()));
 
         webTestClient.get()
                 .uri( ("/delivery-progresses-2/" + API_VERSION + "/streams/{streamId}").replace("{streamId}", streamId) )
@@ -202,7 +201,7 @@ class PnStreamsControllerTest {
                 })
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(StreamMetadataResponseV26.class);
+                .expectBody(StreamMetadataResponseV27.class);
 
         Mockito.verify(service).getEventStream(Mockito.anyString(),Mockito.anyString(),Mockito.any(), Mockito.any(), Mockito.any(UUID.class));
 
@@ -257,7 +256,7 @@ class PnStreamsControllerTest {
     void updateEventStream() {
         String streamId = UUID.randomUUID().toString();
         Mockito.when(service.updateEventStream(Mockito.anyString(),Mockito.anyString(),Mockito.any(), Mockito.any(), Mockito.any(UUID.class), Mockito.any()))
-                .thenReturn(Mono.just(new StreamMetadataResponseV26()));
+                .thenReturn(Mono.just(new StreamMetadataResponseV27()));
 
         webTestClient.put()
                 .uri( ("/delivery-progresses-2/" + API_VERSION + "/streams/{streamId}").replace("{streamId}", streamId) )
@@ -271,7 +270,7 @@ class PnStreamsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(StreamMetadataResponseV26.class);
+                .expectBody(StreamMetadataResponseV27.class);
 
         Mockito.verify(service).updateEventStream(Mockito.anyString(),Mockito.anyString(),Mockito.any(), Mockito.any(), Mockito.any(UUID.class), Mockito.any());
     }
