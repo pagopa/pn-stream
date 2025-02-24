@@ -21,6 +21,7 @@
     "MaximumRetryAttemptsValueNotification": "5",
     "StreamStatsTimeUnit": "HOURS",
     "StreamStatsSpanUnit": "1",
-    "StreamStatsTtl":"365"
+    "StreamStatsTtl":"365d",
+    "CustomStatsTtlParameterName": "/pn-stream/stats/custom-ttl"
   }
 }

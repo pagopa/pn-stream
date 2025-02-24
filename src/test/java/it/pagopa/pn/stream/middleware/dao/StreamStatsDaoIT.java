@@ -63,7 +63,7 @@ class StreamStatsDaoIT extends BaseTest.WithLocalStack {
 
     @Test
     void updateCustomCounterStats() {
-        webhookStatsDao.updateCustomCounterStats("paId#streamId#NUMBER_OF_READINGS", "sk3", 5).block();
+        webhookStatsDao.updateCustomCounterStats("paId#streamId#NUMBER_OF_READINGS", "sk3", 5, Duration.ofDays(2)).block();
         StreamStatsEntity updatedEntity = webhookStatsDao.getItem(Key.builder().partitionValue("paId#streamId#NUMBER_OF_READINGS").sortValue("sk3").build()).block();
         assert updatedEntity != null;
         Assertions.assertEquals("paId#streamId#NUMBER_OF_READINGS", updatedEntity.getPk());
