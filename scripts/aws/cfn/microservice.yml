@@ -448,7 +448,7 @@ Resources:
         ContainerEnvEntry22: !Sub 'PN_STREAM_NOTIFICATIONSLA=${notificationSla}'
         ContainerEnvEntry23: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
         ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
-        ContainerEnvEntry25: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLE=${StreamStatsTableName}'
+        ContainerEnvEntry25: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLENAME=${StreamStatsTableName}'
         ContainerEnvEntry26: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
         ContainerEnvEntry27: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
         ContainerEnvEntry28: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
