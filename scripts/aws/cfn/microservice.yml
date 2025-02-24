@@ -361,6 +361,15 @@ Parameters:
     Description: 'Period for TTL of notification SLA'
     Default: 1d
 
+  MaxWrittenCounter:
+    Type: Number
+    Description: 'Max written counter for schedule unlock events'
+
+  QueryEventQuarantineLimit:
+    Type: Number
+    Description: 'Limit for query on event quarantine table'
+    Default: 100
+
 Resources:
 
   # pn-stream microservice
@@ -408,7 +417,9 @@ Resources:
         ContainerEnvEntry19: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         ContainerEnvEntry20: !Sub 'PN_STREAM_SORTEVENTDELAYSECONDS=${SortEventDelaySeconds}'
         ContainerEnvEntry21: !Sub 'PN_STREAM_UNLOCKEDEVENTTTL=${UnlockedEventTtl}'
-        ContainerEnvEntry22: !Sub 'PN_STREAM_notificationSla=${notificationSla}'
+        ContainerEnvEntry22: !Sub 'PN_STREAM_NOTIFICATIONSLA=${notificationSla}'
+        ContainerEnvEntry23: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
+        ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName

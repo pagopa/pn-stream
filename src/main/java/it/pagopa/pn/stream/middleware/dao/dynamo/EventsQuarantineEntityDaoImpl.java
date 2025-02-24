@@ -5,6 +5,7 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
@@ -12,8 +13,11 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo;
@@ -33,21 +37,31 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
     }
 
     @Override
-    public Mono<Page<EventsQuarantineEntity>> findByPk(String pk) {
+    public Mono<Page<EventsQuarantineEntity>> findByPk(String pk, Map<String, AttributeValue> lastEvaluateKey, int limit) {
         log.info("findByPk pk={}", pk);
         Key key = Key.builder().partitionValue(pk).build();
         QueryConditional queryByHashKey = keyEqualTo(key);
-        return Mono.from(tableQuarantine.query(queryByHashKey));
+
+        QueryEnhancedRequest.Builder queryEnhancedRequest = QueryEnhancedRequest
+                .builder()
+                .limit(limit)
+                .queryConditional(queryByHashKey);
+
+        if (!CollectionUtils.isEmpty(lastEvaluateKey)) {
+            queryEnhancedRequest.exclusiveStartKey(lastEvaluateKey);
+        }
+
+        return Mono.from(tableQuarantine.query(queryEnhancedRequest.build()));
     }
 
     @Override
     public Mono<EventsQuarantineEntity> putItem(EventsQuarantineEntity entity) {
         log.info("putItem entity={}", entity);
-        return Mono.fromFuture(tableQuarantine.putItem(entity).thenApply(r -> entity));
+        return Mono.fromFuture(tableQuarantine.putItem(entity)).thenReturn(entity);
     }
 
     @Override
-    public Mono<Void> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity) {
+    public Mono<EventEntity> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity) {
         log.info("save and delete items entity={} eventEntity={}", entity, eventEntity);
 
         if (Objects.isNull(entity) || Objects.isNull(eventEntity)) {
@@ -57,6 +71,7 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
         TransactWriteItemsEnhancedRequest.Builder transactWriteItemsEnhancedRequest = TransactWriteItemsEnhancedRequest.builder();
         transactWriteItemsEnhancedRequest.addPutItem(tableEvents, eventEntity);
         transactWriteItemsEnhancedRequest.addDeleteItem(tableQuarantine, entity);
-        return Mono.fromFuture(dynamoDbEnhancedClient.transactWriteItems(transactWriteItemsEnhancedRequest.build()));
+        return Mono.fromFuture(dynamoDbEnhancedClient.transactWriteItems(transactWriteItemsEnhancedRequest.build()))
+                .thenReturn(eventEntity);
     }
 }

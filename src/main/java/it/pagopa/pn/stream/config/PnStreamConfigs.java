@@ -37,6 +37,8 @@ public class PnStreamConfigs {
     private Integer sortEventDelaySeconds;
     private Duration unlockedEventTtl;
     private Duration notificationSla;
+    private Integer maxWrittenCounter;
+    private Integer queryEventQuarantineLimit;
 
     @Data
     public static class Dao {

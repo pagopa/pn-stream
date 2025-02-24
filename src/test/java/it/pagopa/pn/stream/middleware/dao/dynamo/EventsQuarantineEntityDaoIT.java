@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,7 +42,7 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
         entity.setEvent(objectMapper.writeValueAsString(objectHashMap));
         eventsQuarantineEntityDao.putItem(entity).block();
 
-        Mono<Page<EventsQuarantineEntity>> result = eventsQuarantineEntityDao.findByPk("streamId_iun");
+        Mono<Page<EventsQuarantineEntity>> result = eventsQuarantineEntityDao.findByPk("streamId_iun", new HashMap<>(), 5);
         Page<EventsQuarantineEntity> foundEntity = result.block();
 
         assert foundEntity != null;
@@ -61,7 +63,9 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
         EventsQuarantineEntity entity2 = new EventsQuarantineEntity("streamId2", "iun2", "eventId3");
         eventsQuarantineEntityDao.putItem(entity2).block();
 
-        Page<EventsQuarantineEntity> result = eventsQuarantineEntityDao.findByPk("streamId2_iun2").block();
+        Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
+
+        Page<EventsQuarantineEntity> result = eventsQuarantineEntityDao.findByPk("streamId2_iun2", lastEvaluateKey, 100).block();
 
         assert result != null;
 
@@ -72,8 +76,11 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
             eventsQuarantineEntityDao.saveAndClearElement(resultEntity, eventEntity).block();
         });
 
-        List<EventsQuarantineEntity> finalResult = Objects.requireNonNull(eventsQuarantineEntityDao.findByPk("streamId2_iun2").block()).items();
+        lastEvaluateKey = new HashMap<>();
+
+        List<EventsQuarantineEntity> finalResult = Objects.requireNonNull(eventsQuarantineEntityDao.findByPk("streamId2_iun2", lastEvaluateKey, 100).block()).items();
         EventEntityBatch resultEvent = eventEntityDao.findByStreamId("streamId2", null).block();
+
 
         assert CollectionUtils.isEmpty(finalResult);
         assert !Objects.isNull(resultEvent) && !CollectionUtils.isEmpty(resultEvent.getEvents());
