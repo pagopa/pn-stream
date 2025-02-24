@@ -58,7 +58,7 @@ describe("ConsumeEventStreamHandler", () => {
     describe("handlerEvent", () => {
 
         process.env = Object.assign(process.env, {
-            PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.4",
+            PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.4",
         });
 
         it("successful request - with element", async () => {
@@ -74,7 +74,7 @@ describe("ConsumeEventStreamHandler", () => {
                 },
             }
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/events`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
 
             const responseBodyV23 = [
                 {
@@ -174,7 +174,7 @@ describe("ConsumeEventStreamHandler", () => {
                 },
             }
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/events`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
             
             const responseBodyV24 = [
                 {
@@ -296,7 +296,7 @@ describe("ConsumeEventStreamHandler", () => {
                 },
             }
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/events`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
             
             const responseBodyV24 = [
                 {
@@ -440,7 +440,7 @@ describe("ConsumeEventStreamHandler", () => {
                 },
             }
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/events`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
 
             const responseBodyV25 = [
                 {
@@ -583,7 +583,7 @@ describe("ConsumeEventStreamHandler", () => {
                 },
             }
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/events`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
 
             const responseBodyV26 = [
                 {
@@ -671,7 +671,7 @@ describe("ConsumeEventStreamHandler", () => {
                 },
             }
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/events?lastEventId=00000000000000000000000000000000000083`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events?lastEventId=00000000000000000000000000000000000083`;
 
             const responseBodyV23 = [
                 {
@@ -771,7 +771,7 @@ describe("ConsumeEventStreamHandler", () => {
                 },
             }
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/events`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
 
             const responseBodyV23 = [
                 {

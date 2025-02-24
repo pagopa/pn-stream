@@ -61,7 +61,7 @@ describe("DisableEventStreamHandler", () => {
     describe("handlerEvent", () => {
 
         process.env = Object.assign(process.env, {
-            PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.4",
+            PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.4",
         });
 
         it("successful request", async () => {
@@ -78,7 +78,7 @@ describe("DisableEventStreamHandler", () => {
                 body: b
             };
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/action/disable`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/action/disable`;
 
             const responseBodyV23 = {
                 title: "stream name",
@@ -113,7 +113,7 @@ describe("DisableEventStreamHandler", () => {
     describe("handlerEvent", () => {
 
         process.env = Object.assign(process.env, {
-            PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
+            PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
         });
 
         it("successful request 2.5", async () => {
@@ -130,7 +130,7 @@ describe("DisableEventStreamHandler", () => {
                 body: b
             };
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/action/disable`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/action/disable`;
 
             const responseBodyV25 = {
                 title: "stream name",
@@ -165,7 +165,7 @@ describe("DisableEventStreamHandler", () => {
     describe("handlerEvent", () => {
 
         process.env = Object.assign(process.env, {
-            PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
+            PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
         });
 
         it("successful request 2.4", async () => {
@@ -182,7 +182,7 @@ describe("DisableEventStreamHandler", () => {
                 body: b
             };
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/action/disable`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/action/disable`;
 
             const responseBodyV24 = {
                 title: "stream name",
@@ -219,7 +219,7 @@ describe("DisableEventStreamHandler", () => {
         it("successful request 2.6", async () => {
 
             process.env = Object.assign(process.env, {
-                PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
+                PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
             });
 
             disableEventStreamHandler = new DisableEventStreamHandler();
@@ -237,7 +237,7 @@ describe("DisableEventStreamHandler", () => {
                 body: b
             };
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}/action/disable`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/action/disable`;
 
             const responseBodyV26 = {
                 title: "stream name",
@@ -272,7 +272,7 @@ describe("DisableEventStreamHandler", () => {
     describe("handlerEvent 1.0 error", () => {
 
         process.env = Object.assign(process.env, {
-            PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.4",
+            PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.4",
         });
 
         it("successful request", async () => {

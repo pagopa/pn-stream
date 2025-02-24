@@ -9,7 +9,7 @@ describe('EventHandler', () => {
     });
 
     process.env = Object.assign(process.env, {
-        PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
+        PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
         ATTEMPT_TIMEOUT_SEC: 5,
         NUM_RETRY: 3
     });

@@ -252,7 +252,7 @@ Parameters:
 
   ScheduleInterval:
     Type: String
-    Description: 'Time interval between two webhook-scans every scan send notifications
+    Description: 'Time interval between two stream-scans every scan send notifications
                   update to Public Administration'
     Default: 60000
 
@@ -278,7 +278,7 @@ Parameters:
 
   MaxLength:
     Type: String
-    Description: 'Max elements quantity for each webhook call'
+    Description: 'Max elements quantity for each stream call'
 
   RetryParameterPrefix:
     Type: String
@@ -312,9 +312,9 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
-  VersioningV1V2WebhookLambdaName:
+  VersioningV1V2StreamLambdaName:
     Type: String
-    Description: 'VersioningV1V2WebhookLambdaName'
+    Description: 'VersioningV1V2StreamLambdaName'
 
   NumRetry:
     Type: Number
@@ -326,9 +326,9 @@ Parameters:
     Description: 'Timeout in seconds for each retry attempt for each idempotent versioning lambda'
     Default: 7
 
-  VersioningV1V2WebhookLambdaProvisionedConcurrency:
+  VersioningV1V2StreamLambdaProvisionedConcurrency:
     Type: Number
-    Description: 'VersioningV1V2WebhookLambdaProvisionedConcurrency'
+    Description: 'VersioningV1V2StreamLambdaProvisionedConcurrency'
     Default: 1
 
 Resources:
@@ -640,33 +640,33 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
 
   #########################################################
-  ###              VersioningV1V2Webhook                ###
+  ###              VersioningV1V2Stream                 ###
   #########################################################
-  VersioningV1V2WebhookSecGroup:
+  VersioningV1V2StreamSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub '${VersioningV1V2WebhookLambdaName}-sec-group'
+      GroupDescription: !Sub '${VersioningV1V2StreamLambdaName}-sec-group'
       VpcId: !Ref VpcId
 
   # Lambda function
-  VersioningV1V2WebhookLambda:
+  VersioningV1V2StreamLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Ref VersioningV1V2WebhookLambdaName
+      FunctionName: !Ref VersioningV1V2StreamLambdaName
       Runtime: nodejs18.x
       Handler: "index.handler"
       Code:
         S3Bucket: !Ref MicroserviceBucketName
-        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/versioningV1V2Webhook.zip"
-      Role: !GetAtt VersioningV1V2WebhookLambdaRole.Arn
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/versioningV1V2Stream.zip"
+      Role: !GetAtt VersioningV1V2StreamLambdaRole.Arn
       VpcConfig:
         SecurityGroupIds:
-          - !GetAtt VersioningV1V2WebhookSecGroup.GroupId
+          - !GetAtt VersioningV1V2StreamSecGroup.GroupId
         SubnetIds: !Ref VpcEgressSubnetsIds
       Environment:
         Variables:
           REGION: !Sub ${AWS::Region}
-          PN_WEBHOOK_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/delivery-progresses/v2.6"
+          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/delivery-progresses/v2.6"
           NUM_RETRY: !Ref NumRetry
           ATTEMPT_TIMEOUT_SEC: !Ref AttemptTimeoutSec
       TracingConfig:
@@ -679,29 +679,29 @@ Resources:
         - Key: "pn-eni-related"
           Value: "true"
         - Key: "pn-eni-related-groupName-regexp"
-          Value: !Base64 "^pn-stream-microsvc-prod-VersioningV1V2WebhookSecGroup*$"
+          Value: !Base64 "^pn-stream-microsvc-prod-VersioningV1V2StreamSecGroup*$"
 
   # a new version at each deploy, with provisioned concurrency set
   # remember to set transform -> UpdateDeploymentTransform at beginning of the file
-  VersioningV1V2WebhookLambdaVersionPnPlaceholderEpochSeconds:
+  VersioningV1V2StreamLambdaVersionPnPlaceholderEpochSeconds:
     Type: AWS::Lambda::Version
     Properties:
-      FunctionName: !Ref VersioningV1V2WebhookLambda
+      FunctionName: !Ref VersioningV1V2StreamLambda
 
-  VersioningV1V2WebhookLambdaVersionAlias:
+  VersioningV1V2StreamLambdaVersionAlias:
     Type: AWS::Lambda::Alias
     Properties:
-      FunctionName: !Ref VersioningV1V2WebhookLambda
-      FunctionVersion: !GetAtt VersioningV1V2WebhookLambdaVersionPnPlaceholderEpochSeconds.Version
+      FunctionName: !Ref VersioningV1V2StreamLambda
+      FunctionVersion: !GetAtt VersioningV1V2StreamLambdaVersionPnPlaceholderEpochSeconds.Version
       Name: live
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: !Ref VersioningV1V2WebhookLambdaProvisionedConcurrency
+        ProvisionedConcurrentExecutions: !Ref VersioningV1V2StreamLambdaProvisionedConcurrency
 
   # Lambda function role
-  VersioningV1V2WebhookLambdaRole:
+  VersioningV1V2StreamLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${ProjectName}-VersioningV1V2WebhookLambdaRole
+      RoleName: !Sub ${ProjectName}-VersioningV1V2StreamLambdaRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -716,20 +716,20 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
 
-  VersioningV1V2WebhookLambdaAlarms:
+  VersioningV1V2StreamLambdaAlarms:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/lambda-alarms.yaml"
       Parameters:
-        FunctionName: !Ref VersioningV1V2WebhookLambda
+        FunctionName: !Ref VersioningV1V2StreamLambda
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         FilterPattern: "FATAL"
 
   # Lambda access right
-  VersioningV1V2WebhookLambdaPermission:
+  VersioningV1V2StreamLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref VersioningV1V2WebhookLambdaVersionAlias
+      FunctionName: !Ref VersioningV1V2StreamLambdaVersionAlias
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*'
@@ -748,12 +748,12 @@ Resources:
             - !Ref EventQueueAgeAlarmARN
             - !Ref ScheduledActionsQueueAlarmARN
             - !Ref ScheduledActionsQueueAgeAlarmARN
-            - !GetAtt VersioningV1V2WebhookLambdaAlarms.Outputs.LambdaInvocationErrorLogsMetricAlarm //FIXME?
+            - !GetAtt VersioningV1V2StreamLambdaAlarms.Outputs.LambdaInvocationErrorLogsMetricAlarm
         LambdaArns: !Join
           - ','
           - - !GetAtt StreamEventManagerLambda.Arn
             - !GetAtt NotificationStreamManagerLambda.Arn
-            - !GetAtt VersioningV1V2WebhookLambda.Arn
+            - !GetAtt VersioningV1V2StreamLambda.Arn
         QueueArns: !Join
           - ','
           - - !Ref EventQueueARN
@@ -763,7 +763,7 @@ Resources:
           - - !Sub '/aws/ecs/${ProjectName}-stream'
             - !Sub '/aws/lambda/${NotificationStreamManagerLambdaName}'
             - !Sub '/aws/lambda/${StreamEventManagerLambdaName}'
-            - !Sub '/aws/lambda/${VersioningV1V2WebhookLambdaName}'
+            - !Sub '/aws/lambda/${VersioningV1V2StreamLambdaName}'
         DynamoDBTableNames: !Join
           - ','
           - - !Ref StreamNotificationTableName

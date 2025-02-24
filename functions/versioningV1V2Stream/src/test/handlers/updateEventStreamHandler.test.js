@@ -61,7 +61,7 @@ describe("UpdateEventStreamHandler", () => {
     describe("handlerEvent that applies a map function for response body", () => {
 
         process.env = Object.assign(process.env, {
-            PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
+            PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
         });
 
         it("successful request v10", async () => {
@@ -82,7 +82,7 @@ describe("UpdateEventStreamHandler", () => {
                 body: b
             };
 
-            let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}`;
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}`;
 
             const responseBodyV23 = {
                 title: "stream name",
@@ -205,7 +205,7 @@ describe("UpdateEventStreamHandler", () => {
         describe("handlerEvent", () => {
 
             process.env = Object.assign(process.env, {
-                PN_WEBHOOK_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
+                PN_STREAM_URL: "https://api.dev.notifichedigitali.it/delivery-progresses/v2.6",
             });
 
             testCases.forEach(({ version, responseBody }) => {
@@ -227,7 +227,7 @@ describe("UpdateEventStreamHandler", () => {
                         body: b
                     };
 
-                    let url = `${process.env.PN_WEBHOOK_URL}/streams/${streamId}`;
+                    let url = `${process.env.PN_STREAM_URL}/streams/${streamId}`;
 
                     mock.onPut(url).reply(200, responseBody);
 
