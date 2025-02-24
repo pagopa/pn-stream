@@ -362,7 +362,7 @@ Resources:
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
-        ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLE=${StreamStatsTableName}'
+        ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLENAME=${StreamStatsTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName

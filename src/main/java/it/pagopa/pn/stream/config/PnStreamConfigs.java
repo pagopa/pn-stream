@@ -42,7 +42,7 @@ public class PnStreamConfigs {
         private String streamsTableName;
         private String eventsTableName;
         private String streamNotificationTable;
-        private String streamStatsTable;
+        private String streamStatsTableName;
     }
 
     @Data
