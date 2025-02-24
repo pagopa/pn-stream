@@ -23,7 +23,7 @@
     "UnlockedEventTtl": "2d",
     "notificationSla": "1d",
     "MaxWrittenCounter": "5",
-    "QueryEventQuarantineLimit": 100,
+    "QueryEventQuarantineLimit": "100",
     "StreamStatsTimeUnit": "HOURS",
     "StreamStatsSpanUnit": "1",
     "StreamStatsTtl":"365d",
