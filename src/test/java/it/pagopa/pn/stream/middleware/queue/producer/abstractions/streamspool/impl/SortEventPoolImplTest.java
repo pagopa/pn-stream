@@ -32,12 +32,28 @@ class SortEventPoolImplTest {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
 
         Mockito.when(clock.instant()).thenReturn(instant);
+        SortEventAction sortEvent = buildSortEventAction();
+
+        sortEventPool.scheduleFutureAction(sortEvent, SortEventType.UNLOCK_EVENTS);
+
+        Mockito.verify(sortActionsQueue).push(Mockito.argThat(matches((SortEvent tmp) ->
+                tmp.getHeader().getEventType().equalsIgnoreCase("UNLOCK_EVENTS") &&
+                tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))));
+    }
+
+    @Test
+    void scheduleFutureActionUnlockEventsNoDelay() {
+        Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
+
+        Mockito.when(clock.instant()).thenReturn(instant);
+        SortEventAction sortEvent = buildSortEventAction();
+        sortEvent.setDelaySeconds(null);
 
         sortEventPool.scheduleFutureAction(buildSortEventAction(), SortEventType.UNLOCK_EVENTS);
 
         Mockito.verify(sortActionsQueue).push(Mockito.argThat(matches((SortEvent tmp) ->
                 tmp.getHeader().getEventType().equalsIgnoreCase("UNLOCK_EVENTS") &&
-                tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))));
+                        tmp.getPayload().getEventKey().equalsIgnoreCase("streamId_IUN"))), Mockito.eq(30));
     }
 
     @Test
