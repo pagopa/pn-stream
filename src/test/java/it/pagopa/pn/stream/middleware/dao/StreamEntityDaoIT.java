@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import reactor.util.function.Tuple2;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 class StreamEntityDaoIT extends BaseTest.WithLocalStack {
@@ -20,12 +21,15 @@ class StreamEntityDaoIT extends BaseTest.WithLocalStack {
     @Test
     void findByPa() {
         streamEntityDaoDynamo.save(new StreamEntity("paId","streamId")).block();
-        StreamEntity streamEntity = streamEntityDaoDynamo.findByPa("paId").blockFirst();
+        streamEntityDaoDynamo.save(new StreamEntity("paId","RETRY#streamId")).block();
+        streamEntityDaoDynamo.save(new StreamEntity("paId","streamId2")).block();
+        List<StreamEntity> streamEntity = streamEntityDaoDynamo.findByPa("paId").collectList().block();
         assert streamEntity != null;
-        Assertions.assertEquals("paId", streamEntity.getPaId()) ;
-        Assertions.assertEquals("streamId", streamEntity.getStreamId());
-        Assertions.assertNotNull(streamEntity.getActivationDate());
-        Assertions.assertEquals(0,streamEntity.getEventAtomicCounter());
+        Assertions.assertEquals(2, streamEntity.size());
+        Assertions.assertEquals("paId", streamEntity.get(0).getPaId()) ;
+        Assertions.assertEquals("streamId", streamEntity.get(0).getStreamId());
+        Assertions.assertEquals("paId", streamEntity.get(1).getPaId()) ;
+        Assertions.assertEquals("streamId2", streamEntity.get(1).getStreamId());
     }
 
     @Test
@@ -70,9 +74,12 @@ class StreamEntityDaoIT extends BaseTest.WithLocalStack {
     @Test
     void delete() {
         streamEntityDaoDynamo.save(new StreamEntity("paId2","streamId2")).block();
+        streamEntityDaoDynamo.save(new StreamEntity("paId2","RETRY#streamId2")).block();
         streamEntityDaoDynamo.delete("paId2", "streamId2").block();
         StreamEntity streamEntity = streamEntityDaoDynamo.get("paId2", "streamId2").block();
+        StreamEntity streamEntityRETRY = streamEntityDaoDynamo.get("paId2", "RETRY#streamId2").block();
         Assertions.assertNull(streamEntity);
+        Assertions.assertNull(streamEntityRETRY);
     }
 
     @Test
