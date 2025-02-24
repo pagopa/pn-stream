@@ -8,15 +8,9 @@ import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
-import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
-import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
-import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
-import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
-import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
-import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
-import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.dto.*;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
+import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV27;
@@ -61,7 +55,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private final StreamUtils streamUtils;
     private final TimelineService timelineService;
     private final ConfidentialInformationService confidentialInformationService;
-    private final StreamStatsService streamStatsService;
 
     private final AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation;
     private static final String LOG_MSG_JSON_COMPRESSION = "Error while compressing timeline elements into JSON for the audit";
@@ -73,9 +66,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    ConfidentialInformationService confidentialInformationService,
                                    AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation,
                                    StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive,
-                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao){
-        super(streamEntityDao, pnStreamConfigs);
-                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive, StreamStatsService streamStatsService) {
+                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao,
+                                   StreamStatsService streamStatsService) {
         super(streamEntityDao, pnStreamConfigs,streamStatsService);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
@@ -87,7 +79,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         this.pnDeliveryClientReactive = pnDeliveryClientReactive;
         this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
         this.notificationUnlockedEntityDao = notificationUnlockedEntityDao;
-        this.streamStatsService = streamStatsService;
     }
 
     @Override
@@ -323,8 +314,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         Set<String> filteredValues = retrieveFilteredValues(stream, eventType);
 
         log.info("timelineEventCategory={} for stream={}", stream.getStreamId(), timelineEventCategory);
-        if ((eventType == StreamCreationRequestV26.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
-                || (eventType == StreamCreationRequestV26.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
+        if ((eventType == StreamCreationRequestV27.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
+                || (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
             return Mono.just(stream);
         } else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
