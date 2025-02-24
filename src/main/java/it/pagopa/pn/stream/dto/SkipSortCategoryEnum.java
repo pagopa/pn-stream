@@ -1,0 +1,9 @@
+package it.pagopa.pn.stream.dto;
+
+public enum SkipSortCategoryEnum {
+    SENDER_ACK_CREATION_REQUEST,
+    VALIDATE_NORMALIZE_ADDRESSES_REQUEST,
+    NORMALIZED_ADDRESS,
+    VALIDATED_F24,
+    VALIDATE_F24_REQUEST
+}

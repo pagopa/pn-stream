@@ -114,6 +114,47 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  # Webhook Notification Table
+  EventsQuarantineTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-eventsQuarantine'
+      AttributeDefinitions:
+        - AttributeName: "pk"
+          AttributeType: "S"
+        - AttributeName: "eventId"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "pk"
+          KeyType: "HASH"
+        - AttributeName: "eventId"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # Notification Unlocked Table
+  NotificationUnlockedTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-NotificationUnlocked'
+      AttributeDefinitions:
+        - AttributeName: "pk"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "pk"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
   StreamStatsTable:
     Type: AWS::DynamoDB::Table
     UpdateReplacePolicy: Retain
@@ -173,6 +214,20 @@ Resources:
         LogGroupRetention: !Ref LogRetention
         LogGroupPrefix: /aws/lambda
 
+  # Internal queues
+  EventScheduleQueue:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: !Sub '${ProjectName}-stream_schedule'
+        AlarmSNSTopicName: !Ref AlarmSNSTopicName
+        VisibilityTimeout: 60
+        MaxReceiveCount: 10
+        DelaySeconds: 1
+
 Outputs:
 
   StreamNotificationTableName:
@@ -187,6 +242,20 @@ Outputs:
   StreamStatsTableArn:
     Description: ARN of dynamodb table containing
     Value: !Sub '${StreamStatsTable.Arn}'
+
+  EventsQuarantineTableName:
+    Description: Name of dynamodb table containing quarantined events
+    Value: !Ref EventsQuarantineTable
+  EventsQuarantineTableArn:
+    Description: ARN of dynamodb table containing
+    Value: !Sub '${EventsQuarantineTable.Arn}'
+
+  NotificationUnlockedTableName:
+    Description: Name of dynamodb table containing the unlocked notification
+    Value: !Ref NotificationUnlockedTable
+  NotificationUnlockedTableArn:
+    Description: ARN of dynamodb table containing the unlocked notification
+    Value: !Sub '${NotificationUnlockedTable.Arn}'
 
   # Event queue
   EventQueueName:
@@ -204,6 +273,20 @@ Outputs:
   EventQueueAgeAlarmARN:
     Value: !GetAtt EventQueue.Outputs.SqsAgeAlarmArn
     Description: pn-delivery-push actions done queue age alarm ARN
+
+  # Event schedule queue
+  EventScheduleQueueName:
+    Value: !GetAtt EventScheduleQueue.Outputs.QueueName
+    Description: pn-stream_schedule queue name
+  EventScheduleQueueARN:
+    Value: !GetAtt EventScheduleQueue.Outputs.QueueARN
+    Description: pn-stream_schedule queue ARN
+  EventScheduleQueueAlarmARN:
+    Value: !GetAtt EventScheduleQueue.Outputs.SqsDLQAlarmArn
+    Description: pn-stream_schedule queue dlq alarm ARN
+  EventScheduleQueueAgeAlarmARN:
+    Value: !GetAtt EventScheduleQueue.Outputs.SqsAgeAlarmArn
+    Description: pn-stream_schedule queue age alarm ARN
 
   ScheduledActionsQueueName:
     Value: !GetAtt ScheduledActionsQueue.Outputs.QueueName

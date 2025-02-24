@@ -36,13 +36,20 @@ public class PnStreamConfigs {
     private Long streamNotificationTtl;
     private Stats stats;
     private List<String> listCategoriesPa;
+    private Integer sortEventDelaySeconds;
+    private Duration unlockedEventTtl;
+    private Duration notificationSla;
+    private Integer maxWrittenCounter;
+    private Integer queryEventQuarantineLimit;
 
     @Data
     public static class Dao {
         private String streamsTableName;
         private String eventsTableName;
-        private String streamNotificationTable;
         private String streamStatsTable;
+        private String streamNotificationTableName;
+        private String notificationUnlockedTableName;
+        private String eventsQuarantineTableName;
     }
 
     @Data
@@ -57,5 +64,10 @@ public class PnStreamConfigs {
     public static class Topics {
         private String scheduledActions;
         private String event;
+        private String eventSchedule;
+    }
+
+    public Duration getMaxTtl() {
+        return notificationSla.compareTo(unlockedEventTtl) >=0 ? notificationSla : unlockedEventTtl;
     }
 }

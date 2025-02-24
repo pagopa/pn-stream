@@ -1,6 +1,6 @@
 package it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook;
 
-import it.pagopa.pn.stream.dto.timeline.StatusInfoEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StatusInfoEntity;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
 import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;

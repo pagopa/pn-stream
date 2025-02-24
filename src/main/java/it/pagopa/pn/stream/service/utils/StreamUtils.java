@@ -11,7 +11,9 @@ import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStat
 import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
+import it.pagopa.pn.stream.exceptions.PnStreamException;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
@@ -29,6 +31,7 @@ import java.time.*;
 import java.util.*;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
+import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_EVENT_CONVERSION;
 
 
 @Slf4j
@@ -102,6 +105,17 @@ public class StreamUtils {
         }
     }
 
+    public TimelineElementInternal getTimelineInternalFromQuarantineAndSetTimestamp(EventsQuarantineEntity entity) throws PnInternalException{
+        try {
+            TimelineElementInternal timelineElementInternal = entityToDtoTimelineMapper.entityToDto(timelineElementJsonConverter.jsonToEntity(entity.getEvent()));
+            timelineElementInternal.setBusinessTimestamp(timelineElementInternal.getTimestamp());
+            timelineElementInternal.setTimestamp(timelineElementInternal.getIngestionTimestamp());
+            return timelineElementInternal;
+        } catch (JsonProcessingException e) {
+            throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
+        }
+    }
+
 
     public static boolean checkGroups(List<String> toCheckGroups, List<String> allowedGroups){
         List<String> safeToCheck = toCheckGroups != null ? toCheckGroups : Collections.emptyList();
@@ -117,7 +131,17 @@ public class StreamUtils {
             return Integer.parseInt(versionNumberString);
         }
         return Integer.parseInt(pnStreamConfigs.getCurrentVersion().replace("v", ""));
+    }
 
+    public EventsQuarantineEntity buildEventQuarantineEntity(StreamEntity stream, TimelineElementInternal timelineElement) {
+       try {
+           EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getTimelineElementId());
+           eventsQuarantineEntity.setEvent(this.timelineElementJsonConverter.entityToJson(mapperTimeline.dtoToEntity(timelineElement)));
+           return eventsQuarantineEntity;
+       } catch (JsonProcessingException e) {
+           log.warn("Error while converting timeline element into JSON", e);
+           throw new PnStreamException("Error while converting timeline element into JSON", 500, ERROR_EVENT_CONVERSION);
+       }
     }
     public Instant retrieveCurrentInterval(StatsTimeUnit timeUnit, Integer spanUnit) {
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);

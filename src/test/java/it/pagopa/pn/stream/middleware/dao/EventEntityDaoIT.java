@@ -67,11 +67,11 @@ class EventEntityDaoIT extends BaseTest.WithLocalStack{
 
     @Test
     void findByStreamIdWithoutLastEventFound() {
-        eventEntityDao.save(new EventEntity(1L, "streamId2")).block();
-        eventEntityDao.save(new EventEntity(2L, "streamId2")).block();
-        EventEntityBatch eventEntityBatch = eventEntityDao.findByStreamId("streamId2",null).block();
+        eventEntityDao.save(new EventEntity(1L, "streamIdx")).block();
+        eventEntityDao.save(new EventEntity(2L, "streamIdx")).block();
+        EventEntityBatch eventEntityBatch = eventEntityDao.findByStreamId("streamIdx",null).block();
         Assertions.assertEquals(2, eventEntityBatch.getEvents().size());
-        Assertions.assertEquals("streamId2", eventEntityBatch.getStreamId());
+        Assertions.assertEquals("streamIdx", eventEntityBatch.getStreamId());
     }
 
     @Test

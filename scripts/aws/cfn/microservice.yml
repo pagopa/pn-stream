@@ -340,6 +340,64 @@ Parameters:
     Type: String
     Description: 'Custom parameter name for Stream Stats TTL'
 
+  EventsQuarantineTableName:
+    Type: String
+    Description: Name of dynamodb table containing quarantined events
+
+  EventsQuarantineTableArn:
+    Type: String
+    Description: ARN of dynamodb table containing quarantined events
+
+  # Event schedule queue
+  EventScheduleQueueName:
+    Type: String
+    Description: 'pn-stream_schedule queue name'
+
+  EventScheduleQueueARN:
+    Type: String
+    Description: 'pn-stream_schedule queue ARN'
+
+  EventScheduleQueueAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue dlq alarm ARN'
+
+  EventScheduleQueueAgeAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue age alarm ARN'
+
+
+  NotificationUnlockedTableName:
+    Type: String
+    Description: Name of dynamodb table containing the unlocked notification
+
+  NotificationUnlockedTableArn:
+    Type: String
+    Description: ARN of dynamodb table containing the unlocked notification
+
+  SortEventDelaySeconds:
+    Type: Number
+    Description: 'Sort event delay seconds'
+    Default: 30
+
+  UnlockedEventTtl:
+    Type: String
+    Description: 'Period for TTL of unlocked events'
+    Default: 1d
+
+  notificationSla:
+    Type: String
+    Description: 'Period for TTL of notification SLA'
+    Default: 1d
+
+  MaxWrittenCounter:
+    Type: Number
+    Description: 'Max written counter for schedule unlock events'
+
+  QueryEventQuarantineLimit:
+    Type: Number
+    Description: 'Limit for query on event quarantine table'
+    Default: 100
+
 Resources:
 
   # pn-stream microservice
@@ -367,7 +425,7 @@ Resources:
         WireTapLogActivation: !Ref WireTapLogActivation
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub "AWS_REGIONCODE=${AWS::Region}"
-        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLE=${StreamNotificationTableName}'
+        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLENAME=${StreamNotificationTableName}'
         ContainerEnvEntry3: !Sub 'PN_STREAM_SCHEDULEINTERVAL=${ScheduleInterval}'
         ContainerEnvEntry4: !Sub 'PN_STREAM_TOPICS_SCHEDULEDACTIONS=${ScheduledActionsQueueName}'
         ContainerEnvEntry5: !Sub 'PN_STREAM_MAXSTREAMS=${MaxStreams}'
@@ -379,14 +437,22 @@ Resources:
         ContainerEnvEntry11: !Sub 'PN_STREAM_RETRYPARAMETERPREFIX=${RetryParameterPrefix}'
         ContainerEnvEntry12: !Sub 'PN_STREAM_RETRYAFTERENABLED=${RetryAfterEnabled}'
         ContainerEnvEntry13: !Sub 'PN_STREAM_TOPICS_EVENT=${EventQueueName}'
-        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
+        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName},${EventScheduleQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
         ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLE=${StreamStatsTableName}'
-        ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
-        ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
-        ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
-        ContainerEnvEntry21: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
+        ContainerEnvEntry21: !Sub 'PN_STREAM_SORTEVENTDELAYSECONDS=${SortEventDelaySeconds}'
+        ContainerEnvEntry22: !Sub 'PN_STREAM_UNLOCKEDEVENTTTL=${UnlockedEventTtl}'
+        ContainerEnvEntry23: !Sub 'PN_STREAM_NOTIFICATIONSLA=${notificationSla}'
+        ContainerEnvEntry24: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
+        ContainerEnvEntry25: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
+        ContainerEnvEntry26: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
+        ContainerEnvEntry27: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
+        ContainerEnvEntry28: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
+        ContainerEnvEntry29: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -422,6 +488,10 @@ Resources:
               - !Sub "${EventsTableArn}/*"
               - !Sub "${StreamNotificationTableArn}"
               - !Sub "${StreamNotificationTableArn}/*"
+              - !Sub "${EventsQuarantineTableArn}"
+              - !Sub "${EventsQuarantineTableArn}/*"
+              - !Sub "${NotificationUnlockedTableArn}"
+              - !Sub "${NotificationUnlockedTableArn}/*"
               - !Sub "${StreamStatsTableArn}"
               - !Sub "${StreamStatsTableArn}/*"
           - Effect: Allow
@@ -438,6 +508,7 @@ Resources:
             Resource:
               - !Ref EventQueueARN
               - !Ref ScheduledActionsQueueARN
+              - !Ref EventScheduleQueueARN
           - Effect: Allow
             Action:
               - ssm:GetParameter
@@ -677,10 +748,13 @@ Resources:
             - !Ref EventQueueAgeAlarmARN
             - !Ref ScheduledActionsQueueAlarmARN
             - !Ref ScheduledActionsQueueAgeAlarmARN
+            - !Ref EventScheduleQueueAlarmARN
+            - !Ref EventScheduleQueueAgeAlarmARN
         QueueArns: !Join
           - ','
           - - !Ref EventQueueARN
             - !Ref ScheduledActionsQueueARN
+            - !Ref EventScheduleQueueARN
         LogGroupsNames: !Join
           - ','
           - - !Sub '/aws/ecs/${ProjectName}-stream'
@@ -692,6 +766,8 @@ Resources:
             - !Ref StreamStatsTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
+            - !Ref EventsQuarantineTableName
+            - !Ref NotificationUnlockedTableName
 
 Outputs:
   #

@@ -31,6 +31,7 @@ public class StreamEntity {
     private static final String COL_VERSION = "version";
     private static final String COL_SORTING = "sorting";
     private static final String COL_GROUPS = "groups";
+    private static final String COL_SORTING = "sorting";
     private static final String COL_TTL = "ttl";
 
 
@@ -55,5 +56,6 @@ public class StreamEntity {
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_DISABLED_DATE), @DynamoDbUpdateBehavior(UpdateBehavior.WRITE_IF_NOT_EXISTS)})) private Instant disabledDate;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_VERSION)})) private String version;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_GROUPS)})) private List<String> groups;
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_SORTING)})) private boolean sorting;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_TTL)})) private long ttl;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_SORTING)})) private boolean sorting;}
