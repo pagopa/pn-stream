@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Import;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 @Configuration
 @ConfigurationProperties( prefix = "pn.stream")
@@ -68,6 +69,12 @@ public class PnStreamConfigs {
     }
 
     public Duration getMaxTtl() {
-        return notificationSla.compareTo(unlockedEventTtl) >=0 ? notificationSla : unlockedEventTtl;
+        if (Objects.isNull(notificationSla)) {
+            return unlockedEventTtl;
+        } else if (Objects.isNull(unlockedEventTtl)) {
+            return notificationSla;
+        } else {
+            return notificationSla.compareTo(unlockedEventTtl) >= 0 ? notificationSla : unlockedEventTtl;
+        }
     }
 }

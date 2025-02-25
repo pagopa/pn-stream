@@ -12,10 +12,7 @@ import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
-import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
@@ -206,5 +203,15 @@ public class StreamUtils {
                 spanUnit = customStatsConfig.getSpanUnit();
         }
         return retrieveCurrentInterval(timeUnit, spanUnit) + "#" + timeUnit + "#" + spanUnit;
+    }
+
+    public NotificationUnlockedEntity buildNotificationUnlockedEntity(String streamId, String iun, Instant notificationSentAt) {
+        NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(streamId, iun);
+        notificationUnlockedEntity.setTtl(notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).atZone(ZoneOffset.UTC).toEpochSecond());
+        return notificationUnlockedEntity;
+    }
+
+    public boolean checkIfTtlIsExpired(Instant notificationSentAt) {
+        return notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now());
     }
 }
