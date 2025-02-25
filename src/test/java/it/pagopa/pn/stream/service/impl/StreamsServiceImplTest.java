@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -233,6 +234,58 @@ class StreamsServiceImplTest {
         }
 
         Mockito.when(streamEntityDao.findByPa(Mockito.anyString())).thenReturn(Flux.fromIterable(sss));
+        Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
+
+        //WHEN
+        Mono<StreamMetadataResponseV27> mono = webhookService.createEventStream(xpagopapnuid, xpagopacxid,null,null, Mono.just(req));
+        assertDoesNotThrow(() -> mono.block(d));
+
+        //THEN
+        Mockito.verify(streamEntityDao, times(1)).save(Mockito.any());
+    }
+
+    @Test
+    void createEventStreamSkipRetryForMaxReached() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String xpagopapnuid = "PA-xpagopapnuid";
+        StreamCreationRequestV27 req = new StreamCreationRequestV27();
+        req.setTitle("titolo");
+        req.setEventType(StreamCreationRequestV27.EventTypeEnum.STATUS);
+        req.setFilterValues(null);
+
+        String uuid = UUID.randomUUID().toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle(req.getTitle());
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(req.getEventType().toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+
+        List<StreamEntity> sss = new ArrayList<>();
+        for(int i = 0; i< maxStreams-1; i++) {
+            StreamEntity pentity = new StreamEntity();
+            pentity.setStreamId(UUID.randomUUID().toString());
+            pentity.setTitle(req.getTitle());
+            pentity.setPaId(xpagopacxid);
+            pentity.setEventType(req.getEventType().toString());
+            pentity.setFilterValues(new HashSet<>());
+            pentity.setActivationDate(Instant.now());
+            sss.add(pentity);
+        }
+
+        StreamEntity retryEntity = new StreamEntity();
+        retryEntity.setStreamId(RETRY_PREFIX+ UUID.randomUUID());
+        retryEntity.setTitle(req.getTitle());
+        retryEntity.setPaId(xpagopacxid);
+        retryEntity.setEventType(req.getEventType().toString());
+        retryEntity.setFilterValues(new HashSet<>());
+        retryEntity.setActivationDate(Instant.now());
+        retryEntity.setDisabledDate(Instant.now());
+        sss.add(retryEntity);
+
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(sss));
         Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
 
         //WHEN
