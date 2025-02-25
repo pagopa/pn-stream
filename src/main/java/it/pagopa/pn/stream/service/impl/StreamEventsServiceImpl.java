@@ -229,7 +229,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
         log.debug("sortStream streamId={} timelineElementId={} category={}", streamEntity.getStreamId(), timelineElement.getTimelineElementId(), timelineElement.getCategory());
 
-        if (Arrays.stream(SkipSortCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+        if (Arrays.stream(TimelineElementCategoryInt.SkipSortCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
             log.info("Event {} in validation, ignoring sorting flow for stream with id={}", timelineElement.getTimelineElementId(), streamEntity.getStreamId());
             return Mono.just(streamEntity);
         }
@@ -244,7 +244,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
     private Mono<StreamEntity> manageUnlockEvent(StreamEntity stream, TimelineElementInternal timelineElement) {
-        if (Arrays.stream(UnlockCategoryEnum.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+        if (Arrays.stream(TimelineElementCategoryInt.UnlockTimelineElementCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
             log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
             NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun());
             notificationUnlockedEntity.setTtl(timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getMaxTtl()).toEpochMilli());
