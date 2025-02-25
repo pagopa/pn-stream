@@ -67,6 +67,7 @@ public enum TimelineElementCategoryInt {
     public static final int VERSION_23 = 23;
     public static final int VERSION_25 = 25;
     public static final int VERSION_26 = 26;
+    public static final int VERSION_27 = 27;
 
     public enum DiagnosticTimelineElementCategory {
         VALIDATED_F24,
@@ -78,6 +79,7 @@ public enum TimelineElementCategoryInt {
 
     @Getter
     public enum StreamVersions {
+        STREAM_V27(VERSION_27, VERSION_26,VERSION_10),
         STREAM_V26(VERSION_26, VERSION_26,VERSION_10),
         STREAM_V25(VERSION_25, VERSION_25,VERSION_10),
         STREAM_V23(VERSION_23, VERSION_23,VERSION_10),
