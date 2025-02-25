@@ -8,6 +8,7 @@ import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.NotificationUnlockedEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
@@ -19,10 +20,7 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -128,5 +126,15 @@ public class StreamUtils {
            log.warn("Error while converting timeline element into JSON", e);
            throw new PnStreamException("Error while converting timeline element into JSON", 500, ERROR_EVENT_CONVERSION);
        }
+    }
+
+    public NotificationUnlockedEntity buildNotificationUnlockedEntity(String streamId, String iun, Instant notificationSentAt) {
+        NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(streamId, iun);
+        notificationUnlockedEntity.setTtl(notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).atZone(ZoneOffset.UTC).toEpochSecond());
+        return notificationUnlockedEntity;
+    }
+
+    public boolean checkIfTtlIsExpired(Instant notificationSentAt) {
+        return notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now());
     }
 }

@@ -8,16 +8,19 @@ import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV20;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.NotificationUnlockedEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.EntityToDtoWebhookTimelineMapper;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.WebhookTimelineElementJsonConverter;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -217,6 +220,30 @@ class StreamUtilsTest {
                 .build());
 
         return res;
+    }
+
+    @Test
+    void buildNotificationUnlockedEntityTtlEqualsNotificationSlaMaxTtl() {
+        Instant notificationSentAt = Instant.parse("2021-01-01T00:00:00Z");
+
+        NotificationUnlockedEntity result = streamUtils.buildNotificationUnlockedEntity("streamId", "iun", notificationSentAt);
+
+        assertEquals("streamId_iun", result.getPk());
+        assertEquals(notificationSentAt.plus(Duration.ofDays(2)).atZone(ZoneOffset.UTC).toEpochSecond(), result.getTtl());
+    }
+
+    @Test
+    void checkIfTtlIsExpiredTrue(){
+        Instant notificationSentAt = Instant.parse("2021-01-01T00:00:00Z");
+        boolean result = streamUtils.checkIfTtlIsExpired(notificationSentAt);
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    void checkIfTtlIsExpiredFalse(){
+        Instant notificationSentAt = Instant.now().minus(Duration.ofDays(1));
+        boolean result = streamUtils.checkIfTtlIsExpired(notificationSentAt);
+        Assertions.assertFalse(result);
     }
 
 }

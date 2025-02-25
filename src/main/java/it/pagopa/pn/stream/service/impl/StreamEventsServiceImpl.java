@@ -8,7 +8,9 @@ import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
-import it.pagopa.pn.stream.dto.*;
+import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
+import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
+import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
@@ -246,13 +248,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private Mono<StreamEntity> manageUnlockEvent(StreamEntity stream, TimelineElementInternal timelineElement) {
         if (Arrays.stream(TimelineElementCategoryInt.UnlockTimelineElementCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
             log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
-            NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun());
-            notificationUnlockedEntity.setTtl(timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getMaxTtl()).toEpochMilli());
+            NotificationUnlockedEntity notificationUnlockedEntity = streamUtils.buildNotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getNotificationSentAt());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
                     .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_EVENTS))
                     .map(entity -> stream);
         } else {
-            if (timelineElement.getNotificationSentAt().plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now())) {
+            if (streamUtils.checkIfTtlIsExpired(timelineElement.getNotificationSentAt())) {
                 return Mono.just(stream);
             }
             return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
