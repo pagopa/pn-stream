@@ -332,9 +332,9 @@ Parameters:
     Default: 1
 
   StreamStatsTtl:
-    Type: Number
+    Type: String
     Description: 'TTL in days offset for Stream Stats'
-    Default: 365d
+    Default: '365d'
 
   CustomStatsTtlParameterName:
     Type: String
