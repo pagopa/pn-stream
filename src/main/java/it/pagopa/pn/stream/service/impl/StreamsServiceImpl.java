@@ -30,6 +30,8 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
+
 @Service
 @Slf4j
 public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsService {
@@ -209,6 +211,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     private Mono<Boolean> checkStreamCount(String xPagopaPnCxId) {
         return streamEntityDao.findByPa(xPagopaPnCxId)
                 .filter(streamEntity -> streamEntity.getDisabledDate() == null)
+                .filter(streamEntity -> !streamEntity.getStreamId().startsWith(RETRY_PREFIX))
                 .collectList().flatMap(list -> {
                     if (list.size() >= pnStreamConfigs.getMaxStreams()) {
                         return Mono.error(new PnStreamMaxStreamsCountReachedException());
