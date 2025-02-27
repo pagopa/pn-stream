@@ -42,6 +42,7 @@ public class PnStreamConfigs {
         private String streamsTableName;
         private String eventsTableName;
         private String streamNotificationTableName;
+        private String notificationUnlockedTableName;
         private String eventsQuarantineTableName;
         private String streamStatsTableName;
     }

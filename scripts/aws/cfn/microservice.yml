@@ -385,6 +385,14 @@ Parameters:
     Description: 'pn-stream_schedule queue age alarm ARN'
 
 
+  NotificationUnlockedTableName:
+    Type: String
+    Description: Name of dynamodb table containing the unlocked notification
+
+  NotificationUnlockedTableArn:
+    Type: String
+    Description: ARN of dynamodb table containing the unlocked notification
+
 Resources:
 
   # pn-stream microservice
@@ -434,6 +442,7 @@ Resources:
         ContainerEnvEntry21: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
         ContainerEnvEntry22: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
         ContainerEnvEntry23: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
+        ContainerEnvEntry24: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -473,6 +482,8 @@ Resources:
               - !Sub "${EventsQuarantineTableArn}/*"
               - !Sub "${StreamStatsTableArn}"
               - !Sub "${StreamStatsTableArn}/*"
+              - !Sub "${NotificationUnlockedTableArn}"
+              - !Sub "${NotificationUnlockedTableArn}/*"
           - Effect: Allow
             Action:
               - sqs:ChangeMessageVisibility
@@ -848,6 +859,7 @@ Resources:
             - !Ref StreamsTableName
             - !Ref EventsTableName
             - !Ref EventsQuarantineTableName
+            - !Ref NotificationUnlockedTableName
 
 Outputs:
   #
