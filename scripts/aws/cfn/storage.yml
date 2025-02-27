@@ -120,7 +120,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-eventsQuarantine'
+      TableName: !Sub '${ProjectName}-WebhookEventsQuarantine'
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"

@@ -53,7 +53,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb create-table \
-    --table-name pn-EventsQuarantine  \
+    --table-name pn-WebhookEventsQuarantine  \
     --attribute-definitions \
         AttributeName=pk,AttributeType=S \
         AttributeName=eventId,AttributeType=S \
