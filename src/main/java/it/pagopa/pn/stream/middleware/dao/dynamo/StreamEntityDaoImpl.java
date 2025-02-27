@@ -68,7 +68,7 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
     public Mono<Tuple2<StreamEntity, Optional<StreamRetryAfter>>> getWithRetryAfter(String paId, String streamId) {
         log.info("getWithRetryAfter paId={} streamId={}", paId, streamId);
         Key hashKey = Key.builder().partitionValue(paId).sortValue(streamId).build();
-        Key retryHashKey = Key.builder().partitionValue(paId).sortValue(StreamRetryAfter.RETRY_PREFIX + streamId).build();
+        Key retryHashKey = Key.builder().partitionValue(paId).sortValue(RETRY_PREFIX + streamId).build();
 
         ReadBatch streamEntityBatch = ReadBatch.builder(StreamEntity.class)
                 .mappedTableResource(table)
@@ -85,13 +85,13 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
                 .map(batchGetResultPage ->
                         Tuples.of(
                                 batchGetResultPage.resultsForTable(table).stream()
-                                        .filter(entity -> !entity.getStreamId().startsWith(StreamRetryAfter.RETRY_PREFIX))
+                                        .filter(entity -> !entity.getStreamId().startsWith(RETRY_PREFIX))
                                         .findFirst()
                                         .orElseThrow(() -> new PnNotFoundException("Not found"
                                                 , String.format("Stream %s non found for Pa %s", streamId, paId)
                                                 , ERROR_CODE_STREAM_STREAMNOTFOUND)),
                                 batchGetResultPage.resultsForTable(tableRetry).stream()
-                                        .filter(entity -> entity.getStreamId().startsWith(StreamRetryAfter.RETRY_PREFIX) && Objects.nonNull(entity.getRetryAfter()))
+                                        .filter(entity -> entity.getStreamId().startsWith(RETRY_PREFIX) && Objects.nonNull(entity.getRetryAfter()))
                                         .findFirst())));
     }
 
