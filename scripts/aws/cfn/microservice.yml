@@ -412,7 +412,7 @@ Resources:
         WireTapLogActivation: !Ref WireTapLogActivation
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub "AWS_REGIONCODE=${AWS::Region}"
-        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLE=${StreamNotificationTableName}'
+        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLENAME=${StreamNotificationTableName}'
         ContainerEnvEntry3: !Sub 'PN_STREAM_SCHEDULEINTERVAL=${ScheduleInterval}'
         ContainerEnvEntry4: !Sub 'PN_STREAM_TOPICS_SCHEDULEDACTIONS=${ScheduledActionsQueueName}'
         ContainerEnvEntry5: !Sub 'PN_STREAM_MAXSTREAMS=${MaxStreams}'
