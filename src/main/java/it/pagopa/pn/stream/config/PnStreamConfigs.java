@@ -41,7 +41,8 @@ public class PnStreamConfigs {
     public static class Dao {
         private String streamsTableName;
         private String eventsTableName;
-        private String streamNotificationTable;
+        private String streamNotificationTableName;
+        private String eventsQuarantineTableName;
         private String streamStatsTableName;
     }
 
