@@ -320,6 +320,26 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
+  StreamStatsTimeUnit:
+    Type: String
+    Description: 'Time units for statistics'
+    Default: 'HOURS'
+    AllowedValues: [ DAYS, HOURS, MINUTES ]
+
+  StreamStatsSpanUnit:
+    Type: Number
+    Description: 'Time interval for statistics'
+    Default: 1
+
+  StreamStatsTtl:
+    Type: String
+    Description: 'TTL in days offset for Stream Stats'
+    Default: '365d'
+
+  CustomStatsTtlParameterName:
+    Type: String
+    Description: 'Custom parameter name for Stream Stats TTL'
+
 Resources:
 
   # pn-stream microservice
@@ -363,6 +383,10 @@ Resources:
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
         ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLENAME=${StreamStatsTableName}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
+        ContainerEnvEntry21: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -414,6 +438,14 @@ Resources:
             Resource:
               - !Ref EventQueueARN
               - !Ref ScheduledActionsQueueARN
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${CustomStatsTtlParameterName}'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${RetryParameterPrefix}*'
+
 
 
 
