@@ -139,14 +139,14 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 );
     }
 
-    private Mono<Void> updateStreamRetryAfter(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV26> eventList) {
+    private Mono<Void> updateStreamRetryAfter(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV27> eventList) {
         if (eventList.isEmpty()) {
             return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
         }
         return Mono.empty();
     }
 
-    private Mono<Void> updateStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV26> eventList) {
+    private Mono<Void> updateStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV27> eventList) {
         if (eventList.isEmpty()) {
             return streamStatsService.updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xPagopaPnCxId, streamId.toString());
         }
@@ -187,7 +187,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return retryAfterEntity;
     }
 
-    private ProgressResponseElementV26 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
+    private ProgressResponseElementV27 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
         var response = ProgressResponseElementMapper.internalToExternal(eventTimeline.getEventEntity());
         if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
             TimelineElementV26 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());

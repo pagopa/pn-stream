@@ -23,7 +23,6 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.EventEntityBatch;
 import it.pagopa.pn.stream.middleware.dao.dynamo.EventEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamNotificationDao;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV26;
 import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
