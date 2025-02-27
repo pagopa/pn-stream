@@ -28,7 +28,7 @@ Parameters:
     Description: 'The name of the ECS cluster where the microservice is going to be deployed'
 
   VpcEgressSubnetsIds:
-    Type: String
+    Type: CommaDelimitedList
     Description: 'subnets ids. Where to deploy the microservice'
 
   VpcId:
@@ -359,6 +359,14 @@ Parameters:
     Description: 'VersioningV1V2StreamLambdaProvisionedConcurrency'
     Default: 1
 
+  EventsQuarantineTableName:
+    Type: String
+    Description: Name of dynamodb table containing quarantined events
+
+  EventsQuarantineTableArn:
+    Type: String
+    Description: ARN of dynamodb table containing quarantined events
+
   # Event schedule queue
   EventScheduleQueueName:
     Type: String
@@ -404,7 +412,7 @@ Resources:
         WireTapLogActivation: !Ref WireTapLogActivation
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub "AWS_REGIONCODE=${AWS::Region}"
-        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLE=${StreamNotificationTableName}'
+        ContainerEnvEntry2: !Sub 'PN_STREAM_DAO_STREAMNOTIFICATIONTABLENAME=${StreamNotificationTableName}'
         ContainerEnvEntry3: !Sub 'PN_STREAM_SCHEDULEINTERVAL=${ScheduleInterval}'
         ContainerEnvEntry4: !Sub 'PN_STREAM_TOPICS_SCHEDULEDACTIONS=${ScheduledActionsQueueName}'
         ContainerEnvEntry5: !Sub 'PN_STREAM_MAXSTREAMS=${MaxStreams}'
@@ -425,10 +433,11 @@ Resources:
         ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
         ContainerEnvEntry21: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
         ContainerEnvEntry22: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
+        ContainerEnvEntry23: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
-        Subnets: !Ref VpcEgressSubnetsIds
+        Subnets: !Join [ ',', !Ref VpcEgressSubnetsIds ]
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
@@ -460,6 +469,8 @@ Resources:
               - !Sub "${EventsTableArn}/*"
               - !Sub "${StreamNotificationTableArn}"
               - !Sub "${StreamNotificationTableArn}/*"
+              - !Sub "${EventsQuarantineTableArn}"
+              - !Sub "${EventsQuarantineTableArn}/*"
               - !Sub "${StreamStatsTableArn}"
               - !Sub "${StreamStatsTableArn}/*"
           - Effect: Allow
@@ -836,6 +847,7 @@ Resources:
             - !Ref StreamStatsTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
+            - !Ref EventsQuarantineTableName
 
 Outputs:
   #
