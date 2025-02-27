@@ -891,6 +891,7 @@ class EventsServiceImplTest {
         Mockito.when(eventEntityDao.saveWithCondition(Mockito.any(EventEntity.class))).thenReturn(Mono.just(new EventEntity()));
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(notificationInt));
         Mockito.when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.just(true));
 
         //WHEN
         webhookEventsService.saveEvent(newtimeline).block(d);
@@ -898,6 +899,7 @@ class EventsServiceImplTest {
         //THEN
         Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
         Mockito.verify(eventEntityDao, Mockito.times(1)).saveWithCondition(Mockito.any(EventEntity.class));
+        Mockito.verify(schedulerService, Mockito.times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_WRITINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
@@ -1000,12 +1002,14 @@ class EventsServiceImplTest {
         Mockito.when(eventEntityDao.saveWithCondition(Mockito.any(EventEntity.class))).thenReturn(Mono.just(new EventEntity()));
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(notificationInt));
         Mockito.when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.just(true));
 
         //WHEN
         webhookEventsService.saveEvent(newtimeline).block(d);
         //THEN
         Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
         Mockito.verify(eventEntityDao, Mockito.times(2)).saveWithCondition(Mockito.any(EventEntity.class));
+        Mockito.verify(schedulerService, Mockito.times(2)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_WRITINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
@@ -1065,6 +1069,7 @@ class EventsServiceImplTest {
         Mockito.when(eventEntityDao.saveWithCondition(Mockito.any(EventEntity.class))).thenReturn(Mono.just(new EventEntity()));
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
         Mockito.when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.just(true));
 
 
         //WHEN
@@ -1079,6 +1084,7 @@ class EventsServiceImplTest {
         Mockito.verify(streamEntityDao, Mockito.times(2)).findByPa(xpagopacxid);
         Mockito.verify(eventEntityDao, Mockito.times(4)).saveWithCondition(Mockito.any(EventEntity.class));
         Mockito.verify(streamStatsService, Mockito.times(2)).updateStreamStats(StreamStatsEnum.NUMBER_OF_WRITINGS, xpagopacxid, uuid);
+        Mockito.verify(schedulerService, Mockito.times(4)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.RETRY_AFTER_VIOLATION, xpagopacxid, uuid);
@@ -1104,6 +1110,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setVersion("V23");
         entity.setEventAtomicCounter(1L);
+        entity.setSorting(false);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1114,6 +1121,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
+        entity.setSorting(false);
         entity.setVersion("V23");
         list.add(entity);
 
@@ -1150,6 +1158,7 @@ class EventsServiceImplTest {
         Mockito.when(eventEntityDao.saveWithCondition(Mockito.any(EventEntity.class))).thenReturn(Mono.just(new EventEntity()));
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(streamNotificationEntity));
         Mockito.when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.just(true));
 
 
         //WHEN
@@ -1160,6 +1169,7 @@ class EventsServiceImplTest {
         //THEN
         Mockito.verify(streamEntityDao, Mockito.times(2)).findByPa(xpagopacxid);
         Mockito.verify(eventEntityDao, Mockito.times(3)).saveWithCondition(Mockito.any(EventEntity.class));
+        Mockito.verify(schedulerService, Mockito.times(3)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_WRITINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
@@ -1250,6 +1260,8 @@ class EventsServiceImplTest {
         Mockito.when(eventEntityDao.saveWithCondition(Mockito.any(EventEntity.class))).thenReturn(Mono.just(new EventEntity()));
         Mockito.when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(streamNotificationEntity));
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.just(true));
+
 
         TimelineElementInternal timelineElementInternal3 = Mockito.mock(TimelineElementInternal.class);
         Mockito.when(timelineElementInternal3.getCategory()).thenReturn(TimelineElementCategoryInt.NOTIFICATION_CANCELLATION_REQUEST.name());
@@ -1268,6 +1280,7 @@ class EventsServiceImplTest {
         Mockito.verify(streamEntityDao, Mockito.times(timeline.size())).findByPa(xpagopacxid);
         Mockito.verify(eventEntityDao, Mockito.times(6)).saveWithCondition(Mockito.any(EventEntity.class));
         Mockito.verify(streamStatsService, Mockito.times(3)).updateStreamStats(StreamStatsEnum.NUMBER_OF_WRITINGS, xpagopacxid, uuid);
+        Mockito.verify(schedulerService, Mockito.times(6)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.RETRY_AFTER_VIOLATION, xpagopacxid, uuid);
@@ -1394,6 +1407,7 @@ class EventsServiceImplTest {
         when(streamNotificationDao.findByIun(anyString())).thenReturn(Mono.empty());
         when(pnDeliveryClientReactive.getSentNotification(anyString())).thenReturn(Mono.just(sentNotification));
         when(streamNotificationDao.putItem(any())).thenReturn(Mono.just(streamNotification));
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.just(true));
 
         Mockito.when(streamEntityDao.updateAndGetAtomicCounter(streamEntityList.get(0)))
                 .thenReturn(Mono.just(2L));
@@ -1416,6 +1430,7 @@ class EventsServiceImplTest {
                 .saveWithCondition(Mockito.any());
         Mockito.verify(pnDeliveryClientReactive, Mockito.times(1))
                 .getSentNotification(anyString());
+        Mockito.verify(schedulerService, Mockito.times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateStreamStats(StreamStatsEnum.NUMBER_OF_WRITINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS, xpagopacxid, uuid);
         Mockito.verify(streamStatsService, Mockito.never()).updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, xpagopacxid, uuid);
@@ -1639,7 +1654,8 @@ class EventsServiceImplTest {
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
         Mockito.when(notificationUnlockedEntityDao.findByPk(uuid+"_"+iun)).thenReturn(Mono.empty());
         Mockito.when(notificationUnlockedEntityDao.putItem(Mockito.any())).thenReturn(Mono.just(new NotificationUnlockedEntity()));
-        Mockito.doNothing().when(schedulerService).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.just(true));
+
 
         webhookEventsService.saveEvent(newtimeline).block(d);
 
@@ -1648,7 +1664,6 @@ class EventsServiceImplTest {
         Mockito.verify(notificationUnlockedEntityDao, Mockito.times(1)).putItem(Mockito.any());
         Mockito.verify(schedulerService, Mockito.times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(eventEntityDao, Mockito.times(1)).saveWithCondition(Mockito.any(EventEntity.class));
-
     }
 
     @Test
