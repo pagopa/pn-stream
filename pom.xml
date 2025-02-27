@@ -8,7 +8,7 @@
 		<relativePath />
 	</parent>
 	<artifactId>pn-stream</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>pn-stream</name>
 	<description>Manage streams and events from timeline</description>
 	<scm>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>regions</artifactId>
-			<version>2.30.11</version>
+			<version>2.30.26</version>
 		</dependency>
 
 		<dependency>
@@ -107,7 +107,7 @@
 		<dependency>
 			<groupId>org.mock-server</groupId>
 			<artifactId>mockserver-junit-jupiter</artifactId>
-			<version>5.11.1</version>
+			<version>5.15.0</version>
 			<scope>test</scope>
 		</dependency>
 
