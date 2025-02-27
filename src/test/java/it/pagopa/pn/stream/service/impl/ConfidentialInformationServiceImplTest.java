@@ -49,7 +49,7 @@ class ConfidentialInformationServiceImplTest {
         timelineElementInternal.setTimestamp(Instant.now());
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setStatusInfo(StatusInfoInternal.builder().build());
-        timelineElementInternal.setLegalFactsIds(List.of(new LegalFactsIdV20()));
+        timelineElementInternal.setLegalFactId(List.of(new LegalFactsIdV20()));
 
         ConfidentialTimelineElementDto confidentialTimelineElementDto = new ConfidentialTimelineElementDto();
         confidentialTimelineElementDto.setTaxId("taxId");
@@ -86,7 +86,7 @@ class ConfidentialInformationServiceImplTest {
         timelineElementInternal.setTimestamp(Instant.now());
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setStatusInfo(StatusInfoInternal.builder().build());
-        timelineElementInternal.setLegalFactsIds(List.of(new LegalFactsIdV20()));
+        timelineElementInternal.setLegalFactId(List.of(new LegalFactsIdV20()));
 
         Mockito.when(pnDataVaultClientReactive.getNotificationTimelines(Mockito.any())).thenThrow(PnInternalException.class);
 

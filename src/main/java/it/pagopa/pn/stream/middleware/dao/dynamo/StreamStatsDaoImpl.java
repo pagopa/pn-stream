@@ -28,7 +28,7 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
 
     public StreamStatsDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg, DynamoDbAsyncClient dynamoDbAsyncClient) {
         this.dynamoDbAsyncClient = dynamoDbAsyncClient;
-        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getStreamStatsTable(), TableSchema.fromBean(StreamStatsEntity.class));
+        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getStreamStatsTableName(), TableSchema.fromBean(StreamStatsEntity.class));
     }
 
 
