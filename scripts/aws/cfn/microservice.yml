@@ -28,7 +28,7 @@ Parameters:
     Description: 'The name of the ECS cluster where the microservice is going to be deployed'
 
   VpcEgressSubnetsIds:
-    Type: String
+    Type: CommaDelimitedList
     Description: 'subnets ids. Where to deploy the microservice'
 
   VpcId:
@@ -437,7 +437,7 @@ Resources:
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
-        Subnets: !Ref VpcEgressSubnetsIds
+        Subnets: !Join [ ',', !Ref VpcEgressSubnetsIds ]
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
