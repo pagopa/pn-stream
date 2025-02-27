@@ -42,7 +42,7 @@ public class PnStreamConfigs {
         private String streamsTableName;
         private String eventsTableName;
         private String streamNotificationTable;
-        private String streamStatsTable;
+        private String streamStatsTableName;
     }
 
     @Data
@@ -50,6 +50,7 @@ public class PnStreamConfigs {
         private int spanUnit;
         private StatsTimeUnit timeUnit;
         private Duration ttl;
+        private String customTtlParameterName;
     }
 
     @Data

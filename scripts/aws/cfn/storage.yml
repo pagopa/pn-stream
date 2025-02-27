@@ -119,7 +119,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-StreamStats'
+      TableName: !Sub '${ProjectName}-WebhookStats'
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"

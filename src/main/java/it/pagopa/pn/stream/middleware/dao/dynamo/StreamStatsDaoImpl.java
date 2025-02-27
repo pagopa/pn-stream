@@ -14,23 +14,21 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemResponse;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Repository
 public class StreamStatsDaoImpl implements StreamStatsDao {
     private final DynamoDbAsyncTable<StreamStatsEntity> table;
     private final DynamoDbAsyncClient dynamoDbAsyncClient;
-    private final PnStreamConfigs pnStreamConfigs;
 
-    public StreamStatsDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg, DynamoDbAsyncClient dynamoDbAsyncClient, PnStreamConfigs pnStreamConfigs) {
+    public StreamStatsDaoImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedClient, PnStreamConfigs cfg, DynamoDbAsyncClient dynamoDbAsyncClient) {
         this.dynamoDbAsyncClient = dynamoDbAsyncClient;
-        this.pnStreamConfigs = pnStreamConfigs;
-        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getStreamStatsTable(), TableSchema.fromBean(StreamStatsEntity.class));
+        this.table = dynamoDbEnhancedClient.table(cfg.getDao().getStreamStatsTableName(), TableSchema.fromBean(StreamStatsEntity.class));
     }
 
 
@@ -53,12 +51,10 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
     }
 
     @Override
-    public Mono<UpdateItemResponse> updateCustomCounterStats(String pk, String sk, Integer increment) {
+    public Mono<UpdateItemResponse> updateCustomCounterStats(String pk, String sk, Integer increment, Duration ttlDuration) {
         log.info("update custom counter stats for pk={}, sk={}, increment={}", pk, sk, increment);
-        Long ttl = null;
 
-        if (!pnStreamConfigs.getStats().getTtl().isZero())
-            ttl=LocalDateTime.now().plus(pnStreamConfigs.getStats().getTtl()).atZone(ZoneOffset.UTC).toEpochSecond();
+        Long ttl = LocalDateTime.now().plus(ttlDuration).atZone(ZoneOffset.UTC).toEpochSecond();
 
         Map<String, AttributeValue> key = new HashMap<>();
         key.put(StreamStatsEntity.COL_PK, AttributeValue.builder().s(pk).build());
@@ -66,23 +62,17 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
 
         Map<String, AttributeValue> attributeValue = new HashMap<>();
         attributeValue.put(":counter", AttributeValue.builder().n(String.valueOf(increment)).build());
+        attributeValue.put(":t", AttributeValue.builder().n(String.valueOf(ttl)).build());
 
         Map<String, String> attributeName = new HashMap<>();
         attributeName.put("#counter", StreamStatsEntity.COL_COUNTER);
+        attributeName.put("#ttl", StreamStatsEntity.COL_TTL);
 
-        String updateExpression = "ADD #counter :counter";
+        String updateExpression = "ADD #counter :counter SET #ttl = :t";
 
-        UpdateItemRequest.Builder updateRequestBuilder = UpdateItemRequest.builder()
+        UpdateItemRequest updateItemRequest = UpdateItemRequest.builder()
                 .tableName(table.tableName())
-                .key(key);
-
-        if (Objects.nonNull(ttl)){
-            attributeName.put("#ttl", StreamStatsEntity.COL_TTL);
-            attributeValue.put(":t", AttributeValue.builder().n(String.valueOf(ttl)).build());
-            updateExpression += " SET #ttl = :t";
-        }
-
-        UpdateItemRequest updateItemRequest = updateRequestBuilder
+                .key(key)
                 .updateExpression(updateExpression)
                 .expressionAttributeNames(attributeName)
                 .expressionAttributeValues(attributeValue)
