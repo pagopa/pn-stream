@@ -141,7 +141,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-NotificationUnlocked'
+      TableName: !Sub '${ProjectName}-WebhookNotificationUnlocked'
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"
