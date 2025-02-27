@@ -198,7 +198,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
-                .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY1").build(), LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY2").build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY1").build(), LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY2").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION)
                 .timestamp(t0.plusMillis(1000))
@@ -207,7 +207,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
-                .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
@@ -216,7 +216,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_ANALOG_DOMICILE.name())
-                .legalFactsIds(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_ANALOG_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
@@ -450,4 +450,6 @@ class StreamUtilsTest {
         Assertions.assertEquals(split[1], "DAYS");
         Assertions.assertEquals(split[2], "1");
     }
+
+
 }

@@ -26,7 +26,10 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
 
@@ -119,6 +122,7 @@ public class StreamUtils {
         return Integer.parseInt(pnStreamConfigs.getCurrentVersion().replace("v", ""));
 
     }
+
     public Instant retrieveCurrentInterval(StatsTimeUnit timeUnit, Integer spanUnit) {
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
@@ -183,4 +187,5 @@ public class StreamUtils {
         }
         return retrieveCurrentInterval(timeUnit, spanUnit) + "#" + timeUnit + "#" + spanUnit;
     }
+
 }
