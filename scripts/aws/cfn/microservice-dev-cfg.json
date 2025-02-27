@@ -28,6 +28,6 @@
     "VersioningV1V2StreamLambdaProvisionedConcurrency": "1",
     "SortEventDelaySeconds": "30",
     "MaxWrittenCounter": "5",
-    "QueryEventQuarantineLimit": 100
+    "QueryEventQuarantineLimit": "100"
   }
 }
