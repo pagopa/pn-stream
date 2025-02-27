@@ -28,6 +28,8 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamNotificationEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter;
+import it.pagopa.pn.stream.middleware.dao.dynamo.*;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.service.ConfidentialInformationService;
 import it.pagopa.pn.stream.service.SchedulerService;
@@ -92,6 +94,11 @@ class EventsServiceImplTest {
 
     @Mock
     private PnDeliveryClientReactive pnDeliveryClientReactive;
+
+    @Mock
+    private UnlockedNotificationEntityDao notificationUnlockedEntityDao;
+    @Mock
+    private EventsQuarantineEntityDao eventsQuarantineEntityDao;
 
     Duration d = Duration.ofSeconds(3);
 

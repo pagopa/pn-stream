@@ -25,6 +25,9 @@
     "CustomStatsTtlParameterName": "/pn-stream/stats/custom-ttl",
     "NumRetry": "3",
     "AttemptTimeoutSec": "7",
-    "VersioningV1V2StreamLambdaProvisionedConcurrency": "1"
+    "VersioningV1V2StreamLambdaProvisionedConcurrency": "1",
+    "SortEventDelaySeconds": "30",
+    "MaxWrittenCounter": "5",
+    "QueryEventQuarantineLimit": 100
   }
 }

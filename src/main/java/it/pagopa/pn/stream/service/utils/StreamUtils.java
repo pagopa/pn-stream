@@ -12,6 +12,7 @@ import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamStatsEntity;
 import it.pagopa.pn.stream.middleware.dao.mapper.DtoToEntityWebhookTimelineMapper;
@@ -100,6 +101,17 @@ public class StreamUtils {
         WebhookTimelineElementEntity timelineElementEntity = this.timelineElementJsonConverter.jsonToEntity(entity.getElement());
         try {
             return entityToDtoTimelineMapper.entityToDto(timelineElementEntity);
+        } catch (JsonProcessingException e) {
+            throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
+        }
+    }
+
+    public TimelineElementInternal getTimelineInternalFromQuarantineAndSetTimestamp(EventsQuarantineEntity entity) throws PnInternalException{
+        try {
+            TimelineElementInternal timelineElementInternal = entityToDtoTimelineMapper.entityToDto(timelineElementJsonConverter.jsonToEntity(entity.getEvent()));
+            timelineElementInternal.setBusinessTimestamp(timelineElementInternal.getTimestamp());
+            timelineElementInternal.setTimestamp(timelineElementInternal.getIngestionTimestamp());
+            return timelineElementInternal;
         } catch (JsonProcessingException e) {
             throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
         }
