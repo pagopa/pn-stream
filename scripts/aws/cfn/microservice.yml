@@ -847,6 +847,7 @@ Resources:
             - !Ref StreamStatsTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
+            - !Ref EventsQuarantineTableName
 
 Outputs:
   #
