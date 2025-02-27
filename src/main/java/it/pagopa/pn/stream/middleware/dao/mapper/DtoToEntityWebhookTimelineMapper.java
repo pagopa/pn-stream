@@ -22,7 +22,7 @@ public class DtoToEntityWebhookTimelineMapper {
                 .paId( dto.getPaId() )
                 .category(dto.getCategory())
                 .details(objectMapper.readValue(dto.getDetails(), new TypeReference<>() {}))
-                .legalFactIds(dto.getLegalFactsIds())
+                .legalFactIds(dto.getLegalFactId())
                 .statusInfo(dtoToStatusInfoEntity(dto.getStatusInfo()))
                 .notificationSentAt(dto.getNotificationSentAt())
                 .timestamp(dto.getBusinessTimestamp())
