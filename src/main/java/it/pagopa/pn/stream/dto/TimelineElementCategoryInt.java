@@ -78,19 +78,6 @@ public enum TimelineElementCategoryInt {
         NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST;
     }
 
-    public enum UnlockTimelineElementCategory {
-        REQUEST_ACCEPTED,
-        REQUEST_REFUSED;
-    }
-
-    public enum SkipSortCategory {
-        SENDER_ACK_CREATION_REQUEST,
-        VALIDATE_NORMALIZE_ADDRESSES_REQUEST,
-        NORMALIZED_ADDRESS,
-        VALIDATED_F24,
-        VALIDATE_F24_REQUEST
-    }
-
     @Getter
     public enum StreamVersions {
         STREAM_V27(VERSION_27, VERSION_26,VERSION_10),

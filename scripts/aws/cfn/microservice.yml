@@ -398,16 +398,6 @@ Parameters:
     Description: 'Sort event delay seconds'
     Default: 30
 
-  UnlockedEventTtl:
-    Type: String
-    Description: 'Period for TTL of unlocked events'
-    Default: 1d
-
-  notificationSla:
-    Type: String
-    Description: 'Period for TTL of notification SLA'
-    Default: 1d
-
   MaxWrittenCounter:
     Type: Number
     Description: 'Max written counter for schedule unlock events'
@@ -468,10 +458,8 @@ Resources:
         ContainerEnvEntry23: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
         ContainerEnvEntry24: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         ContainerEnvEntry25: !Sub 'PN_STREAM_SORTEVENTDELAYSECONDS=${SortEventDelaySeconds}'
-        ContainerEnvEntry26: !Sub 'PN_STREAM_UNLOCKEDEVENTTTL=${UnlockedEventTtl}'
-        ContainerEnvEntry27: !Sub 'PN_STREAM_NOTIFICATIONSLA=${notificationSla}'
-        ContainerEnvEntry28: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
-        ContainerEnvEntry29: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
+        ContainerEnvEntry26: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
+        ContainerEnvEntry27: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName

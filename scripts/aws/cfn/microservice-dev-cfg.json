@@ -27,8 +27,6 @@
     "AttemptTimeoutSec": "7",
     "VersioningV1V2StreamLambdaProvisionedConcurrency": "1",
     "SortEventDelaySeconds": "30",
-    "UnlockedEventTtl": "2d",
-    "notificationSla": "1d",
     "MaxWrittenCounter": "5",
     "QueryEventQuarantineLimit": 100
   }

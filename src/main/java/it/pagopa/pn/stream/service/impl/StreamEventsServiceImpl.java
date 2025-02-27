@@ -247,7 +247,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .thenReturn(streamNotificationEntity);
     }
 
-    private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
+    private Mono<Void> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
 
         if (!CollectionUtils.isEmpty(stream.getGroups()) && !checkGroups(Collections.singletonList(groups), stream.getGroups())) {
             log.info("skipping saving webhook event for stream={} because stream groups are different", stream.getStreamId());

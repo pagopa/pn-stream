@@ -12,6 +12,7 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.So
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamScheduleService;
+import it.pagopa.pn.stream.service.StreamStatsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -37,9 +38,9 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
     private final SchedulerService schedulerService;
     private final StreamUtils streamUtils;
     public StreamScheduleServiceImpl(StreamEntityDao streamEntityDao, PnStreamConfigs pnStreamConfigs,
-            EventsQuarantineEntityDao eventsQuarantineEntityDao, SchedulerService schedulerService,
-            StreamUtils streamUtils) {
-        super(streamEntityDao, pnStreamConfigs);
+                                     EventsQuarantineEntityDao eventsQuarantineEntityDao, SchedulerService schedulerService,
+                                     StreamUtils streamUtils, StreamStatsService streamStatsService) {
+        super(streamEntityDao, pnStreamConfigs, streamStatsService);
         this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
         this.schedulerService = schedulerService;
         this.streamUtils = streamUtils;
@@ -52,13 +53,15 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
         checkInitalValues(event);
         Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
         return callToUnlockEvents(event, lastEvaluateKey)
-                .doOnNext(sortEventAction -> {
+                .flatMap(sortEventAction -> {
                     if (resendMessage && sortEventAction.getWrittenCounter() <= pnStreamConfigs.getMaxWrittenCounter()) {
                         log.info("Resend message for eventKey: [{}] to unlock with delay: [{}] and writtenCounter: [{}]", event.getEventKey(), event.getDelaySeconds(), event.getWrittenCounter());
-                        schedulerService.scheduleSortEvent(event.getEventKey(), sortEventAction.getDelaySeconds(), sortEventAction.getWrittenCounter(), SortEventType.UNLOCK_EVENTS);
+                        return Mono.just(schedulerService.scheduleSortEvent(event.getEventKey(), sortEventAction.getDelaySeconds(), sortEventAction.getWrittenCounter(), SortEventType.UNLOCK_EVENTS))
+                                .doOnError(throwable -> log.error("Error in resend message for eventKey: [{}]", event.getEventKey(), throwable))
+                                .then();
                     }
-                })
-                .then();
+                    return Mono.empty();
+                });
     }
 
     private Mono<SortEventAction> callToUnlockEvents(SortEventAction event, Map<String, AttributeValue> lastEvaluateKey) {
@@ -79,9 +82,7 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                                         .flatMap(this::computeNewValues);
                             }));
                 })
-                .doOnError(throwable -> log.error("Error in callToUnlockEvents", throwable))
-                .onErrorResume(throwable -> computeNewValues(event));
-
+                .doOnError(throwable -> log.error("Error in callToUnlockEvents", throwable));
     }
 
     @NotNull
