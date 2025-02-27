@@ -142,6 +142,8 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                     generateAuditLog(PnAuditLogEventType.AUD_WH_UPDATE, msg, values.toArray(new String[0])).log();
                 })
                 .flatMap(request -> getStreamEntityToWrite(apiVersion(xPagopaPnApiVersion), xPagopaPnCxId, xPagopaPnCxGroups, streamId, false)
+                        .filter(checkDisableDate())
+                        .switchIfEmpty(Mono.error(new PnStreamForbiddenException(String.format("Stream [%s] is disabled, cannot be updated", streamId))))
                         .filter(filterUpdateRequest(xPagopaPnUid, xPagopaPnCxId, xPagopaPnCxGroups, request))
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Not supported operation, groups cannot be removed")))
                         .map(r -> DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request))
@@ -156,14 +158,20 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .generateFailure("error updating stream", err).log());
     }
 
-    private Predicate<StreamEntity> filterUpdateRequest(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, StreamRequestV27 request) {
+    private Predicate<StreamEntity> checkDisableDate() {
         return r -> {
             //Non posso aggiornare stream disabilitato
             if (r.getDisabledDate() != null) {
                 log.error("Stream is disabled, cannot be updated!");
                 return false;
             }
+            return true;
+        };
+    }
 
+
+    private Predicate<StreamEntity> filterUpdateRequest(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, StreamRequestV27 request) {
+        return r -> {
             //Da master se non restringo i gruppi sullo stream OK
             if (CollectionUtils.isEmpty(r.getGroups())
                     && CollectionUtils.isEmpty(request.getGroups())
@@ -210,7 +218,6 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     private Mono<Boolean> checkStreamCount(String xPagopaPnCxId) {
         return streamEntityDao.findByPa(xPagopaPnCxId)
                 .filter(streamEntity -> streamEntity.getDisabledDate() == null)
-                .filter(streamEntity -> !streamEntity.getStreamId().startsWith(RETRY_PREFIX))
                 .collectList().flatMap(list -> {
                     if (list.size() >= pnStreamConfigs.getMaxStreams()) {
                         return Mono.error(new PnStreamMaxStreamsCountReachedException());
