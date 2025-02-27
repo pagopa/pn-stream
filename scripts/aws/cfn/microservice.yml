@@ -206,6 +206,14 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing stream notifications'
 
+  StreamStatsTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing stream stats'
+
+  StreamStatsTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing stream stats'
+
   StreamNotificationTtl:
     Type: Number
     Description: 'TTL offset for stream notifications'
@@ -252,7 +260,7 @@ Parameters:
 
   ScheduleInterval:
     Type: String
-    Description: 'Time interval between two webhook-scans every scan send notifications
+    Description: 'Time interval between two stream-scans every scan send notifications
                   update to Public Administration'
     Default: 60000
 
@@ -278,7 +286,7 @@ Parameters:
 
   MaxLength:
     Type: String
-    Description: 'Max elements quantity for each webhook call'
+    Description: 'Max elements quantity for each stream call'
 
   RetryParameterPrefix:
     Type: String
@@ -311,6 +319,45 @@ Parameters:
     Type: Number
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
+
+  StreamStatsTimeUnit:
+    Type: String
+    Description: 'Time units for statistics'
+    Default: 'HOURS'
+    AllowedValues: [ DAYS, HOURS, MINUTES ]
+
+  StreamStatsSpanUnit:
+    Type: Number
+    Description: 'Time interval for statistics'
+    Default: 1
+
+  StreamStatsTtl:
+    Type: String
+    Description: 'TTL in days offset for Stream Stats'
+    Default: '365d'
+
+  CustomStatsTtlParameterName:
+    Type: String
+    Description: 'Custom parameter name for Stream Stats TTL'
+
+  VersioningV1V2StreamLambdaName:
+    Type: String
+    Description: 'VersioningV1V2StreamLambdaName'
+
+  NumRetry:
+    Type: Number
+    Description: 'Number of retries for each idempotent versioning lambda'
+    Default: 3
+
+  AttemptTimeoutSec:
+    Type: Number
+    Description: 'Timeout in seconds for each retry attempt for each idempotent versioning lambda'
+    Default: 7
+
+  VersioningV1V2StreamLambdaProvisionedConcurrency:
+    Type: Number
+    Description: 'VersioningV1V2StreamLambdaProvisionedConcurrency'
+    Default: 1
 
   EventsQuarantineTableName:
     Type: String
@@ -388,9 +435,14 @@ Resources:
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName},${EventScheduleQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
-        ContainerEnvEntry17: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
-        ContainerEnvEntry18: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
-        ContainerEnvEntry19: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
+        ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLENAME=${StreamStatsTableName}'
+        ContainerEnvEntry18: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
+        ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
+        ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
+        ContainerEnvEntry21: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
+        ContainerEnvEntry22: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
+        ContainerEnvEntry23: !Sub 'PN_STREAM_DAO_EVENTSQUARANTINETABLENAME=${EventsQuarantineTableName}'
+        ContainerEnvEntry24: !Sub 'PN_STREAM_DAO_NOTIFICATIONUNLOCKEDTABLENAME=${NotificationUnlockedTableName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -428,6 +480,8 @@ Resources:
               - !Sub "${StreamNotificationTableArn}/*"
               - !Sub "${EventsQuarantineTableArn}"
               - !Sub "${EventsQuarantineTableArn}/*"
+              - !Sub "${StreamStatsTableArn}"
+              - !Sub "${StreamStatsTableArn}/*"
               - !Sub "${NotificationUnlockedTableArn}"
               - !Sub "${NotificationUnlockedTableArn}/*"
           - Effect: Allow
@@ -445,6 +499,14 @@ Resources:
               - !Ref EventQueueARN
               - !Ref ScheduledActionsQueueARN
               - !Ref EventScheduleQueueARN
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${CustomStatsTtlParameterName}'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RetryParameterPrefix}*'
+
 
 
 
@@ -662,6 +724,101 @@ Resources:
         FunctionName: !Ref NotificationStreamManagerLambda
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
 
+  #########################################################
+  ###              VersioningV1V2Stream                 ###
+  #########################################################
+  VersioningV1V2StreamSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${VersioningV1V2StreamLambdaName}-sec-group'
+      VpcId: !Ref VpcId
+
+  # Lambda function
+  VersioningV1V2StreamLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref VersioningV1V2StreamLambdaName
+      Runtime: nodejs18.x
+      Handler: "index.handler"
+      Code:
+        S3Bucket: !Ref MicroserviceBucketName
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/versioningV1V2Stream.zip"
+      Role: !GetAtt VersioningV1V2StreamLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !GetAtt VersioningV1V2StreamSecGroup.GroupId
+        SubnetIds: !Ref VpcEgressSubnetsIds
+      Environment:
+        Variables:
+          REGION: !Sub ${AWS::Region}
+          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/delivery-progresses/v2.6"
+          NUM_RETRY: !Ref NumRetry
+          ATTEMPT_TIMEOUT_SEC: !Ref AttemptTimeoutSec
+      TracingConfig:
+        Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:339249233099:layer:LambdaInsightsExtension:13"
+      Timeout: 30
+      MemorySize: 512
+      Tags:
+        - Key: "pn-eni-related"
+          Value: "true"
+        - Key: "pn-eni-related-groupName-regexp"
+          Value: !Base64 "^pn-stream-microsvc-prod-VersioningV1V2StreamSecGroup*$"
+
+  # a new version at each deploy, with provisioned concurrency set
+  # remember to set transform -> UpdateDeploymentTransform at beginning of the file
+  VersioningV1V2StreamLambdaVersionPnPlaceholderEpochSeconds:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref VersioningV1V2StreamLambda
+
+  VersioningV1V2StreamLambdaVersionAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref VersioningV1V2StreamLambda
+      FunctionVersion: !GetAtt VersioningV1V2StreamLambdaVersionPnPlaceholderEpochSeconds.Version
+      Name: live
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: !Ref VersioningV1V2StreamLambdaProvisionedConcurrency
+
+  # Lambda function role
+  VersioningV1V2StreamLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-VersioningV1V2StreamLambdaRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+
+  VersioningV1V2StreamLambdaAlarms:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/lambda-alarms.yaml"
+      Parameters:
+        FunctionName: !Ref VersioningV1V2StreamLambda
+        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
+        FilterPattern: "FATAL"
+
+  # Lambda access right
+  VersioningV1V2StreamLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref VersioningV1V2StreamLambdaVersionAlias
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*'
+
 
   ## Dashboard
   StreamMicroserviceCloudWatchDashboard:
@@ -678,6 +835,12 @@ Resources:
             - !Ref ScheduledActionsQueueAgeAlarmARN
             - !Ref EventScheduleQueueAlarmARN
             - !Ref EventScheduleQueueAgeAlarmARN
+            - !GetAtt VersioningV1V2StreamLambdaAlarms.Outputs.LambdaInvocationErrorLogsMetricAlarm
+        LambdaArns: !Join
+          - ','
+          - - !GetAtt StreamEventManagerLambda.Arn
+            - !GetAtt NotificationStreamManagerLambda.Arn
+            - !GetAtt VersioningV1V2StreamLambda.Arn
         QueueArns: !Join
           - ','
           - - !Ref EventQueueARN
@@ -688,9 +851,11 @@ Resources:
           - - !Sub '/aws/ecs/${ProjectName}-stream'
             - !Sub '/aws/lambda/${NotificationStreamManagerLambdaName}'
             - !Sub '/aws/lambda/${StreamEventManagerLambdaName}'
+            - !Sub '/aws/lambda/${VersioningV1V2StreamLambdaName}'
         DynamoDBTableNames: !Join
           - ','
           - - !Ref StreamNotificationTableName
+            - !Ref StreamStatsTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
             - !Ref EventsQuarantineTableName
