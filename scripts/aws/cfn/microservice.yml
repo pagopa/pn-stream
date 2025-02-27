@@ -359,6 +359,24 @@ Parameters:
     Description: 'VersioningV1V2StreamLambdaProvisionedConcurrency'
     Default: 1
 
+  # Event schedule queue
+  EventScheduleQueueName:
+    Type: String
+    Description: 'pn-stream_schedule queue name'
+
+  EventScheduleQueueARN:
+    Type: String
+    Description: 'pn-stream_schedule queue ARN'
+
+  EventScheduleQueueAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue dlq alarm ARN'
+
+  EventScheduleQueueAgeAlarmARN:
+    Type: String
+    Description: 'pn-stream_schedule queue age alarm ARN'
+
+
 Resources:
 
   # pn-stream microservice
@@ -398,7 +416,7 @@ Resources:
         ContainerEnvEntry11: !Sub 'PN_STREAM_RETRYPARAMETERPREFIX=${RetryParameterPrefix}'
         ContainerEnvEntry12: !Sub 'PN_STREAM_RETRYAFTERENABLED=${RetryAfterEnabled}'
         ContainerEnvEntry13: !Sub 'PN_STREAM_TOPICS_EVENT=${EventQueueName}'
-        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName}'
+        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName},${EventScheduleQueueName}'
         ContainerEnvEntry15: !Sub 'PN_STREAM_DELIVERYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry16: !Sub 'PN_STREAM_STREAMNOTIFICATIONTTL=${StreamNotificationTtl}'
         ContainerEnvEntry17: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLENAME=${StreamStatsTableName}'
@@ -406,6 +424,7 @@ Resources:
         ContainerEnvEntry19: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
         ContainerEnvEntry20: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
         ContainerEnvEntry21: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
+        ContainerEnvEntry22: !Sub 'PN_STREAM_TOPICS_EVENTSCHEDULE=${EventScheduleQueueName}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -457,6 +476,7 @@ Resources:
             Resource:
               - !Ref EventQueueARN
               - !Ref ScheduledActionsQueueARN
+              - !Ref EventScheduleQueueARN
           - Effect: Allow
             Action:
               - ssm:GetParameter
@@ -791,6 +811,8 @@ Resources:
             - !Ref EventQueueAgeAlarmARN
             - !Ref ScheduledActionsQueueAlarmARN
             - !Ref ScheduledActionsQueueAgeAlarmARN
+            - !Ref EventScheduleQueueAlarmARN
+            - !Ref EventScheduleQueueAgeAlarmARN
             - !GetAtt VersioningV1V2StreamLambdaAlarms.Outputs.LambdaInvocationErrorLogsMetricAlarm
         LambdaArns: !Join
           - ','
@@ -801,6 +823,7 @@ Resources:
           - ','
           - - !Ref EventQueueARN
             - !Ref ScheduledActionsQueueARN
+            - !Ref EventScheduleQueueARN
         LogGroupsNames: !Join
           - ','
           - - !Sub '/aws/ecs/${ProjectName}-stream'

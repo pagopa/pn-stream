@@ -184,6 +184,20 @@ Resources:
         LogGroupRetention: !Ref LogRetention
         LogGroupPrefix: '/aws/lambda'
 
+  # Internal queues
+  EventScheduleQueue:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: !Sub '${ProjectName}-stream_schedule'
+        AlarmSNSTopicName: !Ref AlarmSNSTopicName
+        VisibilityTimeout: 60
+        MaxReceiveCount: 10
+        DelaySeconds: 1
+
 Outputs:
 
   StreamNotificationTableName:
@@ -215,6 +229,20 @@ Outputs:
   EventQueueAgeAlarmARN:
     Value: !GetAtt EventQueue.Outputs.SqsAgeAlarmArn
     Description: pn-delivery-push actions done queue age alarm ARN
+
+  # Event schedule queue
+  EventScheduleQueueName:
+    Value: !GetAtt EventScheduleQueue.Outputs.QueueName
+    Description: pn-stream_schedule queue name
+  EventScheduleQueueARN:
+    Value: !GetAtt EventScheduleQueue.Outputs.QueueARN
+    Description: pn-stream_schedule queue ARN
+  EventScheduleQueueAlarmARN:
+    Value: !GetAtt EventScheduleQueue.Outputs.SqsDLQAlarmArn
+    Description: pn-stream_schedule queue dlq alarm ARN
+  EventScheduleQueueAgeAlarmARN:
+    Value: !GetAtt EventScheduleQueue.Outputs.SqsAgeAlarmArn
+    Description: pn-stream_schedule queue age alarm ARN
 
   ScheduledActionsQueueName:
     Value: !GetAtt ScheduledActionsQueue.Outputs.QueueName
