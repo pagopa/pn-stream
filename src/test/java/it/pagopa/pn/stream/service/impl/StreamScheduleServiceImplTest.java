@@ -70,7 +70,7 @@ class StreamScheduleServiceImplTest {
 
         when(streamEntityDao.updateAndGetAtomicCounter(any())).thenReturn(Mono.just(0L));
         when(eventsQuarantineEntityDao.findByPk(anyString(), any(), anyInt())).thenReturn(Mono.just(Page.create(Collections.emptyList())));
-        when(schedulerService.scheduleSortEvent(anyString(), any(), any(), any())).thenReturn("test");
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 
         // When
         Mono<Void> result = streamScheduleService.unlockEvents(event, true);
@@ -118,7 +118,7 @@ class StreamScheduleServiceImplTest {
         when(eventsQuarantineEntityDao.saveAndClearElement(any(), any())).thenReturn(Mono.empty());
         when(streamUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
         when(streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(any())).thenReturn(timelineElementInternal);
-        when(schedulerService.scheduleSortEvent(anyString(), any(), any(), any())).thenReturn("test");
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 
         // When
         Mono<Void> result = streamScheduleService.unlockEvents(event, true);
@@ -166,7 +166,7 @@ class StreamScheduleServiceImplTest {
         when(eventsQuarantineEntityDao.saveAndClearElement(any(), any())).thenReturn(Mono.empty());
         when(streamUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
         when(streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(any())).thenReturn(timelineElementInternal);
-        when(schedulerService.scheduleSortEvent(anyString(), any(), any(), any())).thenReturn("test");
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 
         // When
         Mono<Void> result = streamScheduleService.unlockEvents(event, false);
@@ -214,7 +214,7 @@ class StreamScheduleServiceImplTest {
         when(eventsQuarantineEntityDao.saveAndClearElement(any(), any())).thenReturn(Mono.empty());
         when(streamUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
         when(streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(any())).thenReturn(timelineElementInternal);
-        when(schedulerService.scheduleSortEvent(anyString(), any(), any(), any())).thenReturn("test");
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 
         // When
         Mono<Void> result = streamScheduleService.unlockEvents(event, true);

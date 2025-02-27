@@ -28,9 +28,6 @@ import org.mockito.Mockito;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -76,6 +73,8 @@ class StreamUtilsTest {
         webhook.setCurrentVersion("v23");
         webhook.setStats(stats);
         webhook.setRetryParameterPrefix("retryParameterPrefix");
+        webhook.setNotificationSla(Duration.ofDays(2));
+        webhook.setUnlockedEventTtl(Duration.ofDays(1));
 
         EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper = new EntityToDtoWebhookTimelineMapper();
         streamUtils = new StreamUtils(timelineMapper, entityToDtoTimelineMapper, timelineElementJsonConverter, webhook, ssmParameterConsumerActivation);
@@ -455,7 +454,6 @@ class StreamUtilsTest {
         Assertions.assertEquals(split[2], "1");
     }
 
-
     @Test
     void buildNotificationUnlockedEntityTtlEqualsNotificationSlaMaxTtl() {
         Instant notificationSentAt = Instant.parse("2021-01-01T00:00:00Z");
@@ -479,5 +477,4 @@ class StreamUtilsTest {
         boolean result = streamUtils.checkIfTtlIsExpired(notificationSentAt);
         Assertions.assertFalse(result);
     }
-
 }

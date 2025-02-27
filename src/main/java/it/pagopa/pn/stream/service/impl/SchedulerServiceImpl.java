@@ -5,7 +5,6 @@ import it.pagopa.pn.stream.service.SchedulerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 

@@ -30,8 +30,6 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
-
 @Service
 @Slf4j
 public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsService {
@@ -159,18 +157,6 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .generateFailure("error updating stream", err).log());
     }
 
-    private Predicate<StreamEntity> checkDisableDate() {
-        return r -> {
-            //Non posso aggiornare stream disabilitato
-            if (r.getDisabledDate() != null) {
-                log.error("Stream is disabled, cannot be updated!");
-                return false;
-            }
-            return true;
-        };
-    }
-
-
     private Predicate<StreamEntity> filterUpdateRequest(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, StreamRequestV27 request) {
         return r -> {
             //Da master se non restringo i gruppi sullo stream OK
@@ -196,6 +182,16 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
         };
     }
 
+    private Predicate<StreamEntity> checkDisableDate() {
+        return r -> {
+            //Non posso aggiornare stream disabilitato
+            if (r.getDisabledDate() != null) {
+                log.error("Stream is disabled, cannot be updated!");
+                return false;
+            }
+            return true;
+        };
+    }
 
     @Override
     public Mono<StreamMetadataResponseV27> disableEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {

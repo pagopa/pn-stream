@@ -11,6 +11,7 @@ import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStat
 import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
+import it.pagopa.pn.stream.exceptions.PnStreamException;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.NotificationUnlockedEntity;
@@ -34,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
+import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_EVENT_CONVERSION;
 
 
 @Slf4j
@@ -133,9 +135,18 @@ public class StreamUtils {
             return Integer.parseInt(versionNumberString);
         }
         return Integer.parseInt(pnStreamConfigs.getCurrentVersion().replace("v", ""));
-
     }
 
+    public EventsQuarantineEntity buildEventQuarantineEntity(StreamEntity stream, TimelineElementInternal timelineElement) {
+       try {
+           EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getTimelineElementId());
+           eventsQuarantineEntity.setEvent(this.timelineElementJsonConverter.entityToJson(mapperTimeline.dtoToEntity(timelineElement)));
+           return eventsQuarantineEntity;
+       } catch (JsonProcessingException e) {
+           log.warn("Error while converting timeline element into JSON", e);
+           throw new PnStreamException("Error while converting timeline element into JSON", 500, ERROR_EVENT_CONVERSION);
+       }
+    }
     public Instant retrieveCurrentInterval(StatsTimeUnit timeUnit, Integer spanUnit) {
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
@@ -153,16 +164,6 @@ public class StreamUtils {
             case MINUTES -> spanUnit * SECONDS_IN_MINUTE;
             case DAYS -> spanUnit * SECONDS_IN_DAY;
         };
-    }
-
-    public NotificationUnlockedEntity buildNotificationUnlockedEntity(String streamId, String iun, Instant notificationSentAt) {
-        NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(streamId, iun);
-        notificationUnlockedEntity.setTtl(notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).atZone(ZoneOffset.UTC).toEpochSecond());
-        return notificationUnlockedEntity;
-    }
-
-    public boolean checkIfTtlIsExpired(Instant notificationSentAt) {
-        return notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now());
     }
 
     public StreamStatsEntity buildEntity(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
@@ -211,4 +212,13 @@ public class StreamUtils {
         return retrieveCurrentInterval(timeUnit, spanUnit) + "#" + timeUnit + "#" + spanUnit;
     }
 
+    public NotificationUnlockedEntity buildNotificationUnlockedEntity(String streamId, String iun, Instant notificationSentAt) {
+        NotificationUnlockedEntity notificationUnlockedEntity = new NotificationUnlockedEntity(streamId, iun);
+        notificationUnlockedEntity.setTtl(notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).atZone(ZoneOffset.UTC).toEpochSecond());
+        return notificationUnlockedEntity;
+    }
+
+    public boolean checkIfTtlIsExpired(Instant notificationSentAt) {
+        return notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now());
+    }
 }

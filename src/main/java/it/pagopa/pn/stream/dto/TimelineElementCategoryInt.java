@@ -64,8 +64,8 @@ public enum TimelineElementCategoryInt {
 
     public static final int VERSION_10 = 10;
     public static final int VERSION_20 = 20;
-    public static final int VERSION_24 = 24;
     public static final int VERSION_23 = 23;
+    public static final int VERSION_24 = 24;
     public static final int VERSION_25 = 25;
     public static final int VERSION_26 = 26;
     public static final int VERSION_27 = 27;
@@ -78,10 +78,23 @@ public enum TimelineElementCategoryInt {
         NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST;
     }
 
+    public enum UnlockTimelineElementCategory {
+        REQUEST_ACCEPTED,
+        REQUEST_REFUSED;
+    }
+
+    public enum SkipSortCategory {
+        SENDER_ACK_CREATION_REQUEST,
+        VALIDATE_NORMALIZE_ADDRESSES_REQUEST,
+        NORMALIZED_ADDRESS,
+        VALIDATED_F24,
+        VALIDATE_F24_REQUEST
+    }
+
     @Getter
     public enum StreamVersions {
-        STREAM_V27(VERSION_27, VERSION_26,VERSION_10),
-        STREAM_V26(VERSION_26, VERSION_26,VERSION_10),
+        STREAM_V27(VERSION_27, VERSION_26,VERSION_26),
+        STREAM_V26(VERSION_26, VERSION_26,VERSION_26),
         STREAM_V25(VERSION_25, VERSION_25,VERSION_10),
         STREAM_V24(VERSION_24, VERSION_24,VERSION_10),
         STREAM_V23(VERSION_23, VERSION_23,VERSION_10),
@@ -102,7 +115,7 @@ public enum TimelineElementCategoryInt {
             return Arrays.stream(StreamVersions.values())
                     .filter(streamVersions -> streamVersions.streamVersion == version)
                     .findFirst()
-                    .orElse(null);
+                    .orElse(STREAM_V10);
         }
     }
 

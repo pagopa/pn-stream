@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
@@ -82,12 +83,17 @@ public class EventEntityDaoImpl implements EventEntityDao {
                 .putExpressionName("#streamID", EventEntity.COL_PK)
                 .build();
 
-        return Mono.fromFuture(table.putItem(r -> r.item(entity).conditionExpression(conditionExpression))
-                        .thenApply(r -> entity))
+        PutItemEnhancedRequest<EventEntity> putItemEnhancedRequest = PutItemEnhancedRequest.builder(EventEntity.class)
+                .item(entity)
+                .conditionExpression(conditionExpression)
+                .build();
+
+        return Mono.fromFuture(table.putItem(putItemEnhancedRequest))
                 .onErrorResume(ConditionalCheckFailedException.class, ex -> {
                     log.error("Failed to save entity due to condition check failure", ex);
                     return Mono.empty();
-                });
+                })
+                .flatMap(r -> Mono.just(entity));
     }
 
     private Mono<EventEntityBatch> findByStreamId(String streamId, String eventId, boolean olderThan, int pagelimit) {

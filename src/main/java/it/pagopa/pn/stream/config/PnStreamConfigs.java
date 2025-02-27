@@ -47,10 +47,10 @@ public class PnStreamConfigs {
     public static class Dao {
         private String streamsTableName;
         private String eventsTableName;
+        private String streamStatsTableName;
         private String streamNotificationTableName;
         private String notificationUnlockedTableName;
         private String eventsQuarantineTableName;
-        private String streamStatsTableName;
     }
 
     @Data
