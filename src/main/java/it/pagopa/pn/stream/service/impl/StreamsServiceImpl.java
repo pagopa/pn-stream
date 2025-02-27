@@ -191,8 +191,8 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
 
     @Override
     public Mono<StreamMetadataResponseV27> disableEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
-        String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}";
-        String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion};
+        String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={}";
+        String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString()};
         generateAuditLog(PnAuditLogEventType.AUD_WH_DISABLE, msg, args).log();
 
         return getStreamEntityToWrite(apiVersion(xPagopaPnApiVersion), xPagopaPnCxId, xPagopaPnCxGroups, streamId, false)
@@ -223,8 +223,8 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
 
     private Mono<StreamEntity> replaceStream(String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, StreamCreationRequestV27 dto) {
         StreamEntity streamEntity = DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, UUID.randomUUID().toString(), xPagopaPnApiVersion, dto);
-        String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, disabledStreamId={}";
-        String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, dto.getReplacedStreamId().toString()};
+        String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, disabledStreamId={}, streamId={}";
+        String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, dto.getReplacedStreamId().toString(), dto.getReplacedStreamId().toString()};
         generateAuditLog(PnAuditLogEventType.AUD_WH_DISABLE, msg, args).log();
         return getStreamEntityToWrite(xPagopaPnApiVersion, xPagopaPnCxId, xPagopaPnCxGroups, dto.getReplacedStreamId(), false).
                 flatMap(replacedStream -> replaceStreamEntity(streamEntity, replacedStream))

@@ -243,8 +243,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         if (Boolean.FALSE.equals(streamEntity.isSorting())) {
             log.info("Stream streamId={} is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message", streamEntity.getStreamId());
-            schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_ALL_EVENTS);
-            return Mono.just(streamEntity);
+            return schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_ALL_EVENTS)
+                    .doOnError(ex -> log.error("Error in scheduling UNLOCK_ALL_EVENTS for streamId={}", streamEntity.getStreamId(), ex))
+                    .map(event -> streamEntity);
         }
 
         return manageUnlockEvent(streamEntity, timelineElement);
@@ -255,8 +256,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
             NotificationUnlockedEntity notificationUnlockedEntity = streamUtils.buildNotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getNotificationSentAt());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
-                    .doOnNext(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_EVENTS))
-                    .map(entity -> stream);
+                    .flatMap(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_EVENTS))
+                    .map(booleanResult -> stream);
         } else {
             if (streamUtils.checkIfTtlIsExpired(timelineElement.getNotificationSentAt())) {
                 return Mono.just(stream);
