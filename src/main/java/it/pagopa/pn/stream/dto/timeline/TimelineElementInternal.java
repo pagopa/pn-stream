@@ -18,7 +18,7 @@ public class TimelineElementInternal{
     private String timelineElementId;
     private Instant timestamp;
     private String paId;
-    private List<LegalFactsIdV20> legalFactsIds;
+    private List<LegalFactsIdV20> legalFactId;
     private String category;
     private String details;
     private StatusInfoInternal statusInfo;

@@ -18,10 +18,6 @@
     "RetryAfterEnabled": "false",
     "StreamNotificationTtl": "7889400",
     "MaximumRetryAttemptsValueStream": "5",
-    "MaximumRetryAttemptsValueNotification": "5",
-    "StreamStatsTimeUnit": "HOURS",
-    "StreamStatsSpanUnit": "1",
-    "StreamStatsTtl":"365d",
-    "CustomStatsTtlParameterName": "/pn-stream/stats/custom-ttl"
+    "MaximumRetryAttemptsValueNotification": "5"
   }
 }
