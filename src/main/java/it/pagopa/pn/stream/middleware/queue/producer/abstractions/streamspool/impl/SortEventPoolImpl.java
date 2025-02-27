@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -34,16 +35,21 @@ public class SortEventPoolImpl implements SortEventPool {
     }
 
     private void addSortEventAction(SortEventAction action, SortEventType sortEventType) {
-        sortActionsQueue.push( SortEvent.builder()
+        SortEvent sortEvent = SortEvent.builder()
                 .header( GenericEventHeader.builder()
                         .publisher("pn-stream")
                         .eventId(UUID.randomUUID().toString())
                         .createdAt( clock.instant() )
                         .eventType(sortEventType.name())
-                        .build()
-                )
+                        .build())
                 .payload( action )
-                .build()
-        );
+                .build();
+
+        if(Objects.isNull(action.getDelaySeconds())){
+            sortActionsQueue.push(sortEvent);
+        }else{
+            sortActionsQueue.push(sortEvent, action.getDelaySeconds());
+        }
+
     }
 }

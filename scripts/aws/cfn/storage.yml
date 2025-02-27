@@ -114,13 +114,36 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  StreamStatsTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-WebhookStats'
+      AttributeDefinitions:
+        - AttributeName: "pk"
+          AttributeType: "S"
+        - AttributeName: "sk"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "pk"
+          KeyType: "HASH"
+        - AttributeName: "sk"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
   # Webhook Notification Table
   EventsQuarantineTable:
     Type: AWS::DynamoDB::Table
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-eventsQuarantine'
+      TableName: !Sub '${ProjectName}-WebhookEventsQuarantine'
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"
@@ -141,7 +164,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-NotificationUnlocked'
+      TableName: !Sub '${ProjectName}-WebhookNotificationUnlocked'
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"
@@ -191,6 +214,17 @@ Resources:
         LogGroupRetention: !Ref LogRetention
         LogGroupPrefix: /aws/lambda
 
+  VersioningV1V2StreamLambdaLogGroup:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/log-group.yaml"
+      Parameters:
+        LogGroupName: !Sub "${ProjectName}-versioningV1V2StreamLambda"
+        LogGroupRetention: !Ref LogRetention
+        LogGroupPrefix: '/aws/lambda'
+
   # Internal queues
   EventScheduleQueue:
     Type: AWS::CloudFormation::Stack
@@ -213,6 +247,12 @@ Outputs:
   StreamNotificationTableArn:
     Description: ARN of dynamodb table containing
     Value: !Sub '${StreamNotificationTable.Arn}'
+  StreamStatsTableName:
+    Description: Name of dynamodb table containing
+    Value: !Ref StreamStatsTable
+  StreamStatsTableArn:
+    Description: ARN of dynamodb table containing
+    Value: !Sub '${StreamStatsTable.Arn}'
 
   EventsQuarantineTableName:
     Description: Name of dynamodb table containing quarantined events
@@ -297,3 +337,6 @@ Outputs:
 
   EcsLogGroup:
     Value: !GetAtt PnStreamLogGroup.Outputs.LogGroupName
+
+  VersioningV1V2StreamLambdaName:
+    Value: !Sub "${ProjectName}-versioningV1V2StreamLambda"

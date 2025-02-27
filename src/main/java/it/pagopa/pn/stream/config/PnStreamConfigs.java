@@ -1,6 +1,7 @@
 package it.pagopa.pn.stream.config;
 
 import it.pagopa.pn.commons.conf.SharedAutoConfiguration;
+import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -34,10 +35,13 @@ public class PnStreamConfigs {
     private String retryParameterPrefix;
     private Boolean retryAfterEnabled;
     private Long streamNotificationTtl;
+    private Stats stats;
     private List<String> listCategoriesPa;
     private Integer sortEventDelaySeconds;
     private Duration unlockedEventTtl;
     private Duration notificationSla;
+    private Integer maxWrittenCounter;
+    private Integer queryEventQuarantineLimit;
 
     @Data
     public static class Dao {
@@ -46,6 +50,15 @@ public class PnStreamConfigs {
         private String streamNotificationTableName;
         private String notificationUnlockedTableName;
         private String eventsQuarantineTableName;
+        private String streamStatsTableName;
+    }
+
+    @Data
+    public static class Stats{
+        private int spanUnit;
+        private StatsTimeUnit timeUnit;
+        private Duration ttl;
+        private String customTtlParameterName;
     }
 
     @Data

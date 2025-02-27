@@ -5,6 +5,9 @@ import it.pagopa.pn.stream.service.SchedulerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -27,13 +30,18 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
-    public void scheduleSortEvent(String eventKey, Integer delay, Integer writtenCounter, SortEventType sortEventType) {
-        SortEventAction action = SortEventAction.builder()
+    public String scheduleSortEvent(String eventKey, Integer delay, Integer writtenCounter, SortEventType sortEventType) {
+        SortEventAction.SortEventActionBuilder action = SortEventAction.builder()
                 .eventKey(eventKey)
-                .writtenCounter(writtenCounter)
-                .delaySeconds(delay)
-                .build();
+                .writtenCounter(writtenCounter);
 
-        this.sortEventPool.scheduleFutureAction(action, sortEventType);
+        if(Objects.nonNull(delay)){
+            action = action.delaySeconds(delay);
+        }
+
+        SortEventAction sortEventAction = action.build();
+
+        sortEventPool.scheduleFutureAction(sortEventAction, sortEventType);
+        return eventKey;
     }
 }

@@ -3,7 +3,7 @@ package it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.stream.dto.timeline.StatusInfoEntity;
+import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StatusInfoEntity;
 import it.pagopa.pn.stream.dto.timeline.StatusInfoInternal;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
@@ -20,7 +20,7 @@ public class EntityToDtoWebhookTimelineMapper {
                 .timelineElementId( entity.getTimelineElementId() )
                 .category( entity.getCategory() )
                 .details(objectMapper.writeValueAsString(entity.getDetails()))
-                .legalFactsIds(  entity.getLegalFactIds() )
+                .legalFactId(  entity.getLegalFactIds() )
                 .statusInfo(entityToStatusInfoInternal(entity.getStatusInfo()))
                 .notificationSentAt(entity.getNotificationSentAt())
                 .paId(entity.getPaId())
