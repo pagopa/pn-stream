@@ -254,7 +254,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
                     .doOnNext(entity -> log.info("Saved unlock event for streamId={} and iun={}", stream.getStreamId(), timelineElement.getIun()))
                     .map(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_EVENTS))
-                    .doOnNext(event -> log.info("Scheduled UNLOCK_EVENTS for streamId={}", stream.getStreamId()))
+                    .doOnNext(event -> log.info("Scheduled UNLOCK_EVENTS for streamId={} and iun={}", stream.getStreamId(), timelineElement.getIun()))
                     .map(eventKey -> stream);
         } else {
             if (streamUtils.checkIfTtlIsExpired(timelineElement.getNotificationSentAt())) {
