@@ -224,8 +224,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 })
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
-                        .flatMap(stream -> checkEventToSort(stream, res.getT2()))
-                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()))).collectList().then();
+                        .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
+                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency()))
+                .collectList().then();
     }
 
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
