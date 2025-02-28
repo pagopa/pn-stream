@@ -106,6 +106,50 @@ class StreamEntityDaoIT extends BaseTest.WithLocalStack {
     }
 
     @Test
+    void updateSortingNull() {
+        StreamEntity streamEntity = new StreamEntity("paIdSortingNull","streamSortingNull");
+        streamEntity.setTitle("title");
+        StreamEntity toReplace = new StreamEntity("paIdSortingNull","streamSortingNull");
+        toReplace.setTitle("changedTitle");
+        streamEntityDaoDynamo.save(new StreamEntity("paIdSortingNull","streamSortingNull")).block();
+        streamEntityDaoDynamo.update(toReplace).block();
+        StreamEntity updatedStreamEntity = streamEntityDaoDynamo.get("paIdSortingNull", "streamSortingNull").block();
+        assert updatedStreamEntity != null;
+        Assertions.assertEquals("changedTitle", updatedStreamEntity.getTitle());
+        Assertions.assertNull(updatedStreamEntity.getSorting());
+    }
+
+    @Test
+    void updateSortingFalse() {
+        StreamEntity streamEntity = new StreamEntity("paIdSortingFalse","streamSortingFalse");
+        streamEntity.setTitle("title");
+        StreamEntity toReplace = new StreamEntity("paIdSortingFalse","streamSortingFalse");
+        toReplace.setTitle("changedTitle");
+        toReplace.setSorting(false);
+        streamEntityDaoDynamo.save(new StreamEntity("paIdSortingFalse","streamSortingFalse")).block();
+        streamEntityDaoDynamo.update(toReplace).block();
+        StreamEntity updatedStreamEntity = streamEntityDaoDynamo.get("paIdSortingFalse", "streamSortingFalse").block();
+        assert updatedStreamEntity != null;
+        Assertions.assertEquals("changedTitle", updatedStreamEntity.getTitle());
+        Assertions.assertFalse(updatedStreamEntity.getSorting());
+    }
+
+    @Test
+    void updateSortingTrue() {
+        StreamEntity streamEntity = new StreamEntity("paIdSortingTrue","streamSortingTrue");
+        streamEntity.setTitle("title");
+        StreamEntity toReplace = new StreamEntity("paIdSortingTrue","streamSortingTrue");
+        toReplace.setTitle("changedTitle");
+        toReplace.setSorting(true);
+        streamEntityDaoDynamo.save(new StreamEntity("paIdSortingTrue","streamSortingTrue")).block();
+        streamEntityDaoDynamo.update(toReplace).block();
+        StreamEntity updatedStreamEntity = streamEntityDaoDynamo.get("paIdSortingTrue", "streamSortingTrue").block();
+        assert updatedStreamEntity != null;
+        Assertions.assertEquals("changedTitle", updatedStreamEntity.getTitle());
+        Assertions.assertTrue(updatedStreamEntity.getSorting());
+    }
+
+    @Test
     void updateAndGetAtomicCounter() {
         StreamEntity streamEntity = new StreamEntity("paId5","streamId5");
         streamEntity.setTitle("title");

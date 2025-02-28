@@ -237,7 +237,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             return Mono.just(streamEntity);
         }
 
-        if (Boolean.FALSE.equals(streamEntity.isSorting())) {
+        if (Objects.isNull(streamEntity.getSorting()) || Boolean.FALSE.equals(streamEntity.getSorting())) {
             log.info("Stream streamId={} is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message", streamEntity.getStreamId());
             return Mono.just(schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_ALL_EVENTS))
                     .doOnNext(event -> log.info("Scheduled UNLOCK_ALL_EVENTS for streamId={}", streamEntity.getStreamId()))

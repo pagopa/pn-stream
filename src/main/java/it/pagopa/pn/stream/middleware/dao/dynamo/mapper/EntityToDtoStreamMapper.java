@@ -27,7 +27,7 @@ public class EntityToDtoStreamMapper {
         streamMetadataResponse.setGroups(entity.getGroups());
         streamMetadataResponse.setVersion(entity.getVersion() != null ? entity.getVersion() : firstVersion);
         streamMetadataResponse.setDisabledDate(entity.getDisabledDate());
-        streamMetadataResponse.setWaitForAccepted(entity.isSorting());
+        streamMetadataResponse.setWaitForAccepted(entity.getSorting());
         return streamMetadataResponse;
     }
 
