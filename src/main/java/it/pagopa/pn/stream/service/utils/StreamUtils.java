@@ -88,10 +88,11 @@ public class StreamUtils {
         // il requestId ci va sempre, ed è il base64 dello iun
         eventEntity.setNotificationRequestId(Base64Utils.encodeToString(timelineElementInternal.getIun().getBytes(StandardCharsets.UTF_8)));
 
-        WebhookTimelineElementEntity timelineElementEntity = null;
+        WebhookTimelineElementEntity timelineElementEntity;
         try {
             timelineElementEntity = mapperTimeline.dtoToEntity(timelineElementInternal);
         } catch (JsonProcessingException e) {
+            log.error("Error while converting timeline element into JSON for streamId [{}] event [{}]",streamEntity.getStreamId(), eventEntity.getEventId(), e);
             throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
         }
 
@@ -116,6 +117,7 @@ public class StreamUtils {
             timelineElementInternal.setTimestamp(timelineElementInternal.getIngestionTimestamp());
             return timelineElementInternal;
         } catch (JsonProcessingException e) {
+            log.info("Error while converting timeline element into JSON for pk [{}] and eventId [{}]",entity.getPk(), entity.getEventId(),  e);
             throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
         }
     }

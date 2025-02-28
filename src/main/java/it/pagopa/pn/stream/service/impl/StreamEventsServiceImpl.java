@@ -239,6 +239,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         if (Boolean.FALSE.equals(streamEntity.isSorting())) {
             log.info("Stream streamId={} is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message", streamEntity.getStreamId());
             return Mono.just(schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_ALL_EVENTS))
+                    .doOnNext(event -> log.info("Scheduled UNLOCK_ALL_EVENTS for streamId={}", streamEntity.getStreamId()))
                     .doOnError(ex -> log.error("Error in scheduling UNLOCK_ALL_EVENTS for streamId={}", streamEntity.getStreamId(), ex))
                     .map(event -> streamEntity);
         }
@@ -251,16 +252,21 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
             NotificationUnlockedEntity notificationUnlockedEntity = streamUtils.buildNotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getNotificationSentAt());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
+                    .doOnNext(entity -> log.info("Saved unlock event for streamId={} and iun={}", stream.getStreamId(), timelineElement.getIun()))
                     .map(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_EVENTS))
+                    .doOnNext(event -> log.info("Scheduled UNLOCK_EVENTS for streamId={}", stream.getStreamId()))
                     .map(eventKey -> stream);
         } else {
             if (streamUtils.checkIfTtlIsExpired(timelineElement.getNotificationSentAt())) {
+                log.info("Unlock Event ttl is expired, skipping quarantine for [{}]", timelineElement.getTimelineElementId());
                 return Mono.just(stream);
             }
             return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
+                    .doOnNext(entity -> log.info("Founded unlock Event for eventId [{}]", timelineElement.getTimelineElementId()))
                     .switchIfEmpty(Mono.defer(() -> {
-                        log.info("Event with id={} is not an unlock event, saving in quarantine", timelineElement.getTimelineElementId());
+                        log.info("Unlock event not found for eventId [{}], saving in quarantine", timelineElement.getTimelineElementId());
                         return eventsQuarantineEntityDao.putItem(streamUtils.buildEventQuarantineEntity(stream, timelineElement))
+                                .doOnNext(entity -> log.info("Saved event in quarantine for eventId [{}]", timelineElement.getTimelineElementId()))
                                 .then(Mono.empty());
                     }))
                     .map(notificationUnlockedEntity -> stream);
@@ -271,6 +277,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     public Mono<StreamNotificationEntity> getNotification(String iun) {
         return streamNotificationDao.findByIun(iun)
+                .doOnNext(entity -> log.info("found notification on dynamo for iun={}", iun))
                 .switchIfEmpty(Mono.defer(() -> pnDeliveryClientReactive.getSentNotification(iun))
                         .flatMap(this::constructAndSaveNotificationEntity));
     }
@@ -282,7 +289,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).toEpochMilli());
         streamNotificationEntity.setCreationDate(sentNotificationV24.getSentAt());
         return streamNotificationDao.putItem(streamNotificationEntity)
-                .thenReturn(streamNotificationEntity);
+                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", sentNotificationV24.getIun()));
     }
 
     private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {

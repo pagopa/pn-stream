@@ -64,7 +64,6 @@ public class ActionHandler {
                 log.debug("pnStreamUnlockEventsConsumer, message={}", message);
 
                 SortEventAction action = message.getPayload();
-                HandleEventUtils.addIunToMdc(action.getEventKey());
 
                 log.logStartingProcess(processName);
                 streamScheduleEventHandler.handleUnlockEvents(action);
@@ -92,7 +91,6 @@ public class ActionHandler {
                 log.debug("pnStreamUnlockAllEventsConsumer, message={}", message);
 
                 SortEventAction action = message.getPayload();
-                HandleEventUtils.addIunToMdc(action.getEventKey());
 
                 log.logStartingProcess(processName);
                 streamScheduleEventHandler.handleUnlockAllEvents(action);
