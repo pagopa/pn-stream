@@ -121,6 +121,7 @@ class EventsServiceImplTest {
         when(pnStreamConfigs.getUnlockedEventTtl()).thenReturn(Duration.ofDays(1));
         when(pnStreamConfigs.getNotificationSla()).thenReturn(Duration.ofDays(2));
         when(pnStreamConfigs.getMaxTtl()).thenReturn(Duration.ofDays(2));
+        when(pnStreamConfigs.getSaveEventMaxConcurrency()).thenReturn(1);
     }
 
     private List<TimelineElementInternal> generateTimeline(String iun, String paId){
