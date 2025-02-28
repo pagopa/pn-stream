@@ -88,12 +88,12 @@ public class EventEntityDaoImpl implements EventEntityDao {
                 .conditionExpression(conditionExpression)
                 .build();
 
-        return Mono.fromFuture(table.putItem(putItemEnhancedRequest))
+        return Mono.fromFuture(table.putItem(putItemEnhancedRequest)
+                        .thenApply(unused -> entity))
                 .onErrorResume(ConditionalCheckFailedException.class, ex -> {
                     log.error("Failed to save entity due to condition check failure", ex);
                     return Mono.empty();
-                })
-                .flatMap(r -> Mono.just(entity));
+                });
     }
 
     private Mono<EventEntityBatch> findByStreamId(String streamId, String eventId, boolean olderThan, int pagelimit) {
