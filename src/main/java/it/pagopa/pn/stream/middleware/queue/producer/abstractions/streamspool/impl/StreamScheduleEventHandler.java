@@ -6,8 +6,10 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.So
 import it.pagopa.pn.stream.service.StreamScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
+import static it.pagopa.pn.commons.utils.MDCUtils.MDC_PN_CTX_REQUEST_ID;
 import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_CODE_STREAM_SCHEDULE_EVENTFAILED;
 
 @Service
@@ -21,7 +23,7 @@ public class StreamScheduleEventHandler {
         log.info( "Received UNLOCK_EVENTS event with eventId={}", evt.getEventKey());
         try {
             log.debug("[enter] unlockEvents evt={}", evt);
-
+            MDC.put(MDC_PN_CTX_REQUEST_ID, evt.getEventKey());
             MDCUtils.addMDCToContextAndExecute(
                     scheduleService.unlockEvents(evt, true)
             ).block();
@@ -37,7 +39,7 @@ public class StreamScheduleEventHandler {
         log.info( "Received UNLOCK_ALL_EVENTS event with eventId={}", evt.getEventKey());
         try {
             log.debug("[enter] unlockAllEvents evt={}", evt);
-
+            MDC.put(MDC_PN_CTX_REQUEST_ID, evt.getEventKey());
             MDCUtils.addMDCToContextAndExecute(
                     scheduleService.unlockEvents(evt, false)
             ).block();
