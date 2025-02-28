@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Import;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 @Configuration
 @ConfigurationProperties( prefix = "pn.stream")
@@ -37,6 +38,8 @@ public class PnStreamConfigs {
     private Stats stats;
     private List<String> listCategoriesPa;
     private Integer sortEventDelaySeconds;
+    private Duration unlockedEventTtl;
+    private Duration notificationSla;
     private Integer maxWrittenCounter;
     private Integer queryEventQuarantineLimit;
 
@@ -44,10 +47,10 @@ public class PnStreamConfigs {
     public static class Dao {
         private String streamsTableName;
         private String eventsTableName;
+        private String streamStatsTableName;
         private String streamNotificationTableName;
         private String notificationUnlockedTableName;
         private String eventsQuarantineTableName;
-        private String streamStatsTableName;
     }
 
     @Data
@@ -63,5 +66,15 @@ public class PnStreamConfigs {
         private String scheduledActions;
         private String event;
         private String eventSchedule;
+    }
+
+    public Duration getMaxTtl() {
+        if (Objects.isNull(notificationSla)) {
+            return unlockedEventTtl;
+        } else if (Objects.isNull(unlockedEventTtl)) {
+            return notificationSla;
+        } else {
+            return notificationSla.compareTo(unlockedEventTtl) >= 0 ? notificationSla : unlockedEventTtl;
+        }
     }
 }
