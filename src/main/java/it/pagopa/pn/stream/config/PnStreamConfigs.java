@@ -42,6 +42,7 @@ public class PnStreamConfigs {
     private Duration notificationSla;
     private Integer maxWrittenCounter;
     private Integer queryEventQuarantineLimit;
+    public Integer saveEventMaxConcurrency;
 
     @Data
     public static class Dao {

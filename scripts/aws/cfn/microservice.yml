@@ -417,6 +417,11 @@ Parameters:
     Description: 'Limit for query on event quarantine table'
     Default: 100
 
+  SaveEventMaxConcurrency:
+    Type: Number
+    Description: 'Max concurrency for save events on streams'
+    Default: 100
+
 Resources:
 
   # pn-stream microservice
@@ -472,6 +477,7 @@ Resources:
         ContainerEnvEntry27: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
         ContainerEnvEntry28: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
         ContainerEnvEntry29: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
+        ContainerEnvEntry30: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
