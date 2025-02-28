@@ -60,6 +60,12 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 }).flatMap(x ->
                         (x.getReplacedStreamId() == null ? checkStreamCount(xPagopaPnCxId) : Mono.just(Boolean.TRUE)).then(Mono.just(x))
                 )
+                .map(streamCreationRequestV27 -> {
+                    if (Objects.isNull(streamCreationRequestV27.getWaitForAccepted())) {
+                        streamCreationRequestV27.setWaitForAccepted(Boolean.FALSE);
+                    }
+                    return streamCreationRequestV27;
+                })
                 .flatMap(dto -> {
                     List<String> allowedGroups = CollectionUtils.isEmpty(xPagopaPnCxGroups)
                             ? pnExternalRegistryClient.getGroups(xPagopaPnUid, xPagopaPnCxId)
