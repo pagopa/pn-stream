@@ -10,7 +10,8 @@
     "EventsTableArn": "arn:aws:dynamodb:eu-south-1:830192246553:table/pn-WebhookEvents",
     "PnNotificationTableName": "pn-Notifications",
     "PnTimelinesTableName": "pn-Timelines",
-    "MemoryAmount": "2GB",
+    "CpuValue": 2048,
+    "MemoryAmount": "4GB",
     "ScheduleInterval": "60000",
     "MaxLength": "50",
     "MaxStreams": "10",
@@ -19,10 +20,10 @@
     "StreamNotificationTtl": "7889400",
     "MaximumRetryAttemptsValueStream": "5",
     "MaximumRetryAttemptsValueNotification": "5",
-    "SortEventDelaySeconds": "30",
+    "SortEventDelaySeconds": "90",
     "UnlockedEventTtl": "2d",
     "notificationSla": "1d",
-    "MaxWrittenCounter": "5",
+    "MaxWrittenCounter": "2",
     "QueryEventQuarantineLimit": "100",
     "StreamStatsTimeUnit": "HOURS",
     "StreamStatsSpanUnit": "1",
@@ -31,6 +32,6 @@
     "NumRetry": "3",
     "AttemptTimeoutSec": "7",
     "VersioningV1V2StreamLambdaProvisionedConcurrency": "1",
-    "SaveEventMaxConcurrency": "100"
+    "SaveEventMaxConcurrency": "150"
   }
 }
