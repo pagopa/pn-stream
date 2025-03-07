@@ -13,7 +13,7 @@
     "MemoryAmount": "2GB",
     "ScheduleInterval": "60000",
     "MaxLength": "50",
-    "MaxStreams": "10",
+    "MaxStreams": "100",
     "RetryParameterPrefix": "/pn-stream/retry/",
     "RetryAfterEnabled": "false",
     "StreamNotificationTtl": "7889400",
