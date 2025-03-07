@@ -323,7 +323,7 @@ class StreamUtilsTest {
         streamUtils = new StreamUtils(null, null, null, pnStreamConfigs, ssmParameterConsumerActivation);
 
 
-        StreamStatsEntity entity = streamUtils.buildEntity(StreamStatsEnum.NUMBER_OF_REQUESTS, "paId", "streamId");
+        StreamStatsEntity entity = streamUtils.buildEntity(null, StreamStatsEnum.NUMBER_OF_REQUESTS, "paId", "streamId");
 
         assertNotNull(entity);
         assertNotNull(entity.getSk());
@@ -417,7 +417,7 @@ class StreamUtilsTest {
         customStatsConfig.setConfig(map);
         when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
                 .thenReturn(Optional.of(customStatsConfig));
-        String sk = streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_REQUESTS);
+        String sk = streamUtils.buildSk(customStatsConfig.getConfig().get(StreamStatsEnum.NUMBER_OF_REQUESTS));
         Assertions.assertNotNull(sk);
         String[] split = sk.split("#");
         Assertions.assertEquals(split[1], "HOURS");
@@ -436,7 +436,7 @@ class StreamUtilsTest {
         customStatsConfig.setConfig(map);
         when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
                 .thenReturn(Optional.of(customStatsConfig));
-        String sk = streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_WRITINGS);
+        String sk = streamUtils.buildSk(customStatsConfig.getConfig().get(StreamStatsEnum.NUMBER_OF_WRITINGS));
         Assertions.assertNotNull(sk);
         String[] split = sk.split("#");
         Assertions.assertEquals(split[1], "DAYS");
@@ -447,7 +447,7 @@ class StreamUtilsTest {
     void buildSkCustomConfigParameterNotFound(){
         when(ssmParameterConsumerActivation.getParameterValue("customStatsTtl", CustomStatsConfig.class))
                 .thenReturn(Optional.empty());
-        String sk = streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_REQUESTS);
+        String sk = streamUtils.buildSk(null);
         Assertions.assertNotNull(sk);
         String[] split = sk.split("#");
         Assertions.assertEquals(split[1], "DAYS");
