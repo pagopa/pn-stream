@@ -228,15 +228,4 @@ public class StreamUtils {
     public boolean checkIfTtlIsExpired(Instant notificationSentAt) {
         return notificationSentAt.plus(pnStreamConfigs.getMaxTtl()).isBefore(Instant.now());
     }
-
-    public List<StreamStatsEntity> constructListOfWritingsStats(List<StreamEntity> streamEntities) {
-        StatConfig customStatsConfig = retrieveStatsConfig(StreamStatsEnum.NUMBER_OF_WRITINGS);
-        return streamEntities.stream().map(streamEntity -> {
-                    StreamStatsEntity streamStatsEntity = new StreamStatsEntity(streamEntity.getPaId(), streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_WRITINGS);
-                    streamStatsEntity.setSk(buildSk(customStatsConfig));
-                    streamStatsEntity.setTtl(LocalDateTime.now().plus(retrieveCustomTtl(customStatsConfig)).atZone(ZoneOffset.UTC).toEpochSecond());
-                    log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", StreamStatsEnum.NUMBER_OF_WRITINGS, streamEntity.getPaId(), streamEntity.getStreamId());
-                    return streamStatsEntity;
-                }).toList();
-        }
-    }
+}

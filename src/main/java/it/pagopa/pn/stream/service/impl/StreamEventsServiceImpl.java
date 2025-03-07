@@ -224,15 +224,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
-                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual(), res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency()))
-                .collectList()
-                .flatMap(list -> {
-                    if(Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())){
-                        return Mono.just(streamUtils.constructListOfWritingsStats(list));
-                    }
-                    return Mono.empty();
-                })
-                .flatMap(streamStatsService::updateNumberOfWritingsStreamStats);
+                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency()))
+                .collectList().then();
     }
 
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
@@ -350,19 +343,21 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         }
     }
 
-    private Mono<StreamEntity> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
-                                                            TimelineElementInternal timelineElementInternal) {
+    private Mono<Void> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
+                                                    TimelineElementInternal timelineElementInternal) {
         return streamEntityDao.updateAndGetAtomicCounter(streamEntity)
                 .flatMap(atomicCounterUpdated -> {
                     if (atomicCounterUpdated < 0) {
                         log.warn("updateAndGetAtomicCounter counter is -1, skipping saving stream");
                         return Mono.empty();
                     }
+
                     EventEntity eventEntity = streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity, newStatus, timelineElementInternal);
+
                     return eventEntityDao.save(eventEntity)
                             .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
                             .doOnNext(event -> log.info("saved webhookevent={}", event))
-                            .thenReturn(streamEntity);
+                            .then();
                 });
     }
 

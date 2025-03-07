@@ -1,6 +1,5 @@
 package it.pagopa.pn.stream.service.impl;
 
-import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.CustomStatsConfig;
 import it.pagopa.pn.stream.dto.StatConfig;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
@@ -11,12 +10,10 @@ import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.dynamodb.model.UpdateItemResponse;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -37,13 +34,6 @@ public class StreamStatsServiceImpl implements StreamStatsService {
         }
         StreamStatsEntity streamStatsEntity = streamUtils.buildEntity(statConfig, streamStatsEnum, paId, streamId);
         return streamStatsDao.updateAtomicCounterStats(streamStatsEntity);
-    }
-
-    @Override
-    public Mono<Void> updateNumberOfWritingsStreamStats(List<StreamStatsEntity> streamStatsEntities) {
-        return Flux.fromIterable(streamStatsEntities)
-                .flatMap(streamStatsDao::updateAtomicCounterStats)
-                .then();
     }
 
     @Override
