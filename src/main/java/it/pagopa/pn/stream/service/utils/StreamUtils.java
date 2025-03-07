@@ -92,7 +92,7 @@ public class StreamUtils {
         try {
             timelineElementEntity = mapperTimeline.dtoToEntity(timelineElementInternal);
         } catch (JsonProcessingException e) {
-            log.error("Error while converting timeline element into JSON for streamId [{}] event [{}]",streamEntity.getStreamId(), eventEntity.getEventId(), e);
+            log.error("Error while converting timeline element into JSON for streamId [{}] event [{}]", streamEntity.getStreamId(), eventEntity.getEventId(), e);
             throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
         }
 
@@ -101,7 +101,7 @@ public class StreamUtils {
         return eventEntity;
     }
 
-    public TimelineElementInternal getTimelineInternalFromEvent(EventEntity entity) throws PnInternalException{
+    public TimelineElementInternal getTimelineInternalFromEvent(EventEntity entity) throws PnInternalException {
         WebhookTimelineElementEntity timelineElementEntity = this.timelineElementJsonConverter.jsonToEntity(entity.getElement());
         try {
             return entityToDtoTimelineMapper.entityToDto(timelineElementEntity);
@@ -110,29 +110,29 @@ public class StreamUtils {
         }
     }
 
-    public TimelineElementInternal getTimelineInternalFromQuarantineAndSetTimestamp(EventsQuarantineEntity entity) throws PnInternalException{
+    public TimelineElementInternal getTimelineInternalFromQuarantineAndSetTimestamp(EventsQuarantineEntity entity) throws PnInternalException {
         try {
             TimelineElementInternal timelineElementInternal = entityToDtoTimelineMapper.entityToDto(timelineElementJsonConverter.jsonToEntity(entity.getEvent()));
             timelineElementInternal.setBusinessTimestamp(timelineElementInternal.getTimestamp());
             timelineElementInternal.setTimestamp(timelineElementInternal.getIngestionTimestamp());
             return timelineElementInternal;
         } catch (JsonProcessingException e) {
-            log.info("Error while converting timeline element into JSON for pk [{}] and eventId [{}]",entity.getPk(), entity.getEventId(),  e);
+            log.info("Error while converting timeline element into JSON for pk [{}] and eventId [{}]", entity.getPk(), entity.getEventId(), e);
             throw new PnInternalException(e.getMessage(), ERROR_CODE_PN_GENERIC_ERROR);
         }
     }
 
 
-    public static boolean checkGroups(List<String> toCheckGroups, List<String> allowedGroups){
+    public static boolean checkGroups(List<String> toCheckGroups, List<String> allowedGroups) {
         List<String> safeToCheck = toCheckGroups != null ? toCheckGroups : Collections.emptyList();
         List<String> safeAllowedGroups = allowedGroups != null ? allowedGroups : Collections.emptyList();
 
-        return safeAllowedGroups.isEmpty() || safeAllowedGroups.containsAll(safeToCheck) ;
+        return safeAllowedGroups.isEmpty() || safeAllowedGroups.containsAll(safeToCheck);
     }
 
-    public int getVersion (String version) {
+    public int getVersion(String version) {
 
-        if (version != null && !version.isEmpty()){
+        if (version != null && !version.isEmpty()) {
             String versionNumberString = version.toLowerCase().replace("v", "");
             return Integer.parseInt(versionNumberString);
         }
@@ -140,15 +140,16 @@ public class StreamUtils {
     }
 
     public EventsQuarantineEntity buildEventQuarantineEntity(StreamEntity stream, TimelineElementInternal timelineElement) {
-       try {
-           EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getTimelineElementId());
-           eventsQuarantineEntity.setEvent(this.timelineElementJsonConverter.entityToJson(mapperTimeline.dtoToEntity(timelineElement)));
-           return eventsQuarantineEntity;
-       } catch (JsonProcessingException e) {
-           log.warn("Error while converting timeline element into JSON", e);
-           throw new PnStreamException("Error while converting timeline element into JSON", 500, ERROR_EVENT_CONVERSION);
-       }
+        try {
+            EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getTimelineElementId());
+            eventsQuarantineEntity.setEvent(this.timelineElementJsonConverter.entityToJson(mapperTimeline.dtoToEntity(timelineElement)));
+            return eventsQuarantineEntity;
+        } catch (JsonProcessingException e) {
+            log.warn("Error while converting timeline element into JSON", e);
+            throw new PnStreamException("Error while converting timeline element into JSON", 500, ERROR_EVENT_CONVERSION);
+        }
     }
+
     public Instant retrieveCurrentInterval(StatsTimeUnit timeUnit, Integer spanUnit) {
         Instant startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
@@ -168,10 +169,10 @@ public class StreamUtils {
         };
     }
 
-    public StreamStatsEntity buildEntity(StreamStatsEnum streamStatsEnum, String paId, String streamId) {
+    public StreamStatsEntity buildEntity(StatConfig statConfig, StreamStatsEnum streamStatsEnum, String paId, String streamId) {
         log.info("Build entity for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
         StreamStatsEntity streamStatsEntity = new StreamStatsEntity(paId, streamId, streamStatsEnum);
-        streamStatsEntity.setSk(buildSk(streamStatsEnum));
+        streamStatsEntity.setSk(buildSk(statConfig));
         streamStatsEntity.setTtl(LocalDateTime.now().plus(retrieveCustomTtl(retrieveStatsConfig(streamStatsEnum))).atZone(ZoneOffset.UTC).toEpochSecond());
         log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
         return streamStatsEntity;
@@ -186,8 +187,13 @@ public class StreamUtils {
                 .orElse(pnStreamConfigs.getStats().getTtl());
     }
 
-    public StatConfig retrieveStatsConfig(StreamStatsEnum streamStatsEnum) {
+    public CustomStatsConfig customStatsConfig(){
         return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getStats().getCustomTtlParameterName(), CustomStatsConfig.class)
+                .orElse(null);
+    }
+
+    public StatConfig retrieveStatsConfig(StreamStatsEnum streamStatsEnum) {
+        return Optional.ofNullable(customStatsConfig())
                 .map(configs -> {
                     log.info("Retrieve custom stats config for stream stats: {}", configs.getConfig());
                     return configs.getConfig().get(streamStatsEnum);
@@ -201,14 +207,13 @@ public class StreamUtils {
                 .orElse(Instant.now().plusMillis(pnStreamConfigs.getScheduleInterval()));
     }
 
-    public String buildSk(StreamStatsEnum streamStatsEnum) {
-        StatConfig customStatsConfig = retrieveStatsConfig(streamStatsEnum);
+    public String buildSk(StatConfig customStatsConfig) {
         StatsTimeUnit timeUnit = pnStreamConfigs.getStats().getTimeUnit();
         Integer spanUnit = pnStreamConfigs.getStats().getSpanUnit();
         if (Objects.nonNull(customStatsConfig)) {
-            if(Objects.nonNull(customStatsConfig.getTimeUnit()))
+            if (Objects.nonNull(customStatsConfig.getTimeUnit()))
                 timeUnit = customStatsConfig.getTimeUnit();
-            if(Objects.nonNull(customStatsConfig.getSpanUnit()))
+            if (Objects.nonNull(customStatsConfig.getSpanUnit()))
                 spanUnit = customStatsConfig.getSpanUnit();
         }
         return retrieveCurrentInterval(timeUnit, spanUnit) + "#" + timeUnit + "#" + spanUnit;

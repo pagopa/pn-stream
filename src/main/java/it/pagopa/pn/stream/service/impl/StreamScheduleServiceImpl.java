@@ -36,14 +36,12 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
 
     private final EventsQuarantineEntityDao eventsQuarantineEntityDao;
     private final SchedulerService schedulerService;
-    private final StreamUtils streamUtils;
     public StreamScheduleServiceImpl(StreamEntityDao streamEntityDao, PnStreamConfigs pnStreamConfigs,
                                      EventsQuarantineEntityDao eventsQuarantineEntityDao, SchedulerService schedulerService,
                                      StreamUtils streamUtils, StreamStatsService streamStatsService) {
-        super(streamEntityDao, pnStreamConfigs, streamStatsService);
+        super(streamEntityDao, pnStreamConfigs, streamStatsService, streamUtils);
         this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
         this.schedulerService = schedulerService;
-        this.streamUtils = streamUtils;
     }
 
     @Override

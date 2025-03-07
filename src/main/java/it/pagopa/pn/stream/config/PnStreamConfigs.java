@@ -43,6 +43,7 @@ public class PnStreamConfigs {
     private Integer maxWrittenCounter;
     private Integer queryEventQuarantineLimit;
     public Integer saveEventMaxConcurrency;
+    private Boolean enableStreamStats;
 
     @Data
     public static class Dao {

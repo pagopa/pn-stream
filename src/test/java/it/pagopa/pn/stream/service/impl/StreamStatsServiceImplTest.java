@@ -1,6 +1,8 @@
 package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.dto.CustomStatsConfig;
+import it.pagopa.pn.stream.dto.StatConfig;
 import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamStatsDao;
@@ -15,8 +17,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 
+import static it.pagopa.pn.stream.dto.stats.StreamStatsEnum.NUMBER_OF_READINGS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 class StreamStatsServiceImplTest {
@@ -52,10 +57,10 @@ class StreamStatsServiceImplTest {
         streamStatsEntity.setSk(currentInterval.toString() + "#" + StatsTimeUnit.DAYS + "#" + 1);
         streamStatsEntity.setTtl(LocalDateTime.now().plus(Duration.ofDays(30)).atZone(ZoneOffset.UTC).toEpochSecond());
 
-        when(streamUtils.buildEntity(StreamStatsEnum.NUMBER_OF_REQUESTS, "paId", "streamId")).thenReturn(streamStatsEntity);
+        when(streamUtils.buildEntity(eq(null), eq(StreamStatsEnum.NUMBER_OF_REQUESTS), eq("paId"), eq("streamId"))).thenReturn(streamStatsEntity);
         when(streamStatsDao.updateAtomicCounterStats(streamStatsEntity)).thenReturn(Mono.just(streamStatsEntity));
 
-        streamStatsService.updateStreamStats(StreamStatsEnum.NUMBER_OF_REQUESTS, "paId", "streamId").block();
+        streamStatsService.updateStreamStats(null, StreamStatsEnum.NUMBER_OF_REQUESTS, "paId", "streamId").block();
 
         Mockito.verify(streamStatsDao).updateAtomicCounterStats(streamStatsEntity);
     }
@@ -66,18 +71,20 @@ class StreamStatsServiceImplTest {
         when(streamUtils.retrieveCurrentInterval(StatsTimeUnit.DAYS, 1)).thenReturn(currentInterval);
         when(pnStreamConfigs.getStats()).thenReturn(pnStreamConfigsStats);
 
-        StreamStatsEntity streamStatsEntity = new StreamStatsEntity("paId", "streamId", StreamStatsEnum.NUMBER_OF_READINGS);
-        streamStatsEntity.setPk("paId#streamId#" + StreamStatsEnum.NUMBER_OF_READINGS);
+        StreamStatsEntity streamStatsEntity = new StreamStatsEntity("paId", "streamId", NUMBER_OF_READINGS);
+        streamStatsEntity.setPk("paId#streamId#" + NUMBER_OF_READINGS);
         streamStatsEntity.setSk(currentInterval.toString() + "#" + StatsTimeUnit.DAYS + "#" + 1);
         streamStatsEntity.setTtl(LocalDateTime.now().plus(Duration.ofDays(30)).atZone(ZoneOffset.UTC).toEpochSecond());
 
-        when(streamUtils.buildEntity(StreamStatsEnum.NUMBER_OF_READINGS, "paId", "streamId")).thenReturn(streamStatsEntity);
-        when(streamUtils.buildSk(StreamStatsEnum.NUMBER_OF_READINGS)).thenReturn(streamStatsEntity.getSk());
-        when(streamUtils.retrieveStatsConfig(StreamStatsEnum.NUMBER_OF_READINGS)).thenReturn(null);
+        when(streamUtils.buildEntity(any(), eq(NUMBER_OF_READINGS), eq("paId"), eq("streamId"))).thenReturn(streamStatsEntity);
+        when(streamUtils.buildSk(any())).thenReturn(streamStatsEntity.getSk());
+        when(streamUtils.retrieveStatsConfig(NUMBER_OF_READINGS)).thenReturn(null);
         when(streamUtils.retrieveCustomTtl(any())).thenReturn(Duration.ofDays(30));
         when(streamStatsDao.updateCustomCounterStats(streamStatsEntity.getPk(), streamStatsEntity.getSk(), 3, Duration.ofDays(30))).thenReturn(Mono.empty());
 
-        streamStatsService.updateNumberOfReadingStreamStats("paId", "streamId", 3).block();
+        CustomStatsConfig customStatsConfig = new CustomStatsConfig();
+        customStatsConfig.setConfig(Map.of(NUMBER_OF_READINGS, new StatConfig()));
+        streamStatsService.updateNumberOfReadingStreamStats(customStatsConfig,"paId", "streamId", 3).block();
 
         Mockito.verify(streamStatsDao).updateCustomCounterStats(streamStatsEntity.getPk(), streamStatsEntity.getSk(), 3, Duration.ofDays(30));
     }

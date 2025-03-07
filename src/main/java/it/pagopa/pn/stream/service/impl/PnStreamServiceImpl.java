@@ -32,6 +32,7 @@ public abstract class PnStreamServiceImpl {
     protected final StreamEntityDao streamEntityDao;
     protected final PnStreamConfigs pnStreamConfigs;
     protected final StreamStatsService streamStatsService;
+    protected final StreamUtils streamUtils;
 
 
     protected enum StreamEntityAccessMode {READ, WRITE}
@@ -76,13 +77,18 @@ public abstract class PnStreamServiceImpl {
     private Mono<StreamEntity> checkRetryAfter(String xPagopaPnCxId, String xPagopaPnApiVersion, UUID streamId, StreamRetryAfter entityRetry, StreamEntity streamEntity) {
         if (Instant.now().isBefore(entityRetry.getRetryAfter())) {
             log.warn("Pa {} version {} is trying to access streamId {}: retry after not expired", xPagopaPnCxId, apiVersion(xPagopaPnApiVersion), streamId);
-            return streamStatsService.updateStreamStats(StreamStatsEnum.RETRY_AFTER_VIOLATION, xPagopaPnCxId, streamId.toString())
-                    .then(Mono.defer(() -> {
-                        if (Boolean.TRUE.equals(pnStreamConfigs.getRetryAfterEnabled())) {
-                            return Mono.error(new PnTooManyRequestException("Pa " + xPagopaPnCxId + " version " + apiVersion(xPagopaPnApiVersion) + " is trying to access streamId " + streamId + ": retry after not expired"));
-                        }
-                        return Mono.just(streamEntity);
-                    }));
+            if(Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
+                return streamStatsService.updateStreamStats(streamUtils.customStatsConfig(), StreamStatsEnum.RETRY_AFTER_VIOLATION, xPagopaPnCxId, streamId.toString())
+                        .then(Mono.defer(() -> ignoreOrThrowException(streamEntity)));
+            }
+            return ignoreOrThrowException(streamEntity);
+        }
+        return Mono.just(streamEntity);
+    }
+
+    private Mono<StreamEntity> ignoreOrThrowException(StreamEntity streamEntity) {
+        if (Boolean.TRUE.equals(pnStreamConfigs.getRetryAfterEnabled())) {
+            return Mono.error(new PnTooManyRequestException("Pa " + streamEntity.getPaId() + " version " + apiVersion(streamEntity.getVersion()) + " is trying to access streamId " + streamEntity.getStreamId() + ": retry after not expired"));
         }
         return Mono.just(streamEntity);
     }

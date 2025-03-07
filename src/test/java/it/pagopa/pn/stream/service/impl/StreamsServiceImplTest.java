@@ -65,7 +65,7 @@ class StreamsServiceImplTest {
         when(pnStreamConfigs.getCurrentVersion()).thenReturn("v26");
         when(pnStreamConfigs.getDeltaCounter()).thenReturn(1000);
 
-        webhookService = new StreamsServiceImpl(streamEntityDao, schedulerService, pnStreamConfigs
+        webhookService = new StreamsServiceImpl(streamEntityDao, schedulerService, mock(StreamUtils.class), pnStreamConfigs
             ,pnExternalRegistryClient, streamStatsService);
 
         new DtoToEntityStreamMapper(pnStreamConfigs);
