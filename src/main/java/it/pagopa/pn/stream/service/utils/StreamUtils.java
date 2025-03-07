@@ -234,7 +234,7 @@ public class StreamUtils {
         return streamEntities.stream().map(streamEntity -> {
                     StreamStatsEntity streamStatsEntity = new StreamStatsEntity(streamEntity.getPaId(), streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_WRITINGS);
                     streamStatsEntity.setSk(buildSk(customStatsConfig));
-                    streamStatsEntity.setTtl(LocalDateTime.now().plus(retrieveCustomTtl(retrieveStatsConfig(StreamStatsEnum.NUMBER_OF_WRITINGS))).atZone(ZoneOffset.UTC).toEpochSecond());
+                    streamStatsEntity.setTtl(LocalDateTime.now().plus(retrieveCustomTtl(customStatsConfig)).atZone(ZoneOffset.UTC).toEpochSecond());
                     log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", StreamStatsEnum.NUMBER_OF_WRITINGS, streamEntity.getPaId(), streamEntity.getStreamId());
                     return streamStatsEntity;
                 }).toList();
