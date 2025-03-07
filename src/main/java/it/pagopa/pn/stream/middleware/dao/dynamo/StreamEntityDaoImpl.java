@@ -53,8 +53,7 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
         Key hashKey = Key.builder().partitionValue(paId).build();
         QueryConditional queryByHashKey = keyEqualTo(hashKey);
         return Flux.from(table.query(queryByHashKey)
-                .flatMapIterable(Page::items))
-                .filter(entity -> !entity.getStreamId().startsWith(RETRY_PREFIX));
+                .flatMapIterable(Page::items));
     }
 
     @Override

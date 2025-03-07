@@ -21,7 +21,6 @@ class StreamEntityDaoIT extends BaseTest.WithLocalStack {
     @Test
     void findByPa() {
         streamEntityDaoDynamo.save(new StreamEntity("paId","streamId")).block();
-        streamEntityDaoDynamo.save(new StreamEntity("paId","RETRY#streamId")).block();
         streamEntityDaoDynamo.save(new StreamEntity("paId","streamId2")).block();
         List<StreamEntity> streamEntity = streamEntityDaoDynamo.findByPa("paId").collectList().block();
         assert streamEntity != null;

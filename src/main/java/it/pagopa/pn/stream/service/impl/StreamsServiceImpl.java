@@ -30,6 +30,8 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
+
 @Service
 @Slf4j
 public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsService {
@@ -40,9 +42,9 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
 
     private final int purgeDeletionWaittime;
 
-    public StreamsServiceImpl(StreamEntityDao streamEntityDao, SchedulerService schedulerService
+    public StreamsServiceImpl(StreamEntityDao streamEntityDao, SchedulerService schedulerService, StreamUtils streamUtils
             , PnStreamConfigs pnStreamConfigs, PnExternalRegistryClient pnExternalRegistryClient, StreamStatsService streamStatsService) {
-        super(streamEntityDao, pnStreamConfigs,streamStatsService);
+        super(streamEntityDao, pnStreamConfigs,streamStatsService, streamUtils);
         this.schedulerService = schedulerService;
         this.pnExternalRegistryClient = pnExternalRegistryClient;
         this.purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
@@ -129,6 +131,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
         generateAuditLog(PnAuditLogEventType.AUD_WH_READ, msg, args.toArray(new String[0])).log();
 
         return streamEntityDao.findByPa(xPagopaPnCxId)
+                .filter(entity -> !entity.getStreamId().startsWith(RETRY_PREFIX))
                 .map(EntityToStreamListDtoStreamMapper::entityToDto)
                 .doOnComplete(() ->
                         generateAuditLog(PnAuditLogEventType.AUD_WH_READ, msg, args.toArray(new String[0])).generateSuccess().log()
@@ -220,6 +223,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
 
     private Mono<Boolean> checkStreamCount(String xPagopaPnCxId) {
         return streamEntityDao.findByPa(xPagopaPnCxId)
+                .filter(entity -> !entity.getStreamId().startsWith(RETRY_PREFIX))
                 .filter(streamEntity -> streamEntity.getDisabledDate() == null)
                 .collectList().flatMap(list -> {
                     if (list.size() >= pnStreamConfigs.getMaxStreams()) {
