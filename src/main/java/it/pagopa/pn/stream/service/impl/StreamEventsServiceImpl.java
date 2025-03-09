@@ -250,9 +250,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
             NotificationUnlockedEntity notificationUnlockedEntity = streamUtils.buildNotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getNotificationSentAt());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
-                    .doOnNext(entity -> log.info("Saved unlock event for streamId={} and iun={}", stream.getStreamId(), timelineElement.getIun()))
                     .map(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_EVENTS))
-                    .doOnNext(event -> log.info("Scheduled UNLOCK_EVENTS for streamId={} and iun={}", stream.getStreamId(), timelineElement.getIun()))
                     .map(eventKey -> stream);
         } else {
             if (streamUtils.checkIfTtlIsExpired(timelineElement.getNotificationSentAt())) {
@@ -260,11 +258,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 return Mono.just(stream);
             }
             return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
-                    .doOnNext(entity -> log.info("Founded unlock Event for eventId [{}]", timelineElement.getTimelineElementId()))
                     .switchIfEmpty(Mono.defer(() -> {
                         log.info("Unlock event not found for eventId [{}], saving in quarantine", timelineElement.getTimelineElementId());
                         return eventsQuarantineEntityDao.putItem(streamUtils.buildEventQuarantineEntity(stream, timelineElement))
-                                .doOnNext(entity -> log.info("Saved event in quarantine for eventId [{}]", timelineElement.getTimelineElementId()))
                                 .then(Mono.empty());
                     }))
                     .map(notificationUnlockedEntity -> stream);
@@ -356,7 +352,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
                     return eventEntityDao.save(eventEntity)
                             .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
-                            .doOnNext(event -> log.info("saved webhookevent={}", event))
                             .then();
                 });
     }
@@ -368,10 +363,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .map(thereAreMore -> {
                     if (Boolean.TRUE.equals(thereAreMore)) {
                         var purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
-                        log.info("purgeEvents streamId={} eventId={} olderThan={} there are more event to purge", streamId, eventId, olderThan);
+                        log.debug("purgeEvents streamId={} eventId={} olderThan={} there are more event to purge", streamId, eventId, olderThan);
                         schedulerService.scheduleStreamEvent(streamId, eventId, purgeDeletionWaittime, olderThan ? StreamEventType.PURGE_STREAM_OLDER_THAN : StreamEventType.PURGE_STREAM);
                     } else
-                        log.info("purgeEvents streamId={} eventId={} olderThan={} no more event to purge", streamId, eventId, olderThan);
+                        log.debug("purgeEvents streamId={} eventId={} olderThan={} no more event to purge", streamId, eventId, olderThan);
 
                     return thereAreMore;
                 })

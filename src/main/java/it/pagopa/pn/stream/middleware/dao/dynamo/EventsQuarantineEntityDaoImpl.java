@@ -38,7 +38,6 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
 
     @Override
     public Mono<Page<EventsQuarantineEntity>> findByPk(String pk, Map<String, AttributeValue> lastEvaluateKey, int limit) {
-        log.info("findByPk pk={}", pk);
         Key key = Key.builder().partitionValue(pk).build();
         QueryConditional queryByHashKey = keyEqualTo(key);
 
@@ -56,13 +55,11 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
 
     @Override
     public Mono<EventsQuarantineEntity> putItem(EventsQuarantineEntity entity) {
-        log.info("putItem entity={}", entity);
         return Mono.fromFuture(tableQuarantine.putItem(entity)).thenReturn(entity);
     }
 
     @Override
     public Mono<EventEntity> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity) {
-        log.info("save and delete items entity={} eventEntity={}", entity, eventEntity);
 
         if (Objects.isNull(entity) || Objects.isNull(eventEntity)) {
             return Mono.empty();

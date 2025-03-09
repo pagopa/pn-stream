@@ -46,7 +46,6 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
 
     @Override
     public Mono<Void> unlockEvents(SortEventAction event, boolean resendMessage) {
-        log.info("Message received with event={} and resendMessage={}", event, resendMessage);
 
         checkInitalValues(event);
         Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
@@ -75,7 +74,6 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                                     log.info("There are more element to retrieve for eventKey [{}],start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
                                     return callToUnlockEvents(event, new HashMap<>(quarantinedEventsList.lastEvaluatedKey()));
                                 }
-                                log.info("No more element to retrieve for eventKey [{}]", event.getEventKey());
                                 return Mono.just(event)
                                         .flatMap(this::computeNewValues);
                             }));
@@ -99,7 +97,6 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                                 return eventsQuarantineEntityDao.saveAndClearElement(quarantinedEvent, eventEntity)
                                         .doOnError(throwable -> log.error("Error in save and clear element from quarantine for pk [{}] and eventId [{}]",quarantinedEvent.getPk(), quarantinedEvent.getEventId(), throwable))
                                         .onErrorResume(ex -> Mono.error(new PnInternalException("Error during save and clear element from quarantine", ERROR_CODE_PN_GENERIC_ERROR)))
-                                        .doOnNext(entity -> log.info("saved event={}", entity))
                                         .then();
                             });
                 })

@@ -22,7 +22,7 @@
     "SortEventDelaySeconds": "90",
     "UnlockedEventTtl": "2d",
     "notificationSla": "1d",
-    "MaxWrittenCounter": "3",
+    "MaxWrittenCounter": "2",
     "QueryEventQuarantineLimit": "100",
     "StreamStatsTimeUnit": "HOURS",
     "StreamStatsSpanUnit": "1",

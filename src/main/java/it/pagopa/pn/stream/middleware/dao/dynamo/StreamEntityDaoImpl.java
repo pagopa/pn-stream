@@ -58,7 +58,6 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
 
     @Override
     public Mono<StreamEntity> get(String paId, String streamId) {
-        log.info("get paId={} streamId={}", paId, streamId);
         Key hashKey = Key.builder().partitionValue(paId).sortValue(streamId).build();
         return Mono.fromFuture(table.getItem(hashKey));
     }
@@ -105,7 +104,6 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
 
     @Override
     public Mono<StreamEntity> save(StreamEntity entity) {
-        log.info("save entity={}", entity);
         return Mono.fromFuture(table.putItem(entity).thenApply(r -> entity));
     }
 
@@ -118,7 +116,6 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
                         .ignoreNulls(true)
                         .build();
 
-        log.info("update stream entity={}", entity);
         return Mono.fromFuture(table.updateItem(updateItemEnhancedRequest).thenApply(r -> entity));
     }
 
@@ -142,11 +139,7 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
 
 
         return Mono.fromFuture(dynamoDbAsyncClient.updateItem(updateRequest))
-                .map(resp -> {
-                    Long newcounter = Long.parseLong(resp.attributes().get(StreamEntity.COL_EVENT_CURRENT_COUNTER).n());
-                    log.info("updateAndGetAtomicCounter done paId={} streamId={} newcounter={}", streamEntity.getPaId(), streamEntity.getStreamId(), newcounter);
-                    return newcounter;
-                }).onErrorResume(ConditionalCheckFailedException.class, e -> {
+                .map(resp -> Long.parseLong(resp.attributes().get(StreamEntity.COL_EVENT_CURRENT_COUNTER).n())).onErrorResume(ConditionalCheckFailedException.class, e -> {
                     log.warn("updateAndGetAtomicCounter conditional failed, not updating counter and retourning -1");
                     return Mono.just(-1L);
                 });
@@ -182,7 +175,6 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
 
     @Override
     public Mono<Void> updateStreamRetryAfter(StreamRetryAfter entity) {
-        log.info("updateStreamRetryAfter entity={}", entity);
         return Mono.fromFuture(tableRetry.putItem(entity));
     }
 
