@@ -15,6 +15,7 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.DtoToEntityStreamMapper;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.EntityToDtoStreamMapper;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.EntityToStreamListDtoStreamMapper;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.externalregistry.PnExternalRegistryClient;
+import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamStatsService;
@@ -37,6 +38,7 @@ import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.
 public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsService {
 
     public static final String ERROR_CREATING_STREAM = "error creating stream";
+    public static final int DELAY = 60;
     private final SchedulerService schedulerService;
     private final PnExternalRegistryClient pnExternalRegistryClient;
 
@@ -160,7 +162,12 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                             return entity;
                         })
                         .flatMap(streamEntityDao::update)
-                        .map(EntityToDtoStreamMapper::entityToDto))
+                        .map(EntityToDtoStreamMapper::entityToDto)
+                        .doOnNext(streamMetadataResponseV27 -> {
+                            if(Boolean.FALSE.equals(streamMetadataResponseV27.getWaitForAccepted())) {
+                                schedulerService.scheduleSortEvent(streamId.toString(), DELAY, 0, SortEventType.UNLOCK_ALL_EVENTS);
+                            }
+                        }))
                 .doOnSuccess(newEntity -> generateAuditLog(PnAuditLogEventType.AUD_WH_UPDATE, msg, args.toArray(new String[0]))
                         .generateSuccess().log()).doOnError(err -> generateAuditLog(PnAuditLogEventType.AUD_WH_UPDATE, msg, args.toArray(new String[0]))
                         .generateFailure("error updating stream", err).log());

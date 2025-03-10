@@ -34,7 +34,6 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
 
     @Override
     public Mono<StreamStatsEntity> getItem(Key key) {
-        log.info("get key={}", key);
         return Mono.fromFuture(table.getItem(key))
                 .doOnNext(item -> log.info("Retrieved item: {}", item.getPk()))
                 .doOnError(error -> log.error("Failed to retrieve item with key={}", key, error));
@@ -42,8 +41,6 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
 
     @Override
     public Mono<StreamStatsEntity> updateAtomicCounterStats(StreamStatsEntity entity) {
-        log.info("update webhook stats entity={}", entity);
-        log.info("update stream entity={}", entity);
         return Mono.fromFuture(table.updateItem(entity))
                 .doOnNext(response -> log.info("Successfully updated atomic counter stats for pk={}, sk={}", entity.getPk(), entity.getSk()))
                 .doOnError(error -> log.warn("Failed to update atomic counter stats for pk={}, sk={}",entity.getPk(), entity.getSk(), error))
@@ -52,7 +49,6 @@ public class StreamStatsDaoImpl implements StreamStatsDao {
 
     @Override
     public Mono<UpdateItemResponse> updateCustomCounterStats(String pk, String sk, Integer increment, Duration ttlDuration) {
-        log.info("update custom counter stats for pk={}, sk={}, increment={}", pk, sk, increment);
 
         Long ttl = LocalDateTime.now().plus(ttlDuration).atZone(ZoneOffset.UTC).toEpochSecond();
 

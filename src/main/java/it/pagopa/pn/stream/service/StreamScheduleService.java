@@ -5,4 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface StreamScheduleService {
     Mono<Void> unlockEvents(SortEventAction event, boolean resendMessage);
+
+    Mono<Void> unlockAllEvents(SortEventAction evt);
 }

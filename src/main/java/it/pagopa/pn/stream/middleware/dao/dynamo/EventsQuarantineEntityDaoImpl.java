@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.Map;
 import java.util.Objects;
 
+import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity.STREAMID_INDEX;
 import static software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo;
 
 @Component
@@ -38,7 +39,6 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
 
     @Override
     public Mono<Page<EventsQuarantineEntity>> findByPk(String pk, Map<String, AttributeValue> lastEvaluateKey, int limit) {
-        log.info("findByPk pk={}", pk);
         Key key = Key.builder().partitionValue(pk).build();
         QueryConditional queryByHashKey = keyEqualTo(key);
 
@@ -56,13 +56,11 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
 
     @Override
     public Mono<EventsQuarantineEntity> putItem(EventsQuarantineEntity entity) {
-        log.info("putItem entity={}", entity);
         return Mono.fromFuture(tableQuarantine.putItem(entity)).thenReturn(entity);
     }
 
     @Override
     public Mono<EventEntity> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity) {
-        log.info("save and delete items entity={} eventEntity={}", entity, eventEntity);
 
         if (Objects.isNull(entity) || Objects.isNull(eventEntity)) {
             return Mono.empty();
@@ -73,5 +71,21 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
         transactWriteItemsEnhancedRequest.addDeleteItem(tableQuarantine, entity);
         return Mono.fromFuture(dynamoDbEnhancedClient.transactWriteItems(transactWriteItemsEnhancedRequest.build()))
                 .thenReturn(eventEntity);
+    }
+
+    @Override
+    public Mono<Page<EventsQuarantineEntity>> findByStreamId(String streamId, Map<String, AttributeValue> lastEvaluateKey, int limit) {
+        Key key = Key.builder().partitionValue(streamId).build();
+        QueryConditional queryByHashKey = keyEqualTo(key);
+        QueryEnhancedRequest.Builder queryEnhancedRequest = QueryEnhancedRequest
+                .builder()
+                .limit(limit)
+                .queryConditional(queryByHashKey);
+
+        if (!CollectionUtils.isEmpty(lastEvaluateKey)) {
+            queryEnhancedRequest.exclusiveStartKey(lastEvaluateKey);
+        }
+
+        return Mono.from(tableQuarantine.index(STREAMID_INDEX).query(queryEnhancedRequest.build()));
     }
 }

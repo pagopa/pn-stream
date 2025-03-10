@@ -142,6 +142,7 @@ public class StreamUtils {
     public EventsQuarantineEntity buildEventQuarantineEntity(StreamEntity stream, TimelineElementInternal timelineElement) {
         try {
             EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getTimelineElementId());
+            eventsQuarantineEntity.setStreamId(stream.getStreamId());
             eventsQuarantineEntity.setEvent(this.timelineElementJsonConverter.entityToJson(mapperTimeline.dtoToEntity(timelineElement)));
             return eventsQuarantineEntity;
         } catch (JsonProcessingException e) {
@@ -170,16 +171,13 @@ public class StreamUtils {
     }
 
     public StreamStatsEntity buildEntity(StatConfig statConfig, StreamStatsEnum streamStatsEnum, String paId, String streamId) {
-        log.info("Build entity for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
         StreamStatsEntity streamStatsEntity = new StreamStatsEntity(paId, streamId, streamStatsEnum);
         streamStatsEntity.setSk(buildSk(statConfig));
         streamStatsEntity.setTtl(LocalDateTime.now().plus(retrieveCustomTtl(retrieveStatsConfig(streamStatsEnum))).atZone(ZoneOffset.UTC).toEpochSecond());
-        log.info("Entity built for stream stats: {} for paId: {} and streamId: {}", streamStatsEnum, paId, streamId);
         return streamStatsEntity;
     }
 
     public Duration retrieveCustomTtl(StatConfig config) {
-        log.info("Retrieve custom ttl for config: {}", config);
         return Optional.ofNullable(config)
                 .map(config1 -> Optional.ofNullable(config.getTtl())
                         .map(DurationStyle.SIMPLE::parse)
@@ -195,7 +193,6 @@ public class StreamUtils {
     public StatConfig retrieveStatsConfig(StreamStatsEnum streamStatsEnum) {
         return Optional.ofNullable(customStatsConfig())
                 .map(configs -> {
-                    log.info("Retrieve custom stats config for stream stats: {}", configs.getConfig());
                     return configs.getConfig().get(streamStatsEnum);
                 })
                 .orElse(null);

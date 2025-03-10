@@ -41,7 +41,7 @@ public class StreamScheduleEventHandler {
             log.debug("[enter] unlockAllEvents evt={}", evt);
             MDC.put(MDC_PN_CTX_REQUEST_ID, evt.getEventKey());
             MDCUtils.addMDCToContextAndExecute(
-                    scheduleService.unlockEvents(evt, false)
+                    scheduleService.unlockAllEvents(evt)
             ).block();
 
             log.debug("[exit] unlockAllEvents evt={}", evt);

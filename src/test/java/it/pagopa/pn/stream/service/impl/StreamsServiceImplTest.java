@@ -1409,7 +1409,82 @@ class StreamsServiceImplTest {
 
         //THEN
         Mockito.verify(streamEntityDao, Mockito.times(1)).update(Mockito.any());
+        Mockito.verify(schedulerService, never()).scheduleSortEvent(any(),any(),any(),any());
     }
+
+    @Test
+    void updateEventStreamWithSortingFalse() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String xpagopapnuid = "PA-xpagopapnuid";
+        StreamRequestV27 req = new StreamRequestV27();
+        req.setTitle("titolo");
+        req.setEventType(StreamRequestV27.EventTypeEnum.STATUS);
+        req.setFilterValues(null);
+        req.setGroups(Arrays.asList("gruppo1","gruppo2"));
+        req.setWaitForAccepted(false);
+
+        UUID uuidd = UUID.randomUUID();
+        String uuid = uuidd.toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle(req.getTitle());
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(req.getEventType().toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setGroups(List.of("gruppo1"));
+        entity.setVersion("v26");
+        entity.setSorting(false);
+
+        when(streamEntityDao.getWithRetryAfter(any(), any())).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
+        Mockito.when(streamEntityDao.update(Mockito.any())).thenReturn(Mono.just(entity));
+
+        Mono<StreamMetadataResponseV27> mono = webhookService.updateEventStream(xpagopapnuid,xpagopacxid,Arrays.asList("gruppo1","gruppo2"),null, uuidd, Mono.just(req));
+        assertDoesNotThrow( () -> mono.block(d));
+
+        //THEN
+        Mockito.verify(streamEntityDao, Mockito.times(1)).update(Mockito.any());
+        Mockito.verify(schedulerService,Mockito.times(1)).scheduleSortEvent(any(),any(),any(),any());
+
+    }
+
+    @Test
+    void updateEventStreamWithSortingTrue() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String xpagopapnuid = "PA-xpagopapnuid";
+        StreamRequestV27 req = new StreamRequestV27();
+        req.setTitle("titolo");
+        req.setEventType(StreamRequestV27.EventTypeEnum.STATUS);
+        req.setFilterValues(null);
+        req.setGroups(Arrays.asList("gruppo1","gruppo2"));
+        req.setWaitForAccepted(true);
+
+        UUID uuidd = UUID.randomUUID();
+        String uuid = uuidd.toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle(req.getTitle());
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(req.getEventType().toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setGroups(List.of("gruppo1"));
+        entity.setVersion("v26");
+        entity.setSorting(true);
+
+        when(streamEntityDao.getWithRetryAfter(any(), any())).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
+        Mockito.when(streamEntityDao.update(Mockito.any())).thenReturn(Mono.just(entity));
+
+        Mono<StreamMetadataResponseV27> mono = webhookService.updateEventStream(xpagopapnuid,xpagopacxid,Arrays.asList("gruppo1","gruppo2"),null, uuidd, Mono.just(req));
+        assertDoesNotThrow( () -> mono.block(d));
+
+        //THEN
+        Mockito.verify(streamEntityDao, Mockito.times(1)).update(Mockito.any());
+        Mockito.verify(schedulerService, never()).scheduleSortEvent(any(),any(),any(),any());
+    }
+
 
     @Test
     void updateEventStreamWithGroupDelGroup() {

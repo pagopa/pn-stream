@@ -32,6 +32,7 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
     @Test
     void findByPk() throws JsonProcessingException {
         EventsQuarantineEntity entity = new EventsQuarantineEntity("streamId", "iun", "eventId");
+        entity.setStreamId("streamId");
         WebhookTimelineElementEntity<Object> timelineElementInternal = new WebhookTimelineElementEntity<>();
         timelineElementInternal.setCategory("testCategory");
         timelineElementInternal.setDetails("testDetails");
@@ -56,11 +57,50 @@ class EventsQuarantineEntityDaoIT extends BaseTest.WithLocalStack {
     }
 
     @Test
+    void findByStreamId() throws JsonProcessingException {
+        EventsQuarantineEntity entity = new EventsQuarantineEntity("streamId", "iun", "eventId");
+        entity.setStreamId("streamId");
+        WebhookTimelineElementEntity<Object> timelineElementInternal = new WebhookTimelineElementEntity<>();
+        timelineElementInternal.setCategory("testCategory");
+        timelineElementInternal.setDetails("testDetails");
+
+        EventsQuarantineEntity entity2 = new EventsQuarantineEntity("streamId", "iun2", "eventId");
+        entity2.setStreamId("streamId");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> objectHashMap = objectMapper.convertValue(timelineElementInternal, new TypeReference<>() {});
+
+        entity.setEvent(objectMapper.writeValueAsString(objectHashMap));
+        entity2.setEvent(objectMapper.writeValueAsString(objectHashMap));
+        eventsQuarantineEntityDao.putItem(entity).block();
+        eventsQuarantineEntityDao.putItem(entity2).block();
+
+        Mono<Page<EventsQuarantineEntity>> result = eventsQuarantineEntityDao.findByStreamId("streamId", new HashMap<>(), 5);
+        Page<EventsQuarantineEntity> foundEntities = result.block();
+
+        assert foundEntities != null;
+
+        Assertions.assertEquals("streamId_iun2", foundEntities.items().get(0).getPk());
+        Assertions.assertEquals("eventId", foundEntities.items().get(0).getEventId());
+        Assertions.assertEquals("streamId_iun", foundEntities.items().get(1).getPk());
+        Assertions.assertEquals("eventId", foundEntities.items().get(1).getEventId());
+
+        objectMapper.registerModule(new JavaTimeModule());
+        WebhookTimelineElementEntity webhookTimelineElementEntity = objectMapper.readValue(foundEntities.items().get(0).getEvent(), WebhookTimelineElementEntity.class);
+        WebhookTimelineElementEntity webhookTimelineElementEntity2 = objectMapper.readValue(foundEntities.items().get(1).getEvent(), WebhookTimelineElementEntity.class);
+        Assertions.assertEquals("testCategory", webhookTimelineElementEntity.getCategory());
+        Assertions.assertEquals("testCategory", webhookTimelineElementEntity2.getCategory());
+    }
+
+    @Test
     void deleteItemsByKey() {
         EventsQuarantineEntity entity = new EventsQuarantineEntity("streamId2", "iun2", "eventId2");
+        entity.setStreamId("streamId2");
         eventsQuarantineEntityDao.putItem(entity).block();
 
         EventsQuarantineEntity entity2 = new EventsQuarantineEntity("streamId2", "iun2", "eventId3");
+        entity.setStreamId("streamId2");
+
         eventsQuarantineEntityDao.putItem(entity2).block();
 
         Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
