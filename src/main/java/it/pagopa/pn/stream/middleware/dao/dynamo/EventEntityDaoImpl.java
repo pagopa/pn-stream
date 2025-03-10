@@ -69,13 +69,11 @@ public class EventEntityDaoImpl implements EventEntityDao {
 
     @Override
     public Mono<EventEntity> save(EventEntity entity) {
-        log.info("save entity={}", entity);
         return Mono.fromFuture(table.putItem(entity).thenApply(r -> entity));
     }
 
     @Override
     public Mono<EventEntity> saveWithCondition(EventEntity entity) {
-        log.info("save entity={}", entity);
 
         Expression conditionExpression = Expression.builder()
                 .expression("attribute_not_exists(#eventDescription) AND attribute_not_exists(#streamID)")

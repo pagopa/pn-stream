@@ -46,7 +46,6 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
 
     @Override
     public Mono<Void> unlockEvents(SortEventAction event, boolean resendMessage) {
-        log.info("Message received with event={} and resendMessage={}", event, resendMessage);
 
         checkInitalValues(event);
         Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
@@ -72,12 +71,37 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                     return saveEventAndRemoveFromQuarantine(event, quarantinedEventsList)
                             .then(Mono.defer(() -> {
                                 if (!CollectionUtils.isEmpty(quarantinedEventsList.lastEvaluatedKey())) {
-                                    log.info("There are more element to retrieve for eventKey [{}],start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
+                                    log.debug("There are more element to retrieve for eventKey [{}],start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
                                     return callToUnlockEvents(event, new HashMap<>(quarantinedEventsList.lastEvaluatedKey()));
                                 }
-                                log.info("No more element to retrieve for eventKey [{}]", event.getEventKey());
                                 return Mono.just(event)
                                         .flatMap(this::computeNewValues);
+                            }));
+                })
+                .doOnError(throwable -> log.error("Error in callToUnlockEvents", throwable));
+    }
+
+    @Override
+    public Mono<Void> unlockAllEvents(SortEventAction event) {
+        checkInitalValues(event);
+        Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
+        return callToUnlockAllEvents(event, lastEvaluateKey).then();
+    }
+
+    public Mono<Void> callToUnlockAllEvents(SortEventAction event, Map<String, AttributeValue> lastEvaluateKey) {
+        return eventsQuarantineEntityDao.findByStreamId(event.getEventKey(), lastEvaluateKey, pnStreamConfigs.getQueryEventQuarantineLimit())
+                .flatMap(quarantinedEventsList -> {
+                    if (CollectionUtils.isEmpty(quarantinedEventsList.items())) {
+                        log.info("No element to retrieve for eventKey [{}]", event.getEventKey());
+                        return Mono.empty();
+                    }
+                    return saveEventAndRemoveFromQuarantine(event, quarantinedEventsList)
+                            .then(Mono.defer(() -> {
+                                if (!CollectionUtils.isEmpty(quarantinedEventsList.lastEvaluatedKey())) {
+                                    log.info("There are more element to retrieve for eventKey [{}],start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
+                                    return callToUnlockAllEvents(event, new HashMap<>(quarantinedEventsList.lastEvaluatedKey()));
+                                }
+                                return Mono.empty();
                             }));
                 })
                 .doOnError(throwable -> log.error("Error in callToUnlockEvents", throwable));
@@ -98,11 +122,11 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                                 EventEntity eventEntity = streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity, timelineElementInternal.getStatusInfo().getActual(), timelineElementInternal);
                                 return eventsQuarantineEntityDao.saveAndClearElement(quarantinedEvent, eventEntity)
                                         .doOnError(throwable -> log.error("Error in save and clear element from quarantine for pk [{}] and eventId [{}]",quarantinedEvent.getPk(), quarantinedEvent.getEventId(), throwable))
-                                        .onErrorResume(ex -> Mono.error(new PnInternalException("Error during save and clear element from quarantine", ERROR_CODE_PN_GENERIC_ERROR)))
-                                        .doOnNext(entity -> log.info("saved event={}", entity))
-                                        .then();
+                                        .onErrorResume(ex -> Mono.error(new PnInternalException("Error during save and clear element from quarantine", ERROR_CODE_PN_GENERIC_ERROR)));
                             });
                 })
+                .collectList()
+                .doOnNext(list -> log.info("Saved and removed from quarantine [{}] events", list.size()))
                 .then();
     }
 

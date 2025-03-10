@@ -60,4 +60,17 @@ class SchedulerServiceImplTest {
 
         Mockito.verify(sortEventPool, Mockito.times(1)).scheduleFutureAction(action, SortEventType.UNLOCK_EVENTS);
     }
+
+    @Test
+    void testSortActionEvent2() {
+        SortEventAction action = SortEventAction.builder()
+                .eventKey("streamId")
+                .delaySeconds(null)
+                .writtenCounter(0)
+                .build();
+
+        schedulerService.scheduleSortEvent("streamId", null, 0, SortEventType.UNLOCK_ALL_EVENTS);
+
+        Mockito.verify(sortEventPool, Mockito.times(1)).scheduleFutureAction(action, SortEventType.UNLOCK_ALL_EVENTS);
+    }
 }

@@ -210,6 +210,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     @Override
     public Mono<Void> saveEvent(TimelineElementInternal timelineElementInternal) {
+        log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
                 .collectList()
@@ -225,20 +226,20 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency()))
-                .collectList().then();
+                .collectList()
+                .doOnNext(events -> log.info("Saved event: [{}] on {} streams", timelineElementInternal.getTimelineElementId(), events.size()))
+                .then();
     }
 
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
         log.debug("sortStream streamId={} timelineElementId={} category={}", streamEntity.getStreamId(), timelineElement.getTimelineElementId(), timelineElement.getCategory());
 
-        if (Arrays.stream(TimelineElementCategoryInt.SkipSortCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
-            log.info("Event {} in validation, ignoring sorting flow for stream with id={}", timelineElement.getTimelineElementId(), streamEntity.getStreamId());
-            return Mono.just(streamEntity);
+        if (Objects.isNull(streamEntity.getSorting()) || Boolean.FALSE.equals(streamEntity.getSorting())) {
+           return Mono.just(streamEntity);
         }
 
-        if (Objects.isNull(streamEntity.getSorting()) || Boolean.FALSE.equals(streamEntity.getSorting())) {
-            log.info("Stream streamId={} is not enabled for sorting, saving event directly and sending UNLOCK_EVENTS message", streamEntity.getStreamId());
-            schedulerService.scheduleSortEvent(streamEntity.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_ALL_EVENTS);
+        if (Arrays.stream(TimelineElementCategoryInt.SkipSortCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+            log.debug("Event {} in validation, ignoring sorting flow for stream with id={}", timelineElement.getTimelineElementId(), streamEntity.getStreamId());
             return Mono.just(streamEntity);
         }
 
@@ -250,9 +251,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             log.info("Event with id={} is an unlock event, saving unlock item and sending message UNLOCK_EVENTS", timelineElement.getTimelineElementId());
             NotificationUnlockedEntity notificationUnlockedEntity = streamUtils.buildNotificationUnlockedEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getNotificationSentAt());
             return notificationUnlockedEntityDao.putItem(notificationUnlockedEntity)
-                    .doOnNext(entity -> log.info("Saved unlock event for streamId={} and iun={}", stream.getStreamId(), timelineElement.getIun()))
                     .map(entity -> schedulerService.scheduleSortEvent(stream.getStreamId() + "_" + timelineElement.getIun(), null, 0, SortEventType.UNLOCK_EVENTS))
-                    .doOnNext(event -> log.info("Scheduled UNLOCK_EVENTS for streamId={} and iun={}", stream.getStreamId(), timelineElement.getIun()))
                     .map(eventKey -> stream);
         } else {
             if (streamUtils.checkIfTtlIsExpired(timelineElement.getNotificationSentAt())) {
@@ -260,11 +259,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 return Mono.just(stream);
             }
             return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
-                    .doOnNext(entity -> log.info("Founded unlock Event for eventId [{}]", timelineElement.getTimelineElementId()))
                     .switchIfEmpty(Mono.defer(() -> {
                         log.info("Unlock event not found for eventId [{}], saving in quarantine", timelineElement.getTimelineElementId());
                         return eventsQuarantineEntityDao.putItem(streamUtils.buildEventQuarantineEntity(stream, timelineElement))
-                                .doOnNext(entity -> log.info("Saved event in quarantine for eventId [{}]", timelineElement.getTimelineElementId()))
                                 .then(Mono.empty());
                     }))
                     .map(notificationUnlockedEntity -> stream);
@@ -275,7 +272,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     public Mono<StreamNotificationEntity> getNotification(String iun) {
         return streamNotificationDao.findByIun(iun)
-                .doOnNext(entity -> log.info("found notification on dynamo for iun={}", iun))
+                .doOnNext(entity -> log.info("founded notification on dynamo for iun={}", iun))
                 .switchIfEmpty(Mono.defer(() -> pnDeliveryClientReactive.getSentNotification(iun))
                         .flatMap(this::constructAndSaveNotificationEntity));
     }
@@ -315,7 +312,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         Set<String> filteredValues = retrieveFilteredValues(stream, eventType);
 
-        log.info("timelineEventCategory={} for stream={}", stream.getStreamId(), timelineEventCategory);
         if ((eventType == StreamCreationRequestV27.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
                 || (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
             return Mono.just(stream);
@@ -343,7 +339,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         }
     }
 
-    private Mono<Void> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
+    private Mono<EventEntity> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
                                                     TimelineElementInternal timelineElementInternal) {
         return streamEntityDao.updateAndGetAtomicCounter(streamEntity)
                 .flatMap(atomicCounterUpdated -> {
@@ -355,9 +351,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                     EventEntity eventEntity = streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity, newStatus, timelineElementInternal);
 
                     return eventEntityDao.save(eventEntity)
-                            .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
-                            .doOnNext(event -> log.info("saved webhookevent={}", event))
-                            .then();
+                            .doOnNext(entity -> log.debug("saved event for stream: [{}] and timelineElementId: [{}]", streamEntity.getStreamId(), timelineElementInternal.getTimelineElementId()))
+                            .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)));
                 });
     }
 
@@ -368,10 +363,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .map(thereAreMore -> {
                     if (Boolean.TRUE.equals(thereAreMore)) {
                         var purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
-                        log.info("purgeEvents streamId={} eventId={} olderThan={} there are more event to purge", streamId, eventId, olderThan);
+                        log.debug("purgeEvents streamId={} eventId={} olderThan={} there are more event to purge", streamId, eventId, olderThan);
                         schedulerService.scheduleStreamEvent(streamId, eventId, purgeDeletionWaittime, olderThan ? StreamEventType.PURGE_STREAM_OLDER_THAN : StreamEventType.PURGE_STREAM);
                     } else
-                        log.info("purgeEvents streamId={} eventId={} olderThan={} no more event to purge", streamId, eventId, olderThan);
+                        log.debug("purgeEvents streamId={} eventId={} olderThan={} no more event to purge", streamId, eventId, olderThan);
 
                     return thereAreMore;
                 })
