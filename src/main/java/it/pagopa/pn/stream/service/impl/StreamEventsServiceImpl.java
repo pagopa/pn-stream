@@ -210,6 +210,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     @Override
     public Mono<Void> saveEvent(TimelineElementInternal timelineElementInternal) {
+        log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
                 .collectList()
@@ -225,7 +226,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency()))
-                .collectList().then();
+                .collectList()
+                .doOnNext(streams -> log.info("Saved event: [{}] on {} streams", timelineElementInternal.getTimelineElementId(), streams.size()))
+                .then();
     }
 
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
@@ -269,7 +272,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     public Mono<StreamNotificationEntity> getNotification(String iun) {
         return streamNotificationDao.findByIun(iun)
-                .doOnNext(entity -> log.info("found notification on dynamo for iun={}", iun))
+                .doOnNext(entity -> log.info("founded notification on dynamo for iun={}", iun))
                 .switchIfEmpty(Mono.defer(() -> pnDeliveryClientReactive.getSentNotification(iun))
                         .flatMap(this::constructAndSaveNotificationEntity));
     }
@@ -309,7 +312,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         Set<String> filteredValues = retrieveFilteredValues(stream, eventType);
 
-        log.info("timelineEventCategory={} for stream={}", stream.getStreamId(), timelineEventCategory);
         if ((eventType == StreamCreationRequestV27.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
                 || (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
             return Mono.just(stream);
@@ -349,6 +351,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                     EventEntity eventEntity = streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity, newStatus, timelineElementInternal);
 
                     return eventEntityDao.save(eventEntity)
+                            .doOnNext(entity -> log.debug("saved event for stream: [{}] and timelineElementId: [{}]", streamEntity.getStreamId(), timelineElementInternal.getTimelineElementId()))
                             .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
                             .then();
                 });
