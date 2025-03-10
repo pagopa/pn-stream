@@ -121,7 +121,6 @@ public class StreamEntityDaoImpl implements StreamEntityDao {
 
     @Override
     public Mono<Long> updateAndGetAtomicCounter(StreamEntity streamEntity) {
-        log.info("updateAndGetAtomicCounter paId={} streamId={} counter={}", streamEntity.getPaId(), streamEntity.getStreamId(), streamEntity.getEventAtomicCounter());
         // il metodo utilizza le primitive base di dynamodbclient per poter eseguire l'update
         // atomico tramite l'action "ADD" e facendosi ritornare il nuovo valore
         Map<String, AttributeValue> key = new HashMap<>();
