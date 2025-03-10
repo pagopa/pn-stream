@@ -18,6 +18,9 @@ public class SortEventAction {
     private Integer writtenCounter;
 
     public String getStreamId(){
+        if(!eventKey.contains("_")){
+            return eventKey;
+        }
         String[] splittedEventKey = eventKey.split("_");
         if(splittedEventKey.length == 2) {
             return splittedEventKey[0];

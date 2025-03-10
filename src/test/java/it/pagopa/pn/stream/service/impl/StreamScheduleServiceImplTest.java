@@ -95,6 +95,7 @@ class StreamScheduleServiceImplTest {
                 .build();
 
         EventsQuarantineEntity quarantinedEvent = new EventsQuarantineEntity();
+        quarantinedEvent.setStreamId(streamId);
         quarantinedEvent.setPk(streamId+"_iun");
         quarantinedEvent.setEventId(UUID.randomUUID().toString());
         quarantinedEvent.setEvent("{\"iun\":\"JLPV-MWRV-VEWT-202501-W-1\",\"timelineElementId\":\"SEND_DIGITAL_DOMICILE.IUN_JLPV-MWRV-VEWT-202501-W-1.RECINDEX_0\",\"timestamp\":\"2025-01-31T16:15:34Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"category\":\"SEND_DIGITAL_DOMICILE\",\"details\":{\"deliveryDetailCode\":\"RECAG001C\",\"nextSourceAttemptsMade\":0,\"nextDigitalAddressSource\":\"PLATFORM\",\"notificationDate\":\"2025-01-31T17:40:34Z\",\"physicalAddress\":{\"foreignState\":\"ITALIA\",\"zip\":\"87100\"},\"recIndex\":0,\"registeredLetterCode\":\"97d36dd3cc1542888dced4d3e1cbdf9d\",\"responseStatus\":\"OK\",\"sendingReceipts\":[{\"id\":\"mock-d98299ff-7177-4fcb-93a2-f30281faab0c\",\"system\":\"mock-system\"}],\"sendRequestId\":\"SEND_DIGITAL_DOMICILE.IUN_HWHY-EKZD-UAPU-202501-P-1.RECINDEX_0.ATTEMPT_0\",\"sentAttemptMade\":0,\"serviceLevel\":\"REGISTERED_LETTER_890\"},\"statusInfo\":{\"actual\":\"DELIVERED\",\"statusChangeTimestamp\":\"2025-01-31T16:15:39.762656057Z\",\"statusChanged\":true},\"notificationSentAt\":\"2025-02-19T17:57:33.945285668Z\",\"ingestionTimestamp\":\"2025-01-31T16:15:39.713731463Z\",\"eventTimestamp\":\"2025-01-31T16:15:34Z\"}");
@@ -136,12 +137,13 @@ class StreamScheduleServiceImplTest {
         // Given
         String streamId = UUID.randomUUID().toString();
         SortEventAction event = SortEventAction.builder()
-                .eventKey(streamId+"_iun")
-                .delaySeconds(30)
-                .writtenCounter(0)
+                .eventKey(streamId)
+                .delaySeconds(null)
+                .writtenCounter(null)
                 .build();
 
         EventsQuarantineEntity quarantinedEvent = new EventsQuarantineEntity();
+        quarantinedEvent.setStreamId(streamId);
         quarantinedEvent.setPk(streamId+"_iun");
         quarantinedEvent.setEventId(UUID.randomUUID().toString());
         quarantinedEvent.setEvent("{\"iun\":\"JLPV-MWRV-VEWT-202501-W-1\",\"timelineElementId\":\"SEND_DIGITAL_DOMICILE.IUN_JLPV-MWRV-VEWT-202501-W-1.RECINDEX_0\",\"timestamp\":\"2025-01-31T16:15:34Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"category\":\"SEND_DIGITAL_DOMICILE\",\"details\":{\"deliveryDetailCode\":\"RECAG001C\",\"nextSourceAttemptsMade\":0,\"nextDigitalAddressSource\":\"PLATFORM\",\"notificationDate\":\"2025-01-31T17:40:34Z\",\"physicalAddress\":{\"foreignState\":\"ITALIA\",\"zip\":\"87100\"},\"recIndex\":0,\"registeredLetterCode\":\"97d36dd3cc1542888dced4d3e1cbdf9d\",\"responseStatus\":\"OK\",\"sendingReceipts\":[{\"id\":\"mock-d98299ff-7177-4fcb-93a2-f30281faab0c\",\"system\":\"mock-system\"}],\"sendRequestId\":\"SEND_DIGITAL_DOMICILE.IUN_HWHY-EKZD-UAPU-202501-P-1.RECINDEX_0.ATTEMPT_0\",\"sentAttemptMade\":0,\"serviceLevel\":\"REGISTERED_LETTER_890\"},\"statusInfo\":{\"actual\":\"DELIVERED\",\"statusChangeTimestamp\":\"2025-01-31T16:15:39.762656057Z\",\"statusChanged\":true},\"notificationSentAt\":\"2025-02-19T17:57:33.945285668Z\",\"ingestionTimestamp\":\"2025-01-31T16:15:39.713731463Z\",\"eventTimestamp\":\"2025-01-31T16:15:34Z\"}");
@@ -162,14 +164,12 @@ class StreamScheduleServiceImplTest {
 
 
         when(streamEntityDao.updateAndGetAtomicCounter(any())).thenReturn(Mono.just(0L));
-        when(eventsQuarantineEntityDao.findByPk(anyString(), any(), anyInt())).thenReturn(Mono.just(page));
+        when(eventsQuarantineEntityDao.findByStreamId(anyString(), any(), anyInt())).thenReturn(Mono.just(page));
         when(eventsQuarantineEntityDao.saveAndClearElement(any(), any())).thenReturn(Mono.empty());
         when(streamUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
         when(streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(any())).thenReturn(timelineElementInternal);
-        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
-
         // When
-        Mono<Void> result = streamScheduleService.unlockEvents(event, false);
+        Mono<Void> result = streamScheduleService.unlockAllEvents(event);
         result.block();
 
         // Then
@@ -190,6 +190,7 @@ class StreamScheduleServiceImplTest {
                 .build();
 
         EventsQuarantineEntity quarantinedEvent = new EventsQuarantineEntity();
+        quarantinedEvent.setStreamId(streamId);
         quarantinedEvent.setPk(streamId+"_iun");
         quarantinedEvent.setEventId(UUID.randomUUID().toString());
         quarantinedEvent.setEvent("{\"iun\":\"JLPV-MWRV-VEWT-202501-W-1\",\"timelineElementId\":\"SEND_DIGITAL_DOMICILE.IUN_JLPV-MWRV-VEWT-202501-W-1.RECINDEX_0\",\"timestamp\":\"2025-01-31T16:15:34Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"category\":\"SEND_DIGITAL_DOMICILE\",\"details\":{\"deliveryDetailCode\":\"RECAG001C\",\"nextSourceAttemptsMade\":0,\"nextDigitalAddressSource\":\"PLATFORM\",\"notificationDate\":\"2025-01-31T17:40:34Z\",\"physicalAddress\":{\"foreignState\":\"ITALIA\",\"zip\":\"87100\"},\"recIndex\":0,\"registeredLetterCode\":\"97d36dd3cc1542888dced4d3e1cbdf9d\",\"responseStatus\":\"OK\",\"sendingReceipts\":[{\"id\":\"mock-d98299ff-7177-4fcb-93a2-f30281faab0c\",\"system\":\"mock-system\"}],\"sendRequestId\":\"SEND_DIGITAL_DOMICILE.IUN_HWHY-EKZD-UAPU-202501-P-1.RECINDEX_0.ATTEMPT_0\",\"sentAttemptMade\":0,\"serviceLevel\":\"REGISTERED_LETTER_890\"},\"statusInfo\":{\"actual\":\"DELIVERED\",\"statusChangeTimestamp\":\"2025-01-31T16:15:39.762656057Z\",\"statusChanged\":true},\"notificationSentAt\":\"2025-02-19T17:57:33.945285668Z\",\"ingestionTimestamp\":\"2025-01-31T16:15:39.713731463Z\",\"eventTimestamp\":\"2025-01-31T16:15:34Z\"}");

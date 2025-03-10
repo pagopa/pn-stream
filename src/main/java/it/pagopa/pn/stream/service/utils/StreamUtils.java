@@ -142,6 +142,7 @@ public class StreamUtils {
     public EventsQuarantineEntity buildEventQuarantineEntity(StreamEntity stream, TimelineElementInternal timelineElement) {
         try {
             EventsQuarantineEntity eventsQuarantineEntity = new EventsQuarantineEntity(stream.getStreamId(), timelineElement.getIun(), timelineElement.getTimelineElementId());
+            eventsQuarantineEntity.setStreamId(stream.getStreamId());
             eventsQuarantineEntity.setEvent(this.timelineElementJsonConverter.entityToJson(mapperTimeline.dtoToEntity(timelineElement)));
             return eventsQuarantineEntity;
         } catch (JsonProcessingException e) {

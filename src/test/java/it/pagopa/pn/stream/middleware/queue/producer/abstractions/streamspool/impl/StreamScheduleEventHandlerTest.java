@@ -42,14 +42,14 @@ class StreamScheduleEventHandlerTest {
     void handleUnlockAllEvents() {
         // GIVEN
         SortEventAction action = buildSortEventAction();
-        Mockito.when(scheduleService.unlockEvents(any(), anyBoolean())).thenReturn(Mono.empty());
+        Mockito.when(scheduleService.unlockAllEvents(any())).thenReturn(Mono.empty());
 
         // WHEN
         handler.handleUnlockAllEvents(action);
 
         // THEN
         Mockito.verify(scheduleService, Mockito.times(1))
-                .unlockEvents(any(), anyBoolean());
+                .unlockAllEvents(any());
     }
 
     private SortEventAction buildSortEventAction() {

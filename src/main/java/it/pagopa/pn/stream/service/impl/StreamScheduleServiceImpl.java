@@ -81,6 +81,32 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                 .doOnError(throwable -> log.error("Error in callToUnlockEvents", throwable));
     }
 
+    @Override
+    public Mono<Void> unlockAllEvents(SortEventAction event) {
+        checkInitalValues(event);
+        Map<String, AttributeValue> lastEvaluateKey = new HashMap<>();
+        return callToUnlockAllEvents(event, lastEvaluateKey).then();
+    }
+
+    public Mono<Void> callToUnlockAllEvents(SortEventAction event, Map<String, AttributeValue> lastEvaluateKey) {
+        return eventsQuarantineEntityDao.findByStreamId(event.getEventKey(), lastEvaluateKey, pnStreamConfigs.getQueryEventQuarantineLimit())
+                .flatMap(quarantinedEventsList -> {
+                    if (CollectionUtils.isEmpty(quarantinedEventsList.items())) {
+                        log.info("No element to retrieve for eventKey [{}]", event.getEventKey());
+                        return Mono.empty();
+                    }
+                    return saveEventAndRemoveFromQuarantine(event, quarantinedEventsList)
+                            .then(Mono.defer(() -> {
+                                if (!CollectionUtils.isEmpty(quarantinedEventsList.lastEvaluatedKey())) {
+                                    log.info("There are more element to retrieve for eventKey [{}],start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
+                                    return callToUnlockAllEvents(event, new HashMap<>(quarantinedEventsList.lastEvaluatedKey()));
+                                }
+                                return Mono.empty();
+                            }));
+                })
+                .doOnError(throwable -> log.error("Error in callToUnlockEvents", throwable));
+    }
+
     @NotNull
     private Mono<Void> saveEventAndRemoveFromQuarantine(SortEventAction event, Page<EventsQuarantineEntity> quarantinedEventsList) {
         return Flux.fromStream(quarantinedEventsList.items().stream())

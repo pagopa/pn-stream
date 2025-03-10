@@ -126,11 +126,20 @@ Resources:
           AttributeType: "S"
         - AttributeName: "eventId"
           AttributeType: "S"
+        - AttributeName: "streamId"
+          AttributeType: "S"
       KeySchema:
         - AttributeName: "pk"
           KeyType: "HASH"
         - AttributeName: "eventId"
           KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "streamId-index"
+          KeySchema:
+            - AttributeName: "streamId"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
       BillingMode: "PAY_PER_REQUEST"
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true

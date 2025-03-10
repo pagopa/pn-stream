@@ -16,4 +16,5 @@ public interface EventsQuarantineEntityDao {
 
     Mono<EventEntity> saveAndClearElement(EventsQuarantineEntity entity, EventEntity eventEntity);
 
+    Mono<Page<EventsQuarantineEntity>> findByStreamId(String streamId, Map<String, AttributeValue> lastEvaluateKey, int limit);
 }

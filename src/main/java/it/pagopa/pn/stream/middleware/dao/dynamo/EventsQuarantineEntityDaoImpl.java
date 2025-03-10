@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.Map;
 import java.util.Objects;
 
+import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventsQuarantineEntity.STREAMID_INDEX;
 import static software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo;
 
 @Component
@@ -70,5 +71,21 @@ public class EventsQuarantineEntityDaoImpl implements EventsQuarantineEntityDao 
         transactWriteItemsEnhancedRequest.addDeleteItem(tableQuarantine, entity);
         return Mono.fromFuture(dynamoDbEnhancedClient.transactWriteItems(transactWriteItemsEnhancedRequest.build()))
                 .thenReturn(eventEntity);
+    }
+
+    @Override
+    public Mono<Page<EventsQuarantineEntity>> findByStreamId(String streamId, Map<String, AttributeValue> lastEvaluateKey, int limit) {
+        Key key = Key.builder().partitionValue(streamId).build();
+        QueryConditional queryByHashKey = keyEqualTo(key);
+        QueryEnhancedRequest.Builder queryEnhancedRequest = QueryEnhancedRequest
+                .builder()
+                .limit(limit)
+                .queryConditional(queryByHashKey);
+
+        if (!CollectionUtils.isEmpty(lastEvaluateKey)) {
+            queryEnhancedRequest.exclusiveStartKey(lastEvaluateKey);
+        }
+
+        return Mono.from(tableQuarantine.index(STREAMID_INDEX).query(queryEnhancedRequest.build()));
     }
 }
