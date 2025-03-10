@@ -227,20 +227,20 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency()))
                 .collectList()
-                .doOnNext(streams -> log.info("Saved event: [{}] on {} streams", timelineElementInternal.getTimelineElementId(), streams.size()))
+                .doOnNext(events -> log.info("Saved event: [{}] on {} streams", timelineElementInternal.getTimelineElementId(), events.size()))
                 .then();
     }
 
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {
         log.debug("sortStream streamId={} timelineElementId={} category={}", streamEntity.getStreamId(), timelineElement.getTimelineElementId(), timelineElement.getCategory());
 
-        if (Arrays.stream(TimelineElementCategoryInt.SkipSortCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
-            log.info("Event {} in validation, ignoring sorting flow for stream with id={}", timelineElement.getTimelineElementId(), streamEntity.getStreamId());
-            return Mono.just(streamEntity);
-        }
-
         if (Objects.isNull(streamEntity.getSorting()) || Boolean.FALSE.equals(streamEntity.getSorting())) {
            return Mono.just(streamEntity);
+        }
+
+        if (Arrays.stream(TimelineElementCategoryInt.SkipSortCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
+            log.debug("Event {} in validation, ignoring sorting flow for stream with id={}", timelineElement.getTimelineElementId(), streamEntity.getStreamId());
+            return Mono.just(streamEntity);
         }
 
         return manageUnlockEvent(streamEntity, timelineElement);
@@ -339,7 +339,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         }
     }
 
-    private Mono<Void> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
+    private Mono<EventEntity> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
                                                     TimelineElementInternal timelineElementInternal) {
         return streamEntityDao.updateAndGetAtomicCounter(streamEntity)
                 .flatMap(atomicCounterUpdated -> {
@@ -352,8 +352,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
                     return eventEntityDao.save(eventEntity)
                             .doOnNext(entity -> log.debug("saved event for stream: [{}] and timelineElementId: [{}]", streamEntity.getStreamId(), timelineElementInternal.getTimelineElementId()))
-                            .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
-                            .then();
+                            .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)));
                 });
     }
 

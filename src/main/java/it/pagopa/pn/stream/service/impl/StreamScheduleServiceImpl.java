@@ -71,7 +71,7 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                     return saveEventAndRemoveFromQuarantine(event, quarantinedEventsList)
                             .then(Mono.defer(() -> {
                                 if (!CollectionUtils.isEmpty(quarantinedEventsList.lastEvaluatedKey())) {
-                                    log.info("There are more element to retrieve for eventKey [{}],start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
+                                    log.debug("There are more element to retrieve for eventKey [{}],start get other items, lastEvaluateKey={}", event.getEventKey(), quarantinedEventsList.lastEvaluatedKey());
                                     return callToUnlockEvents(event, new HashMap<>(quarantinedEventsList.lastEvaluatedKey()));
                                 }
                                 return Mono.just(event)
@@ -122,10 +122,11 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
                                 EventEntity eventEntity = streamUtils.buildEventEntity(atomicCounterUpdated, streamEntity, timelineElementInternal.getStatusInfo().getActual(), timelineElementInternal);
                                 return eventsQuarantineEntityDao.saveAndClearElement(quarantinedEvent, eventEntity)
                                         .doOnError(throwable -> log.error("Error in save and clear element from quarantine for pk [{}] and eventId [{}]",quarantinedEvent.getPk(), quarantinedEvent.getEventId(), throwable))
-                                        .onErrorResume(ex -> Mono.error(new PnInternalException("Error during save and clear element from quarantine", ERROR_CODE_PN_GENERIC_ERROR)))
-                                        .then();
+                                        .onErrorResume(ex -> Mono.error(new PnInternalException("Error during save and clear element from quarantine", ERROR_CODE_PN_GENERIC_ERROR)));
                             });
                 })
+                .collectList()
+                .doOnNext(list -> log.info("Saved and removed from quarantine [{}] events", list.size()))
                 .then();
     }
 
