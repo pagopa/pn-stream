@@ -15,7 +15,6 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.DtoToEntityStreamMapper;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.EntityToDtoStreamMapper;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.EntityToStreamListDtoStreamMapper;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.externalregistry.PnExternalRegistryClient;
-import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamStatsService;
@@ -159,15 +158,11 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .map(r -> DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request))
                         .map(entity -> {
                             entity.setEventAtomicCounter(null);
+                            entity.setSorting(null);
                             return entity;
                         })
                         .flatMap(streamEntityDao::update)
-                        .map(EntityToDtoStreamMapper::entityToDto)
-                        .doOnNext(streamMetadataResponseV27 -> {
-                            if(Boolean.FALSE.equals(streamMetadataResponseV27.getWaitForAccepted())) {
-                                schedulerService.scheduleSortEvent(streamId.toString(), DELAY, 0, SortEventType.UNLOCK_ALL_EVENTS);
-                            }
-                        }))
+                        .map(EntityToDtoStreamMapper::entityToDto))
                 .doOnSuccess(newEntity -> generateAuditLog(PnAuditLogEventType.AUD_WH_UPDATE, msg, args.toArray(new String[0]))
                         .generateSuccess().log()).doOnError(err -> generateAuditLog(PnAuditLogEventType.AUD_WH_UPDATE, msg, args.toArray(new String[0]))
                         .generateFailure("error updating stream", err).log());
