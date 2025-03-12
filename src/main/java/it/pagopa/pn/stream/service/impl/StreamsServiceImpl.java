@@ -246,7 +246,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
         String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, disabledStreamId={}, streamId={}";
         String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, dto.getReplacedStreamId().toString(), dto.getReplacedStreamId().toString()};
         generateAuditLog(PnAuditLogEventType.AUD_WH_DISABLE, msg, args).log();
-        return getStreamEntityToWrite(xPagopaPnApiVersion, xPagopaPnCxId, xPagopaPnCxGroups, dto.getReplacedStreamId(), false).
+        return getStreamEntityToWrite(xPagopaPnApiVersion, xPagopaPnCxId, xPagopaPnCxGroups, dto.getReplacedStreamId(),true,  false).
                 flatMap(replacedStream -> replaceStreamEntity(streamEntity, replacedStream))
                 .doOnSuccess(newEntity -> generateAuditLog(PnAuditLogEventType.AUD_WH_DISABLE, msg, args).generateSuccess().log())
                 .doOnError(err -> generateAuditLog(PnAuditLogEventType.AUD_WH_DISABLE, msg, args).generateFailure(ERROR_CREATING_STREAM, err).log());
