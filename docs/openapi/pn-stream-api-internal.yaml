@@ -485,7 +485,7 @@ paths:
     put:
       summary: Update Stream metadata
       description: >-
-        Modifica delle configurazioni dei filtri associati a uno stream di eventi
+        Modifica delle configurazioni dei filtri associati a uno stream di eventi, non è possibile cambiare il valore del flag waitForAccepted.
       tags:
         - Streams
       operationId: updateEventStreamV27

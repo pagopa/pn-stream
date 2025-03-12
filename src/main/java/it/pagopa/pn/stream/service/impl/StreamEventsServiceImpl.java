@@ -258,6 +258,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 log.info("Unlock Event ttl is expired, skipping quarantine for [{}]", timelineElement.getTimelineElementId());
                 return Mono.just(stream);
             }
+
+            if (timelineElement.getNotificationSentAt().isBefore(stream.getActivationDate())) {
+                log.info("Stream activation date is after notificationSentAt, skipping quarantine for [{}]", timelineElement.getTimelineElementId());
+                return Mono.just(stream);
+            }
+
             return notificationUnlockedEntityDao.findByPk(stream.getStreamId() + "_" + timelineElement.getIun())
                     .switchIfEmpty(Mono.defer(() -> {
                         log.info("Unlock event not found for eventId [{}], saving in quarantine", timelineElement.getTimelineElementId());

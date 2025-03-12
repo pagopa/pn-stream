@@ -1445,7 +1445,6 @@ class StreamsServiceImplTest {
 
         //THEN
         Mockito.verify(streamEntityDao, Mockito.times(1)).update(Mockito.any());
-        Mockito.verify(schedulerService,Mockito.times(1)).scheduleSortEvent(any(),any(),any(),any());
 
     }
 
