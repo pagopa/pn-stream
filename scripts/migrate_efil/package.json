@@ -1,0 +1,20 @@
+{
+  "name": "migrate_efil",
+  "version": "1.0.0",
+  "description": "Script to migrate the streams for efil",
+  "type": "module",
+  "main": "migrate_efil.js",
+  "scripts": {
+    "start": "node index.js --envName dev --file filename.json --input-date 2025-03-19T08:08:33Z"
+  },
+  "author": "PagoPA",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.602.0",
+    "fs": "^0.0.1-security",
+    "pn-common": "file:../pn-common/"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
