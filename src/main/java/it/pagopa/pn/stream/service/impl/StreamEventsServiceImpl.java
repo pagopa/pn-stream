@@ -176,10 +176,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
     private StreamRetryAfter constructNewRetryAfterEntity(String xPagopaPnCxId, UUID streamId) {
+        Instant retryAfter = streamUtils.retrieveRetryAfter(xPagopaPnCxId);
         StreamRetryAfter retryAfterEntity = new StreamRetryAfter();
         retryAfterEntity.setPaId(xPagopaPnCxId);
         retryAfterEntity.setStreamId(streamId.toString());
-        retryAfterEntity.setRetryAfter(streamUtils.retrieveRetryAfter(xPagopaPnCxId));
+        retryAfterEntity.setRetryAfter(retryAfter);
+        retryAfterEntity.setTtl(retryAfter.getEpochSecond());
         return retryAfterEntity;
     }
 
