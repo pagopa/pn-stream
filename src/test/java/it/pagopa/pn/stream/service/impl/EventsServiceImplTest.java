@@ -221,7 +221,6 @@ class EventsServiceImplTest {
         when(streamStatsService.updateNumberOfReadingStreamStats(Mockito.any(),Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
         when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
         when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
-        Mockito.doNothing().when(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         when(eventEntityDao.findByStreamId(uuid, null)).thenReturn(Mono.just(eventEntityBatch));
         when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
 
@@ -233,12 +232,102 @@ class EventsServiceImplTest {
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
         Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(any(), eq(xpagopacxid),eq(uuid), eq(list.size()));
         Mockito.verify(streamStatsService).updateStreamStats(any(),eq(StreamStatsEnum.NUMBER_OF_REQUESTS), eq(xpagopacxid), eq(uuid));
         Mockito.verify(streamStatsService, never()).updateStreamStats(any(),eq(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS), eq(xpagopacxid), eq(uuid));
         Mockito.verify(streamStatsService, never()).updateStreamStats(any(),eq(StreamStatsEnum.RETRY_AFTER_VIOLATION),eq(xpagopacxid), eq(uuid));
 
+    }
+
+    @Test
+    void consumeEventStreamWithLastEventId() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        List<String> xPagopaPnCxGroups = new ArrayList<>();
+        String xPagopaPnApiVersion = "v10";
+
+        UUID uuidd = UUID.randomUUID();
+        String uuid = uuidd.toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle("");
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(StreamMetadataResponseV27.EventTypeEnum.STATUS.toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setVersion("v10");
+
+        List<EventEntity> list = new ArrayList<>();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setNewStatus(NotificationStatusInt.ACCEPTED.getValue());
+        eventEntity.setTimelineEventCategory(AAR_GENERATION.name());
+        eventEntity.setIun("");
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(uuid);
+        eventEntity.setEventDescription("2025-01-17T15:51:42.217434925Z_SEND_DIGITAL_FEEDBACK.IUN_DHZW-LJLR-RKXT-202501-D-1.RECINDEX_0.SOURCE_PLATFORM.REPEAT_false.ATTEMPT_0");
+        eventEntity.setElement("{\"timelineElementId\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST.IUN_EWEU-VWQE-DQTL-202501-R-1\",\"iun\":\"EWEU-VWQE-DQTL-202501-R-1\",\"statusInfo\":{\"actual\":\"IN_VALIDATION\",\"statusChangeTimestamp\":\"2025-01-28T10:51:30.521908236Z\",\"statusChanged\":false},\"notificationSentAt\":\"2025-01-28T10:51:30.521908236Z\",\"ingestionTimestamp\":\"2025-01-28T10:52:00.126937484Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"legalFactIds\":[],\"details\":{\"nextSourceAttemptsMade\":0},\"category\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST\",\"timestamp\":\"2025-01-28T10:52:00.126937484Z\",\"eventTimestamp\":\"2025-01-28T10:52:00.126937484Z\"}");
+        list.add(eventEntity);
+
+        eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now().plusMillis(1) + "_" + "timeline_event_id2");
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setTimelineEventCategory(AAR_GENERATION.name());
+        eventEntity.setNewStatus(NotificationStatusInt.ACCEPTED.getValue());
+        eventEntity.setIun("");
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(uuid);
+        eventEntity.setEventDescription("2025-01-17T15:51:42.217434925Z_SEND_DIGITAL_FEEDBACK.IUN_DHZW-LJLR-RKXT-202501-D-1.RECINDEX_0.SOURCE_PLATFORM.REPEAT_false.ATTEMPT_0");
+        eventEntity.setElement("{\"timelineElementId\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST.IUN_EWEU-VWQE-DQTL-202501-R-1\",\"iun\":\"EWEU-VWQE-DQTL-202501-R-1\",\"statusInfo\":{\"actual\":\"IN_VALIDATION\",\"statusChangeTimestamp\":\"2025-01-28T10:51:30.521908236Z\",\"statusChanged\":false},\"notificationSentAt\":\"2025-01-28T10:51:30.521908236Z\",\"ingestionTimestamp\":\"2025-01-28T10:52:00.126937484Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"legalFactIds\":[],\"details\":{\"nextSourceAttemptsMade\":0},\"category\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST\",\"timestamp\":\"2025-01-28T10:52:00.126937484Z\",\"eventTimestamp\":\"2025-01-28T10:52:00.126937484Z\"}");
+        list.add(eventEntity);
+
+        EventEntityBatch eventEntityBatch = new EventEntityBatch();
+        eventEntityBatch.setEvents(list);
+        eventEntityBatch.setStreamId(uuid);
+        eventEntityBatch.setLastEventIdRead(null);
+
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimelineElementId("id");
+        timelineElementInternal.setTimestamp(Instant.now());
+        timelineElementInternal.setIun("Iun");
+        timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
+        timelineElementInternal.setCategory(AAR_GENERATION.name());
+        timelineElementInternal.setPaId("PaId");
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
+        timelineElementInternal.setStatusInfo(null);
+
+        ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
+        timelineElementDtoInt.toBuilder()
+                .timelineElementId("id")
+                .taxId("")
+                .digitalAddress("")
+                .physicalAddress(new PhysicalAddressInt())
+                .newPhysicalAddress(new PhysicalAddressInt())
+                .denomination("")
+                .build();
+
+        when(webhookUtils.getVersion("v10")).thenReturn(10);
+        when(streamStatsService.updateNumberOfReadingStreamStats(Mockito.any(),Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
+        when(streamStatsService.updateStreamStats(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
+        when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
+        Mockito.doNothing().when(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        when(eventEntityDao.findByStreamId(uuid, "00000000000000000000000000000000000001")).thenReturn(Mono.just(eventEntityBatch));
+        when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
+
+
+        //WHEN
+        ProgressResponseElementDto res = webhookEventsService.consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, uuidd, "00000000000000000000000000000000000001").block(d);
+
+        //THEN
+        assertNotNull(res);
+        Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
+        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        Mockito.verify(streamStatsService).updateNumberOfReadingStreamStats(any(), eq(xpagopacxid),eq(uuid), eq(list.size()));
+        Mockito.verify(streamStatsService).updateStreamStats(any(),eq(StreamStatsEnum.NUMBER_OF_REQUESTS), eq(xpagopacxid), eq(uuid));
+        Mockito.verify(streamStatsService, never()).updateStreamStats(any(),eq(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS), eq(xpagopacxid), eq(uuid));
+        Mockito.verify(streamStatsService, never()).updateStreamStats(any(),eq(StreamStatsEnum.RETRY_AFTER_VIOLATION),eq(xpagopacxid), eq(uuid));
+        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -317,7 +406,6 @@ class EventsServiceImplTest {
         when(streamStatsService.updateStreamStats(any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
         when(streamStatsService.updateNumberOfReadingStreamStats(any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Mono.empty());
         when(webhookUtils.getTimelineInternalFromEvent(any())).thenReturn(timelineElementInternal);
-        Mockito.doNothing().when(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
         when(eventEntityDao.findByStreamId(uuid, null)).thenReturn(Mono.just(eventEntityBatch));
 
 
@@ -332,7 +420,6 @@ class EventsServiceImplTest {
         Mockito.verify(streamStatsService).updateStreamStats(any(),eq(StreamStatsEnum.NUMBER_OF_REQUESTS), eq(xpagopacxid), eq(uuid));
         Mockito.verify(streamStatsService, never()).updateStreamStats(any(),eq(StreamStatsEnum.NUMBER_OF_EMPTY_READINGS), eq(xpagopacxid), eq(uuid));
         Mockito.verify(streamStatsService, never()).updateStreamStats(any(),eq(StreamStatsEnum.RETRY_AFTER_VIOLATION),eq(xpagopacxid), eq(uuid));
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -1574,6 +1661,7 @@ class EventsServiceImplTest {
         Mockito.when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.empty());
         Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
         Mockito.when(notificationUnlockedEntityDao.findByPk(Mockito.any())).thenReturn(Mono.empty());
+        Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
