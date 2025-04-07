@@ -28,6 +28,8 @@
     "AttemptTimeoutSec": "7",
     "VersioningV1V2StreamLambdaProvisionedConcurrency": "1",
     "SaveEventMaxConcurrency": "100",
-    "EnableStreamStats": "true"
+    "EnableStreamStats": "true",
+    "DeliveryProgressesApiPath": "delivery-progresses-2",
+    "DeliveryProgressesApiPathNew": "delivery-progresses-new"
   }
 }
