@@ -112,7 +112,7 @@ Resources:
         AttributeName: "ttl"
         Enabled: true
       PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
+        PointInTimeRecoveryEnabled: false
 
   # Webhook Notification Table
   EventsQuarantineTable:
