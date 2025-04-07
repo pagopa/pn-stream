@@ -2,7 +2,7 @@ package it.pagopa.pn.stream.service.mapper;
 
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV26;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV27;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ class TimelineElementMapperTest {
     @Test
     void internalToExternal_validInput() {
         TimelineElementInternal internalDto = buildTimelineElementInternal();
-        TimelineElementV26 result = TimelineElementMapper.internalToExternal(internalDto);
+        TimelineElementV27 result = TimelineElementMapper.internalToExternal(internalDto);
         Assertions.assertNotNull(result);
         Assertions.assertEquals(internalDto.getTimelineElementId(), result.getElementId());
         Assertions.assertEquals(internalDto.getTimestamp(), result.getTimestamp());

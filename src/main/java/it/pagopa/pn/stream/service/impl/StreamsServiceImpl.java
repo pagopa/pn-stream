@@ -5,10 +5,10 @@ import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.exceptions.PnStreamMaxStreamsCountReachedException;
 import it.pagopa.pn.stream.exceptions.PnStreamNotFoundException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV27;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV28;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamListElement;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV27;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV27;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV28;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV28;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.DtoToEntityStreamMapper;
@@ -52,7 +52,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV27> createEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, Mono<StreamCreationRequestV27> streamCreationRequest) {
+    public Mono<StreamMetadataResponseV28> createEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, Mono<StreamCreationRequestV28> streamCreationRequest) {
         final String apiV10 = pnStreamConfigs.getFirstVersion();
         String msg = "createEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}";
         String[] args = {xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion};
@@ -63,11 +63,11 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 }).flatMap(x ->
                         (x.getReplacedStreamId() == null ? checkStreamCount(xPagopaPnCxId) : Mono.just(Boolean.TRUE)).then(Mono.just(x))
                 )
-                .map(streamCreationRequestV27 -> {
-                    if (Objects.isNull(streamCreationRequestV27.getWaitForAccepted())) {
-                        streamCreationRequestV27.setWaitForAccepted(Boolean.FALSE);
+                .map(StreamCreationRequestV28 -> {
+                    if (Objects.isNull(StreamCreationRequestV28.getWaitForAccepted())) {
+                        StreamCreationRequestV28.setWaitForAccepted(Boolean.FALSE);
                     }
-                    return streamCreationRequestV27;
+                    return StreamCreationRequestV28;
                 })
                 .flatMap(dto -> {
                     List<String> allowedGroups = CollectionUtils.isEmpty(xPagopaPnCxGroups)
@@ -84,7 +84,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 }).map(EntityToDtoStreamMapper::entityToDto).doOnSuccess(newEntity -> generateAuditLog(PnAuditLogEventType.AUD_WH_CREATE, msg, args).generateSuccess().log()).doOnError(err -> generateAuditLog(PnAuditLogEventType.AUD_WH_CREATE, msg, args).generateFailure(ERROR_CREATING_STREAM, err).log());
     }
 
-    private Mono<StreamEntity> saveOrReplace(StreamCreationRequestV27 dto, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion) {
+    private Mono<StreamEntity> saveOrReplace(StreamCreationRequestV28 dto, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion) {
         return dto.getReplacedStreamId() == null
                 ? streamEntityDao.save(DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, UUID.randomUUID().toString(), xPagopaPnApiVersion, dto))
                 : replaceStream(xPagopaPnCxId, xPagopaPnCxGroups, xPagopaPnApiVersion, dto);
@@ -109,7 +109,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV27> getEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
+    public Mono<StreamMetadataResponseV28> getEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
         String msg = "getEventStream xPagopaPnUid={}, xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={} ";
         List<String> args = Arrays.asList(xPagopaPnUid, xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString());
         generateAuditLog(PnAuditLogEventType.AUD_WH_READ, msg, args.toArray(new String[0])).log();
@@ -141,7 +141,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV27> updateEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId, Mono<StreamRequestV27> streamRequest) {
+    public Mono<StreamMetadataResponseV28> updateEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId, Mono<StreamRequestV28> streamRequest) {
         String msg = "updateEventStream xPagopaPnUid={},xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={}, request={} ";
         List<String> args = Arrays.asList(xPagopaPnUid, xPagopaPnCxId, groupString(xPagopaPnCxGroups), streamId.toString(), xPagopaPnApiVersion);
 
@@ -168,7 +168,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .generateFailure("error updating stream", err).log());
     }
 
-    private Predicate<StreamEntity> filterUpdateRequest(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, StreamRequestV27 request) {
+    private Predicate<StreamEntity> filterUpdateRequest(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, StreamRequestV28 request) {
         return r -> {
             //Da master se non restringo i gruppi sullo stream OK
             if (CollectionUtils.isEmpty(r.getGroups())
@@ -205,7 +205,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV27> disableEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
+    public Mono<StreamMetadataResponseV28> disableEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
         String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={}";
         String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString()};
         generateAuditLog(PnAuditLogEventType.AUD_WH_DISABLE, msg, args).log();
@@ -236,7 +236,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 });
     }
 
-    private Mono<StreamEntity> replaceStream(String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, StreamCreationRequestV27 dto) {
+    private Mono<StreamEntity> replaceStream(String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, StreamCreationRequestV28 dto) {
         StreamEntity streamEntity = DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, UUID.randomUUID().toString(), xPagopaPnApiVersion, dto);
         String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, disabledStreamId={}, streamId={}";
         String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, dto.getReplacedStreamId().toString(), dto.getReplacedStreamId().toString()};
