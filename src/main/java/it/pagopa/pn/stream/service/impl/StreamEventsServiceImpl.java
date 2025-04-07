@@ -121,10 +121,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .map(eventList -> {
                                     var retryAfter = pnStreamConfigs.getScheduleInterval().intValue();
                                     int currentRetryAfter = res.getLastEventIdRead() == null ? retryAfter : 0;
-                                    var purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
-                                    log.info("consumeEventStream lastEventId={} streamId={} size={} returnedlastEventId={} retryAfter={}", lastEventId, streamId, eventList.size(), (!eventList.isEmpty() ? eventList.get(eventList.size() - 1).getEventId() : "ND"), currentRetryAfter);
-                                    // schedulo la pulizia per gli eventi precedenti a quello richiesto
-                                    schedulerService.scheduleStreamEvent(res.getStreamId(), lastEventId, purgeDeletionWaittime, StreamEventType.PURGE_STREAM_OLDER_THAN);
+                                    if (StringUtils.hasText(lastEventId)) {
+                                        var purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
+                                        log.info("consumeEventStream lastEventId={} streamId={} size={} returnedlastEventId={} retryAfter={}", lastEventId, streamId, eventList.size(), (!eventList.isEmpty() ? eventList.get(eventList.size() - 1).getEventId() : "ND"), currentRetryAfter);
+                                        // schedulo la pulizia per gli eventi precedenti a quello richiesto
+                                        schedulerService.scheduleStreamEvent(res.getStreamId(), lastEventId, purgeDeletionWaittime, StreamEventType.PURGE_STREAM_OLDER_THAN);
+                                    }
                                     // ritorno gli eventi successivi all'evento di buffer, FILTRANDO quello con lastEventId visto che l'ho sicuramente già ritornato
                                     return ProgressResponseElementDto.builder()
                                             .retryAfter(currentRetryAfter)
@@ -174,10 +176,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
     private StreamRetryAfter constructNewRetryAfterEntity(String xPagopaPnCxId, UUID streamId) {
+        Instant retryAfter = streamUtils.retrieveRetryAfter(xPagopaPnCxId);
         StreamRetryAfter retryAfterEntity = new StreamRetryAfter();
         retryAfterEntity.setPaId(xPagopaPnCxId);
         retryAfterEntity.setStreamId(streamId.toString());
-        retryAfterEntity.setRetryAfter(streamUtils.retrieveRetryAfter(xPagopaPnCxId));
+        retryAfterEntity.setRetryAfter(retryAfter);
+        retryAfterEntity.setTtl(retryAfter.getEpochSecond());
         return retryAfterEntity;
     }
 
@@ -256,7 +260,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         } else {
             if (streamUtils.checkIfTtlIsExpired(timelineElement.getNotificationSentAt())) {
                 log.info("Unlock Event ttl is expired, skipping quarantine for [{}]", timelineElement.getTimelineElementId());
-                return Mono.just(stream);
+                return Mono.just(schedulerService.scheduleSortEvent(stream.getStreamId(), null, 0, SortEventType.UNLOCK_ALL_EVENTS))
+                        .thenReturn(stream);
             }
 
             if (timelineElement.getNotificationSentAt().isBefore(stream.getActivationDate())) {
