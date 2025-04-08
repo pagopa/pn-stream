@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.*;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
@@ -283,14 +283,14 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(this::constructAndSaveNotificationEntity));
     }
 
-    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV24 sentNotificationV24) {
+    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV25 SentNotificationV25) {
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
-        streamNotificationEntity.setHashKey(sentNotificationV24.getIun());
-        streamNotificationEntity.setGroup(sentNotificationV24.getGroup());
+        streamNotificationEntity.setHashKey(SentNotificationV25.getIun());
+        streamNotificationEntity.setGroup(SentNotificationV25.getGroup());
         streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
-        streamNotificationEntity.setCreationDate(sentNotificationV24.getSentAt());
+        streamNotificationEntity.setCreationDate(SentNotificationV25.getSentAt());
         return streamNotificationDao.putItem(streamNotificationEntity)
-                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", sentNotificationV24.getIun()));
+                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV25.getIun()));
     }
 
     private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
