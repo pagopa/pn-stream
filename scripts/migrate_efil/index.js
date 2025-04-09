@@ -5,14 +5,14 @@ import { readFileSync } from 'fs';
 
 
 const VALID_ENVIRONMENTS = ['dev', 'uat', 'test', 'prod', 'hotfix'];
-
+const DEFAULT_TABLE = "pn-WebhookStreams1";
 /**
  * Validates command line arguments
  * @returns {Object} Parsed and validated arguments
  */
 function validateArgs() {
     const usage = `
-Usage: node index.js --envName|-e <ambiente> --filename|-f filename.json --input-date|-d <data> --help|-h
+Usage: node index.js --envName|-e <ambiente> --filename|-f filename.json --input-date|-d <data> --tableName|-t <streamTable>--help|-h
 
 Description:
     Questo script permette di aggiornare il flag di sorting e la data di attivazione degli stream passati in input.
@@ -21,6 +21,7 @@ Parameters:
     --envName, -e       Required. Environment to update (dev|uat|test|prod|hotfix)
     --filename, -f             File con i record da aggiornare
     --input-date, -d    Data di attivazione degli stream, obbligatoriamente nel formato UTC
+    -tableName, -t      Nome della tabella degli stream
     --help, -h          Display this help message`;
 
     const args = parseArgs({
@@ -28,6 +29,7 @@ Parameters:
             envName: { type: "string", short: "e" },
             filename: {type: "string", short: "f"},
             inputDate: {type: "string", short: "d"},
+            tableName: {type: "string", short: "t"},
             help: { type: "boolean", short: "h" }
         },
         strict: true
@@ -56,6 +58,12 @@ Parameters:
         process.exit(1);
     }
 
+    if(!args.values.tableName) {
+        console.info("Using default Table");
+        args.values.tableName = DEFAULT_TABLE;
+        
+    }
+    console.log("updated stream table : ", args.values.tableName)
     console.log("inputDate : ", args.values.inputDate)
 
     if(isNaN(new Date(args.values.inputDate))) {
@@ -117,7 +125,7 @@ function printSummary(stats) {
  */
 async function main() {
     const args = validateArgs();
-    const { envName, filename, inputDate } = args;
+    const { envName, filename, inputDate, tableName } = args;
 
     // Initialize AWS client
     const coreClient = new AwsClientsWrapper('core', envName);
@@ -127,7 +135,7 @@ async function main() {
     let streamIDs = JSON.parse(readFileSync(filename, 'utf8'));
 
     const params = {
-        TableName: 'pn-WebhookStreams',
+        TableName: tableName,
         ExclusiveStartKey: null
     };
     const streams = [];
@@ -155,17 +163,18 @@ async function main() {
                 continue;
             }
 
-            console.log("record : ", record.streamId)
+            console.log("stream: ", record.streamId)
 
             let stream = streams.find(stream => stream.sortKey.S == record.streamId)
 
             if (!stream) {
+                console.log(`stream ${record.streamId} not found on table ${tableName}`);
                 continue;
             }
 
 
             const command = new UpdateItemCommand({
-                TableName: 'pn-WebhookStreams',
+                TableName: tableName,
                 Key: {
                   hashKey: {S: stream.hashKey.S},
                   sortKey: {S: record.streamId}
@@ -179,7 +188,7 @@ async function main() {
             
             await coreClient._dynamoClient.send(command);
 
-            console.log(`Migrated succeded for stream: ${record.streamId}`);
+            console.log(`Migrated succeded for stream: ${record.streamId} on table ${tableName}`);
             stats.updated++;
         } catch (error) {
             console.error(`Error processing ${record.streamId}:`, error);
