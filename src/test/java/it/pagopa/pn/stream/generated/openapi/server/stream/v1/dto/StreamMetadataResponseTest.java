@@ -4,22 +4,22 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.UUID;
 
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV27;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV28;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class StreamMetadataResponseTest {
 
-    private StreamMetadataResponseV27 response;
+    private StreamMetadataResponseV28 response;
 
     @BeforeEach
     void setUp() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        response = new StreamMetadataResponseV27();
+        response = new StreamMetadataResponseV28();
         response.setStreamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"));
         response.setActivationDate(instant);
-        response.setEventType(StreamMetadataResponseV27.EventTypeEnum.STATUS);
+        response.setEventType(StreamMetadataResponseV28.EventTypeEnum.STATUS);
         response.setFilterValues(Collections.singletonList("001"));
         response.setTitle("002");
     }
@@ -27,11 +27,11 @@ class StreamMetadataResponseTest {
     @Test
     void title() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV27 expected = StreamMetadataResponseV27.builder()
+        StreamMetadataResponseV28 expected = StreamMetadataResponseV28.builder()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
-                .eventType(StreamMetadataResponseV27.EventTypeEnum.STATUS)
+                .eventType(StreamMetadataResponseV28.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
                 .build();
@@ -46,30 +46,30 @@ class StreamMetadataResponseTest {
     @Test
     void eventType() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV27 expected = StreamMetadataResponseV27.builder()
+        StreamMetadataResponseV28 expected = StreamMetadataResponseV28.builder()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
-                .eventType(StreamMetadataResponseV27.EventTypeEnum.STATUS)
+                .eventType(StreamMetadataResponseV28.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
                 .build();
-        Assertions.assertEquals(expected, response.eventType(StreamMetadataResponseV27.EventTypeEnum.STATUS));
+        Assertions.assertEquals(expected, response.eventType(StreamMetadataResponseV28.EventTypeEnum.STATUS));
     }
 
     @Test
     void getEventType() {
-        Assertions.assertEquals(StreamMetadataResponseV27.EventTypeEnum.STATUS, response.getEventType());
+        Assertions.assertEquals(StreamMetadataResponseV28.EventTypeEnum.STATUS, response.getEventType());
     }
 
     @Test
     void filterValues() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV27 expected = StreamMetadataResponseV27.builder()
+        StreamMetadataResponseV28 expected = StreamMetadataResponseV28.builder()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
-                .eventType(StreamMetadataResponseV27.EventTypeEnum.STATUS)
+                .eventType(StreamMetadataResponseV28.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
                 .build();
@@ -84,11 +84,11 @@ class StreamMetadataResponseTest {
     @Test
     void streamId() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV27 expected = StreamMetadataResponseV27.builder()
+        StreamMetadataResponseV28 expected = StreamMetadataResponseV28.builder()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
-                .eventType(StreamMetadataResponseV27.EventTypeEnum.STATUS)
+                .eventType(StreamMetadataResponseV28.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
                 .build();
@@ -103,11 +103,11 @@ class StreamMetadataResponseTest {
     @Test
     void activationDate() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV27 expected = StreamMetadataResponseV27.builder()
+        StreamMetadataResponseV28 expected = StreamMetadataResponseV28.builder()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
-                .eventType(StreamMetadataResponseV27.EventTypeEnum.STATUS)
+                .eventType(StreamMetadataResponseV28.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
                 .build();
@@ -122,11 +122,11 @@ class StreamMetadataResponseTest {
     @Test
     void testEquals() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV27 expected = StreamMetadataResponseV27.builder()
+        StreamMetadataResponseV28 expected = StreamMetadataResponseV28.builder()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
-                .eventType(StreamMetadataResponseV27.EventTypeEnum.STATUS)
+                .eventType(StreamMetadataResponseV28.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
                 .build();
