@@ -10,14 +10,14 @@ Questo script permette di aggiornare il flag di sorting e la data di attivazione
 ## Utilizzo
 
 ```bash
-node index.js --envName|-e <ambiente> --filename|-f filename.json --input-date|-d <data> --tableName|-t <streamTable> --help|-h
+node index.js --envName|-e <ambiente> --filename|-f filename.json --inputDate|-d <data> --tableName|-t <streamTable> --help|-h
 ```
 
 ### Parametri
 
 - `--envName`, `-e`: Ambiente di destinazione (dev|uat|test|prod|hotfix)
 - `--filename`, `-f`: Il file con i record da aggiornare
-- `--input-date`, `-d`: Data di attivazione degli stream, obbligatoriamente nel formato UTC
+- `--inputDate`, `-d`: Data di attivazione degli stream, obbligatoriamente nel formato UTC
 - `--tableName`, `-t`:      Nome della tabella degli stream
 - `--help`, `-h`: Visualizza il messaggio di aiuto
 

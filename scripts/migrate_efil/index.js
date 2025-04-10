@@ -12,15 +12,15 @@ const DEFAULT_TABLE = "pn-WebhookStreams1";
  */
 function validateArgs() {
     const usage = `
-Usage: node index.js --envName|-e <ambiente> --filename|-f filename.json --input-date|-d <data> --tableName|-t <streamTable>--help|-h
+Usage: node index.js --envName|-e <ambiente> --filename|-f filename.json --inputDate|-d <data> --tableName|-t <streamTable>--help|-h
 
 Description:
     Questo script permette di aggiornare il flag di sorting e la data di attivazione degli stream passati in input.
 
 Parameters:
     --envName, -e       Required. Environment to update (dev|uat|test|prod|hotfix)
-    --filename, -f             File con i record da aggiornare
-    --input-date, -d    Data di attivazione degli stream, obbligatoriamente nel formato UTC
+    --filename, -f      File con i record da aggiornare
+    --inputDate, -d     Data di attivazione degli stream, obbligatoriamente nel formato UTC
     -tableName, -t      Nome della tabella degli stream
     --help, -h          Display this help message`;
 
