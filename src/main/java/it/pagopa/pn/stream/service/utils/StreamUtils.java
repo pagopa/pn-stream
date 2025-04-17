@@ -186,6 +186,7 @@ public class StreamUtils {
     }
 
     public CustomStatsConfig customStatsConfig(){
+        //TODO Rimuovere ora?
         return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getStats().getCustomTtlParameterName(), CustomStatsConfig.class)
                 .orElse(null);
     }

@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.service.impl;
 
+import it.pagopa.pn.commons.configs.EnvironmentConfig;
 import it.pagopa.pn.commons.log.PnAuditLogBuilder;
 import it.pagopa.pn.commons.log.PnAuditLogEvent;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
@@ -10,10 +11,10 @@ import it.pagopa.pn.stream.exceptions.PnTooManyRequestException;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter;
-import it.pagopa.pn.stream.service.StreamStatsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
+import it.pagopa.pn.stream.utils.MetricUtils;
+import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.helpers.MessageFormatter;
@@ -25,13 +26,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-@Slf4j
+@CustomLog
 @RequiredArgsConstructor
 public abstract class PnStreamServiceImpl {
 
     protected final StreamEntityDao streamEntityDao;
     protected final PnStreamConfigs pnStreamConfigs;
-    protected final StreamStatsService streamStatsService;
     protected final StreamUtils streamUtils;
 
 
@@ -78,8 +78,7 @@ public abstract class PnStreamServiceImpl {
         if (Instant.now().isBefore(entityRetry.getRetryAfter())) {
             log.warn("Pa {} version {} is trying to access streamId {}: retry after not expired", xPagopaPnCxId, apiVersion(xPagopaPnApiVersion), streamId);
             if(Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
-                return streamStatsService.updateStreamStats(streamUtils.customStatsConfig(), StreamStatsEnum.RETRY_AFTER_VIOLATION, xPagopaPnCxId, streamId.toString())
-                        .then(Mono.defer(() -> ignoreOrThrowException(streamEntity)));
+                log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.RETRY_AFTER_VIOLATION.name(), "1", Instant.now().toString())), "Logged metric : " + StreamStatsEnum.RETRY_AFTER_VIOLATION.name());
             }
             return ignoreOrThrowException(streamEntity);
         }
