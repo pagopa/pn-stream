@@ -3,14 +3,12 @@ package it.pagopa.pn.stream.service.impl;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.address.PhysicalAddressInt;
 import it.pagopa.pn.stream.dto.ext.datavault.ConfidentialTimelineElementDtoInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
-import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import it.pagopa.pn.stream.dto.timeline.StatusInfoInternal;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
@@ -61,28 +59,19 @@ class EventsServiceImplTest {
     @Mock
     private StreamEntityDao streamEntityDao;
     @Mock
-    private StreamStatsDao streamStatsDao;
-    @Mock
     private PnStreamConfigs pnStreamConfigs;
     @Mock
-    private PnStreamConfigs.Stats stats;
-    @Mock
     private SchedulerService schedulerService;
-    @Mock
-    private AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation;
     @Mock
     private StreamUtils webhookUtils;
     @Mock
     private TimelineService timelineService;
     @Mock
     private ConfidentialInformationService confidentialInformationService;
-
     @Mock
     private StreamNotificationDao streamNotificationDao;
-
     @Mock
     private PnDeliveryClientReactive pnDeliveryClientReactive;
-
     @Mock
     private UnlockedNotificationEntityDao notificationUnlockedEntityDao;
     @Mock
@@ -102,10 +91,6 @@ class EventsServiceImplTest {
         when(pnStreamConfigs.getTtl()).thenReturn(Duration.ofDays(30));
         when(pnStreamConfigs.getFirstVersion()).thenReturn("v10");
         when(pnStreamConfigs.getListCategoriesPa()).thenReturn(List.of("AAR_GENERATION","REQUEST_ACCEPTED","SEND_DIGITAL_DOMICILE"));
-        when(pnStreamConfigs.getStats()).thenReturn(stats);
-        when(pnStreamConfigs.getStats().getTtl()).thenReturn(Duration.ofDays(30));
-        when(pnStreamConfigs.getStats().getSpanUnit()).thenReturn(1);
-        when(pnStreamConfigs.getStats().getTimeUnit()).thenReturn(StatsTimeUnit.DAYS);
         when(pnStreamConfigs.getUnlockedEventTtl()).thenReturn(Duration.ofDays(1));
         when(pnStreamConfigs.getNotificationSla()).thenReturn(Duration.ofDays(2));
         when(pnStreamConfigs.getMaxTtl()).thenReturn(Duration.ofDays(2));
@@ -492,7 +477,6 @@ class EventsServiceImplTest {
         when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
         when(eventEntityDao.findByStreamId(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(eventEntityBatch));
         when(webhookUtils.getVersion(xPagopaPnApiVersion)).thenReturn(10);
-        when(ssmParameterConsumerActivation.getParameterValue(any(), any())).thenReturn(Optional.empty());
         when(streamEntityDao.updateStreamRetryAfter(any())).thenReturn(Mono.empty());
 
 
