@@ -10,7 +10,7 @@ public class MetricUtils {
 
     private MetricUtils() { }
 
-    public static GeneralMetric generateGeneralMetric(String paId, String streamId, String metricName, String metricValue, String timeline) {
+    public static GeneralMetric generateGeneralMetric(String paId, String streamId, String metricName, int metricValue, long timeline) {
         GeneralMetric generalMetric = new GeneralMetric();
         generalMetric.setNamespace("stream-statistics");
         generalMetric.setDimensions(List.of(new Dimension("paId", paId), new Dimension("streamId", streamId)));
