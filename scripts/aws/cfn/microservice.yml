@@ -450,12 +450,8 @@ Resources:
         ContainerEnvEntry22: !Sub 'PN_STREAM_NOTIFICATIONSLA=${notificationSla}'
         ContainerEnvEntry23: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
         ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
-        ContainerEnvEntry25: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
-        ContainerEnvEntry26: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
-        ContainerEnvEntry27: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
-        ContainerEnvEntry28: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
-        ContainerEnvEntry29: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
-        ContainerEnvEntry30: !Sub 'PN_STREAM_ENABLESTREAMSTATS=${EnableStreamStats}'
+        ContainerEnvEntry25: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
+        ContainerEnvEntry26: !Sub 'PN_STREAM_ENABLESTREAMSTATS=${EnableStreamStats}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -515,7 +511,6 @@ Resources:
               - ssm:GetParameter
               - ssm:GetParameters
             Resource:
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${CustomStatsTtlParameterName}'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RetryParameterPrefix}*'
 
 

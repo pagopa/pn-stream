@@ -1,7 +1,6 @@
 package it.pagopa.pn.stream.config;
 
 import it.pagopa.pn.commons.conf.SharedAutoConfiguration;
-import it.pagopa.pn.stream.dto.stats.StatsTimeUnit;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

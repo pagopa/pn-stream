@@ -78,7 +78,7 @@ public abstract class PnStreamServiceImpl {
         if (Instant.now().isBefore(entityRetry.getRetryAfter())) {
             log.warn("Pa {} version {} is trying to access streamId {}: retry after not expired", xPagopaPnCxId, apiVersion(xPagopaPnApiVersion), streamId);
             if(Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
-                log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.RETRY_AFTER_VIOLATION.name(), 1, Instant.now().toEpochMilli())));
+                log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.RETRY_AFTER_VIOLATION.name(), 1, Instant.now().toEpochMilli())), "Logging metric : " + StreamStatsEnum.RETRY_AFTER_VIOLATION.name());
             }
             return ignoreOrThrowException(streamEntity);
         }
