@@ -93,6 +93,55 @@ Resources:
         HasDLQ: "false"
         QueueHasAlarm: "true"
 
+  # WebhookStreams table
+  PnStreamWebhookStreamsTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-WebhookStreams-2'
+      AttributeDefinitions:
+        - AttributeName: "hashKey"
+          AttributeType: "S"
+        - AttributeName: "sortKey"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "hashKey"
+          KeyType: "HASH"
+        - AttributeName: "sortKey"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+      KinesisStreamSpecification:
+        StreamArn: !Ref CdcKinesisSourceStreamArn
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # WebhookEvents table
+  PnStreamWebhookEventsTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-WebhookEvents-2'
+      AttributeDefinitions:
+        - AttributeName: "hashKey"
+          AttributeType: "S"
+        - AttributeName: "sortKey"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "hashKey"
+          KeyType: "HASH"
+        - AttributeName: "sortKey"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
   # Webhook Notification Table
   StreamNotificationTable:
@@ -249,6 +298,20 @@ Resources:
         DelaySeconds: 1
 
 Outputs:
+
+  PnStreamWebhookStreamsTableName:
+    Description: Name of dynamodb table containing
+    Value: !Ref PnStreamWebhookStreamsTable
+  PnStreamWebhookStreamsTableArn:
+    Description: ARN of dynamodb table containing
+    Value: !Sub '${PnStreamWebhookStreamsTable.Arn}'
+
+  PnStreamWebhookEventsTableName:
+    Description: Name of dynamodb table containing
+    Value: !Ref PnStreamWebhookEventsTable
+  PnStreamWebhookEventsTableArn:
+    Description: ARN of dynamodb table containing
+    Value: !Sub '${PnStreamWebhookEventsTable.Arn}'
 
   StreamNotificationTableName:
     Description: Name of dynamodb table containing
