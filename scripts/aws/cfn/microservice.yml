@@ -56,6 +56,12 @@ Parameters:
     Type: String
     Description: 'keep track of used projects commitIds'
 
+  ParameterStoreLoggingLevel:
+    Type: String
+    Description: 'Logging level for Parameter Store common lib operation'
+    AllowedValues: ['ERROR', 'INFO']
+    Default: 'ERROR'
+
   # Instance parameters
   # 256 (.25 vCPU) - Available memory values: 0.5GB, 1GB, 2GB
   # 512 (.5 vCPU) - Available memory values: 1GB, 2GB, 3GB, 4GB
@@ -452,6 +458,7 @@ Resources:
         ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
         ContainerEnvEntry25: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
         ContainerEnvEntry26: !Sub 'PN_STREAM_ENABLESTREAMSTATS=${EnableStreamStats}'
+        ContainerEnvEntry32: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
