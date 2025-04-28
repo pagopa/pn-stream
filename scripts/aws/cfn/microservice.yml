@@ -400,12 +400,6 @@ Parameters:
     Description: 'Max concurrency for save events on streams'
     Default: 100
 
-  EnableStreamStats:
-    Type: String
-    Description: 'Enable stream stats'
-    Default: 'true'
-    AllowedValues: [ true, false ]
-
 Resources:
 
   # pn-stream microservice
@@ -457,8 +451,7 @@ Resources:
         ContainerEnvEntry23: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
         ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
         ContainerEnvEntry25: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
-        ContainerEnvEntry26: !Sub 'PN_STREAM_ENABLESTREAMSTATS=${EnableStreamStats}'
-        ContainerEnvEntry32: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
+        ContainerEnvEntry26: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName

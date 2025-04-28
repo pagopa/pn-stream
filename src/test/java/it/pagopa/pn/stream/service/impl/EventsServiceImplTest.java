@@ -96,7 +96,6 @@ class EventsServiceImplTest {
         when(pnStreamConfigs.getNotificationSla()).thenReturn(Duration.ofDays(2));
         when(pnStreamConfigs.getMaxTtl()).thenReturn(Duration.ofDays(2));
         when(pnStreamConfigs.getSaveEventMaxConcurrency()).thenReturn(1);
-        when(pnStreamConfigs.getEnableStreamStats()).thenReturn(Boolean.TRUE);
     }
 
     private List<TimelineElementInternal> generateTimeline(String iun, String paId){
