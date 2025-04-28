@@ -12,7 +12,6 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.So
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamScheduleService;
-import it.pagopa.pn.stream.service.StreamStatsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -38,8 +37,8 @@ public class StreamScheduleServiceImpl extends PnStreamServiceImpl implements St
     private final SchedulerService schedulerService;
     public StreamScheduleServiceImpl(StreamEntityDao streamEntityDao, PnStreamConfigs pnStreamConfigs,
                                      EventsQuarantineEntityDao eventsQuarantineEntityDao, SchedulerService schedulerService,
-                                     StreamUtils streamUtils, StreamStatsService streamStatsService) {
-        super(streamEntityDao, pnStreamConfigs, streamStatsService, streamUtils);
+                                     StreamUtils streamUtils) {
+        super(streamEntityDao, pnStreamConfigs, streamUtils);
         this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
         this.schedulerService = schedulerService;
     }

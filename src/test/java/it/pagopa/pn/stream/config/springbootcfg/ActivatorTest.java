@@ -11,14 +11,11 @@ class ActivatorTest {
     @Mock
     private AwsConfigs awsConfigs;
     @Mock
-    private SsmClient ssmClient;
-    @Mock
     private ExceptionHelper exceptionHelper;
 
     @Test
     void activatorTest(){
         Assertions.assertDoesNotThrow( ()  -> {
-            new AbstractCachedSsmParameterConsumerActivation(ssmClient);
             new AwsConfigsActivation();
             new AwsServicesClientsConfigActivation(awsConfigs);
             new ClockConfigActivation();

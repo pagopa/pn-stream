@@ -13,7 +13,6 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.DtoToEntityStreamMapper;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.externalregistry.PnExternalRegistryClient;
 import it.pagopa.pn.stream.service.SchedulerService;
-import it.pagopa.pn.stream.service.StreamStatsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -41,7 +40,6 @@ class StreamsServiceImplTest {
     private SchedulerService schedulerService;
     private StreamsServiceImpl webhookService;
     private PnExternalRegistryClient pnExternalRegistryClient;
-    private StreamStatsService streamStatsService;
 
     private final int maxStreams = 5;
 
@@ -53,7 +51,6 @@ class StreamsServiceImplTest {
         schedulerService = Mockito.mock(SchedulerService.class);
         Mockito.mock(StreamUtils.class);
         pnExternalRegistryClient = Mockito.mock(PnExternalRegistryClient.class);
-        streamStatsService = Mockito.mock(StreamStatsService.class);
 
         when(pnStreamConfigs.getScheduleInterval()).thenReturn(1000L);
         when(pnStreamConfigs.getMaxLength()).thenReturn(10);
@@ -66,7 +63,7 @@ class StreamsServiceImplTest {
         when(pnStreamConfigs.getDeltaCounter()).thenReturn(1000);
 
         webhookService = new StreamsServiceImpl(streamEntityDao, schedulerService, mock(StreamUtils.class), pnStreamConfigs
-            ,pnExternalRegistryClient, streamStatsService);
+            ,pnExternalRegistryClient);
 
         new DtoToEntityStreamMapper(pnStreamConfigs);
     }
