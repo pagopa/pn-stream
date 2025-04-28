@@ -8,7 +8,6 @@ info:
   title: 'Piattaforma Notifiche: API B2B avanzamento notifiche'
   x-summary: 'API B2B avanzamento notifiche'
   version: '1.0.0'
-  x-api-id: pn-stream-api-internal-b2b-stream # NO EXTERNAL
   #  x-api-id: pn-stream-api-external-b2b-stream # ONLY EXTERNAL
   contact:
     email: pn-supporto-enti@pagopa.it
