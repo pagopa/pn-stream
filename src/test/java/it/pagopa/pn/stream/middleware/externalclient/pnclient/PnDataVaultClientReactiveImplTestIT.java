@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.MockAWSObjectsTest;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.AnalogDomicile;
-import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.BaseRecipientDto;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.ConfidentialTimelineElementDto;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.ConfidentialTimelineElementId;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.datavault.PnDataVaultClientReactiveImpl;

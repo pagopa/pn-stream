@@ -8,12 +8,6 @@ const ConsumeEventStreamHandler  = require("./handlers/consumeEventStreamHandler
 const DisableEventStreamHandler = require("./handlers/disableEventStreamHandler.js");
 const BaseHandler = require("./handlers/baseHandler.js");
 
-const AWSXRay = require("aws-xray-sdk-core");
-
-AWSXRay.captureHTTPsGlobal(require('http'));
-AWSXRay.captureHTTPsGlobal(require('https'));
-AWSXRay.capturePromise();
-
 const { generateProblem } = require("./lib/utils");
 
 exports.eventHandler = async (event, context) => {
