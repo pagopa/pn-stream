@@ -292,7 +292,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
         streamNotificationEntity.setHashKey(sentNotificationV24.getIun());
         streamNotificationEntity.setGroup(sentNotificationV24.getGroup());
-        streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).toEpochMilli());
+        streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
         streamNotificationEntity.setCreationDate(sentNotificationV24.getSentAt());
         return streamNotificationDao.putItem(streamNotificationEntity)
                 .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", sentNotificationV24.getIun()));
