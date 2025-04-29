@@ -63,11 +63,11 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 }).flatMap(x ->
                         (x.getReplacedStreamId() == null ? checkStreamCount(xPagopaPnCxId) : Mono.just(Boolean.TRUE)).then(Mono.just(x))
                 )
-                .map(StreamCreationRequestV28 -> {
-                    if (Objects.isNull(StreamCreationRequestV28.getWaitForAccepted())) {
-                        StreamCreationRequestV28.setWaitForAccepted(Boolean.FALSE);
+                .map(streamCreationRequestV28 -> {
+                    if (Objects.isNull(streamCreationRequestV28.getWaitForAccepted())) {
+                        streamCreationRequestV28.setWaitForAccepted(Boolean.FALSE);
                     }
-                    return StreamCreationRequestV28;
+                    return streamCreationRequestV28;
                 })
                 .flatMap(dto -> {
                     List<String> allowedGroups = CollectionUtils.isEmpty(xPagopaPnCxGroups)
