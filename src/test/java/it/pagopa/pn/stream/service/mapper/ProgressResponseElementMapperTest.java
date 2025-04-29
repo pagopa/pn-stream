@@ -1,6 +1,6 @@
 package it.pagopa.pn.stream.service.mapper;
 
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV27;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV28;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.RefusedReasonEntity;
 import java.time.Instant;
@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV26.REQUEST_REFUSED;
+import static it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV27.REQUEST_REFUSED;
 
 class ProgressResponseElementMapperTest {
 
@@ -29,7 +29,7 @@ class ProgressResponseElementMapperTest {
         eventEntity.setTimelineEventCategory(REQUEST_REFUSED.getValue());
 
         eventEntity.setValidationErrors( List.of(refusedReasonEntity) );
-        ProgressResponseElementV27 progressResponseElement = ProgressResponseElementMapper.internalToExternal(eventEntity);
+        ProgressResponseElementV28 progressResponseElement = ProgressResponseElementMapper.internalToExternal(eventEntity);
 
         Assertions.assertEquals( ERROR_CODE, progressResponseElement.getValidationErrors().get( 0 ).getErrorCode() );
         Assertions.assertEquals( DETAIL, progressResponseElement.getValidationErrors().get( 0 ).getDetail() );

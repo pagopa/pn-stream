@@ -26,7 +26,7 @@ public class PnStreamsController implements StreamsApi {
     private final StreamsService streamsService;
 
     @Override
-    public Mono<ResponseEntity<StreamMetadataResponseV27>> createEventStreamV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, Mono<StreamCreationRequestV27> streamCreationRequest, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<StreamMetadataResponseV28>> createEventStreamV28(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, Mono<StreamCreationRequestV28> streamCreationRequest, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
         log.info("[enter] createEventStream xPagopaPnCxId={} xPagopaPnCxGroups={}", xPagopaPnCxId, xPagopaPnCxGroups);
 
@@ -37,7 +37,7 @@ public class PnStreamsController implements StreamsApi {
 
 
     @Override
-    public Mono<ResponseEntity<Void>> deleteEventStreamV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion,  final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Void>> deleteEventStreamV28(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion,  final ServerWebExchange exchange) {
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
         log.info("[enter] deleteEventStream xPagopaPnCxId={} uuid={}", xPagopaPnCxId, streamId.toString());
 
@@ -48,7 +48,7 @@ public class PnStreamsController implements StreamsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<StreamMetadataResponseV27>> getEventStreamV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion,  final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<StreamMetadataResponseV28>> getEventStreamV28(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion,  final ServerWebExchange exchange) {
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
         log.info("[enter] getEventStream xPagopaPnCxId={} streamId={}", xPagopaPnCxId, streamId.toString());
 
@@ -59,13 +59,13 @@ public class PnStreamsController implements StreamsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<StreamListElement>>> listEventStreamsV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Flux<StreamListElement>>> listEventStreamsV28(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
         log.info("[enter] listEventStreams xPagopaPnCxId={}", xPagopaPnCxId);
         return Mono.fromSupplier(() -> ResponseEntity.ok(streamsService.listEventStream(xPagopaPnUid, xPagopaPnCxId,xPagopaPnCxGroups, xPagopaPnApiVersion)));
     }
 
     @Override
-    public Mono<ResponseEntity<StreamMetadataResponseV27>> updateEventStreamV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, Mono<StreamRequestV27> streamRequest, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<StreamMetadataResponseV28>> updateEventStreamV28(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, Mono<StreamRequestV28> streamRequest, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, final ServerWebExchange exchange) {
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
         log.info("[enter] updateEventStream xPagopaPnCxId={} xPagopaPnCxType={} xPagopaPnCxGroups={} streamId={}", xPagopaPnCxId, xPagopaPnCxType,xPagopaPnCxGroups==null?"":String.join(",", xPagopaPnCxGroups), streamId.toString());
 
@@ -76,7 +76,7 @@ public class PnStreamsController implements StreamsApi {
     }
 
     @Override
-    public Mono<ResponseEntity<StreamMetadataResponseV27>> disableEventStreamV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion,  final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<StreamMetadataResponseV28>> disableEventStreamV28(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion,  final ServerWebExchange exchange) {
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
         log.info("[enter] disableEventStream xPagopaPnCxId={} uuid={} xPagopaPnCxGroups={}", xPagopaPnCxId, streamId.toString(), xPagopaPnCxGroups==null?"":String.join(",", xPagopaPnCxGroups));
 

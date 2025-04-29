@@ -1,9 +1,9 @@
 package it.pagopa.pn.stream.service.mapper;
 
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV26;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV27;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV28;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.RefusedReason;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV26;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV27;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.RefusedReasonEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.EntityToDtoRefusedReasonMapper;
@@ -16,14 +16,14 @@ public class ProgressResponseElementMapper {
     private ProgressResponseElementMapper() {
     }
 
-    public static ProgressResponseElementV27 internalToExternal(EventEntity ev) {
-        ProgressResponseElementV27 progressResponseElement = new ProgressResponseElementV27();
+    public static ProgressResponseElementV28 internalToExternal(EventEntity ev) {
+        ProgressResponseElementV28 progressResponseElement = new ProgressResponseElementV28();
         progressResponseElement.setEventId(ev.getEventId());
         progressResponseElement.setTimestamp(ev.getTimestamp());
         progressResponseElement.setIun(ev.getIun());
         progressResponseElement.setNewStatus(ev.getNewStatus() != null ? NotificationStatusV26.valueOf(ev.getNewStatus()) : null);
         progressResponseElement.setNotificationRequestId(ev.getNotificationRequestId());
-        progressResponseElement.setTimelineEventCategory(ev.getTimelineEventCategory() !=null ? TimelineElementCategoryV26.fromValue(ev.getTimelineEventCategory()) : null);
+        progressResponseElement.setTimelineEventCategory(ev.getTimelineEventCategory() !=null ? TimelineElementCategoryV27.fromValue(ev.getTimelineEventCategory()) : null);
         progressResponseElement.setChannel(ev.getChannel());
         progressResponseElement.setRecipientIndex(ev.getRecipientIndex());
         progressResponseElement.setLegalfactIds(ev.getLegalfactIds());
