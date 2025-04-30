@@ -224,9 +224,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
-                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency()))
-                .collectList()
-                .doOnNext(events -> log.info("Saved event: [{}] on {} streams", timelineElementInternal.getTimelineElementId(), events.size()))
+                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
+                        .collectList()
+                        .flatMap(events -> Mono.just(Tuples.of(res.getT1(),events))))
+                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), res.getT1().size(), Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
                 .then();
     }
 
