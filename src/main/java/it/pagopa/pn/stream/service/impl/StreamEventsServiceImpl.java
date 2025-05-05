@@ -3,7 +3,6 @@ package it.pagopa.pn.stream.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import it.pagopa.pn.commons.configs.EnvironmentConfig;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
@@ -233,7 +232,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .collectList()
                         .flatMap(events -> Mono.just(Tuples.of(res.getT1(),events))))
-                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), res.getT1().size(), Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
+                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
                 .then();
     }
 

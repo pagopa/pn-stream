@@ -14,7 +14,7 @@ public class MetricUtils {
     public static GeneralMetric generateGeneralMetric(String paId, String streamId, String metricName, int metricValue, long timeline) {
         GeneralMetric generalMetric = new GeneralMetric();
         generalMetric.setNamespace("stream-statistics");
-        generalMetric.setDimensions(List.of(new Dimension("paId", paId), new Dimension("streamId", streamId)));
+        generalMetric.setDimensions(List.of(new Dimension(paId, paId), new Dimension(streamId, streamId)));
         generalMetric.setMetrics(List.of(new Metric(metricName, metricValue)));
         generalMetric.setTimestamp(timeline);
         return generalMetric;

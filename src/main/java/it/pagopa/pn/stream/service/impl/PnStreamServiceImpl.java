@@ -1,6 +1,5 @@
 package it.pagopa.pn.stream.service.impl;
 
-import it.pagopa.pn.commons.configs.EnvironmentConfig;
 import it.pagopa.pn.commons.log.PnAuditLogBuilder;
 import it.pagopa.pn.commons.log.PnAuditLogEvent;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
