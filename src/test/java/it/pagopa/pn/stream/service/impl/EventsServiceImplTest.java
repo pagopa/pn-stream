@@ -1,7 +1,7 @@
 package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.commons.exceptions.PnInternalException;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
@@ -1384,7 +1384,7 @@ class EventsServiceImplTest {
         Mockito.when(timelineElementInternal.getCategory())
                 .thenReturn(TimelineElementCategoryInt.REQUEST_ACCEPTED.name());
 
-        SentNotificationV24 sentNotification = new SentNotificationV24();
+        SentNotificationV25 sentNotification = new SentNotificationV25();
         sentNotification.setGroup(authGroup);
         StreamNotificationEntity streamNotification = new StreamNotificationEntity();
         streamNotification.setGroup(authGroup);
