@@ -3,7 +3,6 @@ package it.pagopa.pn.stream.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import it.pagopa.pn.commons.configs.EnvironmentConfig;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
@@ -97,7 +96,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Cannot consume stream")))
                 .flatMap(streamEntity -> {
                     if (Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
-                        log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_REQUESTS.name(), 1, Instant.now().toEpochMilli())), "Logging metric : " + StreamStatsEnum.NUMBER_OF_REQUESTS.name());
+                        log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_REQUESTS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_REQUESTS.name());
                     }
                     return Mono.just(streamEntity);
                 })
@@ -143,10 +142,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV27> eventList) {
         if(Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
             if (eventList.isEmpty()) {
-                log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli())), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
+                log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
                 return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
             }
-            log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_READINGS.name(), eventList.size(), Instant.now().toEpochMilli())), "Logging metric : " + StreamStatsEnum.NUMBER_OF_READINGS.name());
+            log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_READINGS.name(), eventList.size(), Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_READINGS.name());
             return Mono.empty();
         }
         return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
@@ -233,7 +232,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .collectList()
                         .flatMap(events -> Mono.just(Tuples.of(res.getT1(),events))))
-                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), res.getT1().size(), Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
+                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
                 .then();
     }
 
