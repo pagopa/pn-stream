@@ -1,0 +1,19 @@
+{
+  "name": "unlock_all_stream_events_from_quarantine",
+  "version": "1.0.0",
+  "description": "Script to unlock all the quarantined events from all the streams with enabled sorting",
+  "type": "module",
+  "main": "unlock_all_stream_events_from_quarantine.js",
+  "scripts": {
+    "start": "node index.js --envName dev"
+  },
+  "author": "PagoPA",
+  "license": "ISC",
+  "dependencies": {
+    "pn-common": "file:../pn-common/",
+    "@aws-sdk/client-dynamodb": "^3.602.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
