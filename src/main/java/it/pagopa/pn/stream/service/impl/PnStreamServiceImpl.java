@@ -76,9 +76,7 @@ public abstract class PnStreamServiceImpl {
     private Mono<StreamEntity> checkRetryAfter(String xPagopaPnCxId, String xPagopaPnApiVersion, UUID streamId, StreamRetryAfter entityRetry, StreamEntity streamEntity) {
         if (Instant.now().isBefore(entityRetry.getRetryAfter())) {
             log.warn("Pa {} version {} is trying to access streamId {}: retry after not expired", xPagopaPnCxId, apiVersion(xPagopaPnApiVersion), streamId);
-            if(Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
-                log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.RETRY_AFTER_VIOLATION.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.RETRY_AFTER_VIOLATION.name());
-            }
+            log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.RETRY_AFTER_VIOLATION.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.RETRY_AFTER_VIOLATION.name());
             return ignoreOrThrowException(streamEntity);
         }
         return Mono.just(streamEntity);

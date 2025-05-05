@@ -95,9 +95,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in reading stream").log())
                 .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Cannot consume stream")))
                 .flatMap(streamEntity -> {
-                    if (Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
-                        log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_REQUESTS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_REQUESTS.name());
-                    }
+                    log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_REQUESTS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_REQUESTS.name());
                     return Mono.just(streamEntity);
                 })
                 .flatMap(stream -> eventEntityDao.findByStreamId(stream.getStreamId(), lastEventId))
@@ -140,15 +138,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
     private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV27> eventList) {
-        if(Boolean.TRUE.equals(pnStreamConfigs.getEnableStreamStats())) {
-            if (eventList.isEmpty()) {
-                log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
-                return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
-            }
-            log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_READINGS.name(), eventList.size(), Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_READINGS.name());
-            return Mono.empty();
+        if (eventList.isEmpty()) {
+            log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
+            return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
         }
-        return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
+        log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_READINGS.name(), eventList.size(), Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_READINGS.name());
+        return Mono.empty();
     }
 
     private String createAuditLogOfElementsId(List<EventTimelineInternalDto> items) {
