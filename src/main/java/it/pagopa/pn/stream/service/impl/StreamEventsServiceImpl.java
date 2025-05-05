@@ -95,7 +95,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in reading stream").log())
                 .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Cannot consume stream")))
                 .flatMap(streamEntity -> {
-                    log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_REQUESTS.name(), 1, Instant.now().toEpochMilli())), "Logging metric : " + StreamStatsEnum.NUMBER_OF_REQUESTS.name());
+                    log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_REQUESTS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_REQUESTS.name());
                     return Mono.just(streamEntity);
                 })
                 .flatMap(stream -> eventEntityDao.findByStreamId(stream.getStreamId(), lastEventId))
@@ -139,10 +139,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV27> eventList) {
         if (eventList.isEmpty()) {
-            log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli())), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
+            log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
             return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
         }
-        log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_READINGS.name(), eventList.size(), Instant.now().toEpochMilli())), "Logging metric : " + StreamStatsEnum.NUMBER_OF_READINGS.name());
+        log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_READINGS.name(), eventList.size(), Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_READINGS.name());
         return Mono.empty();
     }
 
@@ -227,7 +227,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .collectList()
                         .flatMap(events -> Mono.just(Tuples.of(res.getT1(),events))))
-                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), res.getT1().size(), Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
+                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
                 .then();
     }
 
