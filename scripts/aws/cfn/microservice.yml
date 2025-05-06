@@ -212,14 +212,6 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing stream notifications'
 
-  StreamStatsTableName:
-    Type: String
-    Description: 'Name of dynamodb table containing stream stats'
-
-  StreamStatsTableArn:
-    Type: String
-    Description: 'ARN of dynamodb table containing stream stats'
-
   StreamNotificationTtl:
     Type: Number
     Description: 'TTL offset for stream notifications'
@@ -326,26 +318,6 @@ Parameters:
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
 
-  StreamStatsTimeUnit:
-    Type: String
-    Description: 'Time units for statistics'
-    Default: 'HOURS'
-    AllowedValues: [ DAYS, HOURS, MINUTES ]
-
-  StreamStatsSpanUnit:
-    Type: Number
-    Description: 'Time interval for statistics'
-    Default: 1
-
-  StreamStatsTtl:
-    Type: String
-    Description: 'TTL in days offset for Stream Stats'
-    Default: '365d'
-
-  CustomStatsTtlParameterName:
-    Type: String
-    Description: 'Custom parameter name for Stream Stats TTL'
-
   VersioningV1V2StreamLambdaName:
     Type: String
     Description: 'VersioningV1V2StreamLambdaName'
@@ -428,12 +400,6 @@ Parameters:
     Description: 'Max concurrency for save events on streams'
     Default: 100
 
-  EnableStreamStats:
-    Type: String
-    Description: 'Enable stream stats'
-    Default: 'true'
-    AllowedValues: [ true, false ]
-
 Resources:
 
   # pn-stream microservice
@@ -484,14 +450,8 @@ Resources:
         ContainerEnvEntry22: !Sub 'PN_STREAM_NOTIFICATIONSLA=${notificationSla}'
         ContainerEnvEntry23: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
         ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
-        ContainerEnvEntry25: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLENAME=${StreamStatsTableName}'
-        ContainerEnvEntry26: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
-        ContainerEnvEntry27: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
-        ContainerEnvEntry28: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
-        ContainerEnvEntry29: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
-        ContainerEnvEntry30: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
-        ContainerEnvEntry31: !Sub 'PN_STREAM_ENABLESTREAMSTATS=${EnableStreamStats}'
-        ContainerEnvEntry32: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
+        ContainerEnvEntry25: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
+        ContainerEnvEntry26: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -531,8 +491,6 @@ Resources:
               - !Sub "${EventsQuarantineTableArn}/*"
               - !Sub "${NotificationUnlockedTableArn}"
               - !Sub "${NotificationUnlockedTableArn}/*"
-              - !Sub "${StreamStatsTableArn}"
-              - !Sub "${StreamStatsTableArn}/*"
           - Effect: Allow
             Action:
               - sqs:ChangeMessageVisibility
@@ -553,7 +511,6 @@ Resources:
               - ssm:GetParameter
               - ssm:GetParameters
             Resource:
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${CustomStatsTtlParameterName}'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RetryParameterPrefix}*'
 
 
@@ -904,7 +861,6 @@ Resources:
         DynamoDBTableNames: !Join
           - ','
           - - !Ref StreamNotificationTableName
-            - !Ref StreamStatsTableName
             - !Ref StreamsTableName
             - !Ref EventsTableName
             - !Ref EventsQuarantineTableName
