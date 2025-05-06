@@ -230,9 +230,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
-                        .collectList()
-                        .flatMap(events -> Mono.just(Tuples.of(res.getT1(),events))))
-                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res.getT1(), StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.getT2().size())))
+                        .collectList())
+                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res, StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.size())))
                 .then();
     }
 
@@ -350,7 +349,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         }
     }
 
-    private Mono<EventEntity> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
+    private Mono<StreamEntity> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
                                                     TimelineElementInternal timelineElementInternal) {
         return streamEntityDao.updateAndGetAtomicCounter(streamEntity)
                 .flatMap(atomicCounterUpdated -> {
@@ -363,7 +362,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
                     return eventEntityDao.save(eventEntity)
                             .doOnNext(entity -> log.debug("saved event for stream: [{}] and timelineElementId: [{}]", streamEntity.getStreamId(), timelineElementInternal.getTimelineElementId()))
-                            .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)));
+                            .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
+                            .thenReturn(streamEntity);
                 });
     }
 
