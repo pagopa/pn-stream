@@ -1,6 +1,6 @@
 let options = {
     "sonar.organization": "pagopa",
-    "sonar.projectKey": "pagopa_pn-delivery-push-streamEventManager"
+    "sonar.projectKey": "pagopa_pn-stream-streamEventManager"
 }
 
 if (process.env.PR_NUM) {
