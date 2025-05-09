@@ -316,24 +316,18 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             return Mono.empty();
         }
 
-        Set<String> filteredValues = retrieveFilteredValues(stream, eventType);
+        Set<String> filteredStatuses = statusByFilter(stream);
+        Set<String> filteredCategories = categoriesByFilter(stream);
 
-        if ((eventType == StreamCreationRequestV27.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
-                || (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
+        if (filteredStatuses.contains(timelineElementInternal.getStatusInfo().getActual())) {
+            if (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE && !filteredCategories.contains(timelineEventCategory)) {
+                return Mono.empty();
+            }
             return Mono.just(stream);
         } else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
         }
         return Mono.empty();
-    }
-
-    private Set<String> retrieveFilteredValues(StreamEntity stream, StreamCreationRequestV27.EventTypeEnum eventType) {
-        if (eventType == StreamCreationRequestV27.EventTypeEnum.TIMELINE) {
-            return categoriesByFilter(stream);
-        } else if (eventType == StreamCreationRequestV27.EventTypeEnum.STATUS) {
-            return statusByFilter(stream);
-        }
-        return Collections.emptySet();
     }
 
     private boolean isDiagnosticElement(String timelineEventCategory) {
@@ -416,7 +410,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     private Set<String> statusByFilter(StreamEntity stream) {
         Set<String> versionedStatusSet = statusByVersion(streamUtils.getVersion(stream.getVersion()));
-        if (CollectionUtils.isEmpty(stream.getFilterValues())) {
+        if (CollectionUtils.isEmpty(stream.getFilterValues()) || StreamCreationRequestV27.EventTypeEnum.TIMELINE.name().equals(stream.getEventType())) {
             return versionedStatusSet;
         }
         return stream.getFilterValues().stream()
