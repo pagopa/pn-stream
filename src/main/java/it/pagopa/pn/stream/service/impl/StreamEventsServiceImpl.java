@@ -410,7 +410,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     private Set<String> statusByFilter(StreamEntity stream) {
         Set<String> versionedStatusSet = statusByVersion(streamUtils.getVersion(stream.getVersion()));
-        if (CollectionUtils.isEmpty(stream.getFilterValues())) {
+        if (CollectionUtils.isEmpty(stream.getFilterValues()) || StreamCreationRequestV27.EventTypeEnum.TIMELINE.name().equals(stream.getEventType())) {
             return versionedStatusSet;
         }
         return stream.getFilterValues().stream()

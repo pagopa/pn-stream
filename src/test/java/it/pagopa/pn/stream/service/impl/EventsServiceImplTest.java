@@ -1215,6 +1215,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLATION_REQUEST )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .statusInfo(new StatusInfoInternal(NotificationStatusInt.ACCEPTED.name(), Instant.now(), false))
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1223,6 +1224,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLED )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .statusInfo(new StatusInfoInternal(NotificationStatusInt.ACCEPTED.name(), Instant.now(), false))
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1231,6 +1233,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.PROBABLE_SCHEDULING_ANALOG_DATE )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .statusInfo(new StatusInfoInternal(NotificationStatusInt.ACCEPTED.name(), Instant.now(), false))
                 .build());
 
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
