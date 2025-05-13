@@ -239,19 +239,19 @@ Parameters:
     Description: 'Stop timestamp for read stream'
     Default: "2099-01-01T00:00:00Z"
 
-  StreamsTableName:
+  PnStreamWebhookStreamsTableName:
     Type: String
     Description: 'Name of dynamodb table containing stream'
 
-  StreamsTableArn:
+  PnStreamWebhookPnStreamWebhookStreamsTableArn:
     Type: String
     Description: 'ARN of dynamodb table containing stream'
 
-  EventsTableName:
+  PnStreamWebhookEventsTableName:
     Type: String
     Description: 'Name of dynamodb table containing events'
 
-  EventsTableArn:
+  PnStreamWebhookEventsTableArn:
     Type: String
     Description: 'ARN of dynamodb table containing events'
 
@@ -434,6 +434,29 @@ Parameters:
     Default: 'true'
     AllowedValues: [ true, false ]
 
+  DeliveryProgressesApiPath:
+    Type: String
+    Description: Variable containing the api path of the endpoint delivery-progresses
+    Default: 'delivery-progresses-2'
+
+  DeliveryProgressesApiPathNew:
+    Type: String
+    Description: Variable containing the new api path of the endpoint delivery-progresses
+    Default: 'delivery-progresses-new'
+
+  ApiDnsName:
+    Type: String
+    Description: 'The DNS name used for B2B rest API.'
+
+  DestApiDnsName:
+    Type: String
+    Description: 'The DNS name used for B2B PG rest API.'
+
+  LogsKinesisSourceStreamArn:
+    Type: String
+    Description: 'Kinesis stream that receive logs'
+
+
 Resources:
 
   # pn-stream microservice
@@ -467,8 +490,8 @@ Resources:
         ContainerEnvEntry5: !Sub 'PN_STREAM_MAXSTREAMS=${MaxStreams}'
         ContainerEnvEntry6: !Sub 'PN_STREAM_MAXLENGTH=${MaxLength}'
         ContainerEnvEntry7: !Sub 'PN_STREAM_EXTERNALREGISTRYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
-        ContainerEnvEntry8: !Sub 'PN_STREAM_DAO_EVENTSTABLENAME=${EventsTableName}'
-        ContainerEnvEntry9: !Sub 'PN_STREAM_DAO_STREAMSTABLENAME=${StreamsTableName}'
+        ContainerEnvEntry8: !Sub 'PN_STREAM_DAO_EVENTSTABLENAME=${PnStreamWebhookEventsTableName}'
+        ContainerEnvEntry9: !Sub 'PN_STREAM_DAO_STREAMSTABLENAME=${PnStreamWebhookStreamsTableName}'
         ContainerEnvEntry10: 'PN_STREAM_DATAVAULTBASEURL=http://alb.confidential.pn.internal:8080'
         ContainerEnvEntry11: !Sub 'PN_STREAM_RETRYPARAMETERPREFIX=${RetryParameterPrefix}'
         ContainerEnvEntry12: !Sub 'PN_STREAM_RETRYAFTERENABLED=${RetryAfterEnabled}'
@@ -521,10 +544,10 @@ Resources:
               - dynamodb:Query
               - dynamodb:BatchGetItem
             Resource:
-              - !Sub "${StreamsTableArn}"
-              - !Sub "${StreamsTableArn}/*"
-              - !Sub "${EventsTableArn}"
-              - !Sub "${EventsTableArn}/*"
+              - !Sub "${PnStreamWebhookStreamsTableArn}"
+              - !Sub "${PnStreamWebhookStreamsTableArn}/*"
+              - !Sub "${PnStreamWebhookEventsTableArn}"
+              - !Sub "${PnStreamWebhookEventsTableArn}/*"
               - !Sub "${StreamNotificationTableArn}"
               - !Sub "${StreamNotificationTableArn}/*"
               - !Sub "${EventsQuarantineTableArn}"
@@ -557,6 +580,34 @@ Resources:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RetryParameterPrefix}*'
 
 
+  # Expose PN-Delivery-progress microservice public API with API-GW for B2B usage
+  DeliveryProgressMicroservicePublicAPI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service-openapi.yaml"
+      Parameters:
+        MicroServiceUniqueName: !Sub '${ProjectName}-delivery-progress'
+        IntendedUsage: B2B
+        DnsName: !Ref ApiDnsName
+        ProjectName: !Ref ProjectName
+        ServiceApiPathOverride: !Ref DeliveryProgressesApiPathNew
+        ServiceApiPath: !Ref DeliveryProgressesApiPath
+        NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
+        ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
+        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
+        CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
+        OpenApiBucketName: !Ref MicroserviceBucketName
+        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-delivery-progresses-B2B-aws.yaml
+
+  DeliveryProgressMicroservicePublicApiWaf:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-waf-acl.yaml"
+      Parameters:
+        WAFName: !Sub '${ProjectName}-delivery-progress-b2b'
+        IntendedUsage: B2B
+        APIGatewayARNs: !GetAtt DeliveryProgressMicroservicePublicAPI.Outputs.APIGatewayARN
+        Limit: 600000
 
 
   #########################################################
@@ -800,7 +851,7 @@ Resources:
       Environment:
         Variables:
           REGION: !Sub ${AWS::Region}
-          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/delivery-progresses/v2.6"
+          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/${DeliveryProgressesApiPathNew}/v2.6"
           NUM_RETRY: !Ref NumRetry
           ATTEMPT_TIMEOUT_SEC: !Ref AttemptTimeoutSec
       TracingConfig:
@@ -905,10 +956,16 @@ Resources:
           - ','
           - - !Ref StreamNotificationTableName
             - !Ref StreamStatsTableName
-            - !Ref StreamsTableName
-            - !Ref EventsTableName
+            - !Ref PnStreamWebhookStreamsTableName
+            - !Ref PnStreamWebhookEventsTableName
             - !Ref EventsQuarantineTableName
             - !Ref NotificationUnlockedTableName
+        RestApiStageArns: !Join
+          - ','
+          - - !GetAtt DeliveryProgressMicroservicePublicAPI.Outputs.RestApiStageArn
+        RestApiNames: !Join
+          - ','
+          - - !GetAtt DeliveryProgressMicroservicePublicAPI.Outputs.RestApiName
 
 Outputs:
   #
