@@ -801,6 +801,7 @@ Resources:
         Variables:
           REGION: !Sub ${AWS::Region}
           PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/delivery-progresses/v2.6"
+          BASE_PATH: !Sub "http://${ApplicationLoadBalancerDomain}:8080"
           NUM_RETRY: !Ref NumRetry
           ATTEMPT_TIMEOUT_SEC: !Ref AttemptTimeoutSec
       TracingConfig:
