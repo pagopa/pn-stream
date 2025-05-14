@@ -561,7 +561,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-waf-acl.yaml"
       Parameters:
-        WAFName: !Sub '${ProjectName}-delivery-progress-b2b'
+        WAFName: !Sub '${ProjectName}-delivery-progress-2-b2b'
         IntendedUsage: B2B
         APIGatewayARNs: !GetAtt DeliveryProgressStreamMicroservicePublicAPI.Outputs.APIGatewayARN
         Limit: 600000
