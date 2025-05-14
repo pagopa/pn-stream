@@ -36,7 +36,7 @@ exports.eventHandler = async (event, context) => {
                     return result;
             }
         }
-        console.log("ERROR ENDPOINT ERRATO");
+        console.log("ERROR: ENDPOINT ERRATO");
         const err = {
             //Nella V10 lo statusCode 502 non è accettato
             statusCode: 500,
