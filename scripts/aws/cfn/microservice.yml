@@ -235,7 +235,7 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing stream'
 
-  PnStreamWebhookPnStreamWebhookStreamsTableArn:
+  PnStreamWebhookStreamsTableArn:
     Type: String
     Description: 'ARN of dynamodb table containing stream'
 

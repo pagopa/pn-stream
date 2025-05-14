@@ -99,7 +99,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-WebhookStreams-2'
+      TableName: !Sub '${ProjectName}-WebhookStreams'
       AttributeDefinitions:
         - AttributeName: "hashKey"
           AttributeType: "S"
@@ -125,7 +125,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-WebhookEvents-2'
+      TableName: !Sub '${ProjectName}-WebhookEvents'
       AttributeDefinitions:
         - AttributeName: "hashKey"
           AttributeType: "S"
