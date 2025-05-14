@@ -538,12 +538,12 @@ Resources:
 
 
   # Expose PN-Delivery-progress microservice public API with API-GW for B2B usage
-  DeliveryProgressMicroservicePublicAPI:
+  DeliveryProgressStreamMicroservicePublicAPI:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service-openapi.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-delivery-progress'
+        MicroServiceUniqueName: !Sub '${ProjectName}-stream-delivery-progress'
         IntendedUsage: B2B
         DnsName: !Ref ApiDnsName
         ProjectName: !Ref ProjectName
@@ -556,14 +556,14 @@ Resources:
         OpenApiBucketName: !Ref MicroserviceBucketName
         OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-delivery-progresses-B2B-aws.yaml
 
-  DeliveryProgressMicroservicePublicApiWaf:
+  DeliveryProgressStreamMicroservicePublicApiWaf:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-waf-acl.yaml"
       Parameters:
         WAFName: !Sub '${ProjectName}-delivery-progress-b2b'
         IntendedUsage: B2B
-        APIGatewayARNs: !GetAtt DeliveryProgressMicroservicePublicAPI.Outputs.APIGatewayARN
+        APIGatewayARNs: !GetAtt DeliveryProgressStreamMicroservicePublicAPI.Outputs.APIGatewayARN
         Limit: 600000
 
 
@@ -918,10 +918,10 @@ Resources:
             - !Ref NotificationUnlockedTableName
         RestApiStageArns: !Join
           - ','
-          - - !GetAtt DeliveryProgressMicroservicePublicAPI.Outputs.RestApiStageArn
+          - - !GetAtt DeliveryProgressStreamMicroservicePublicAPI.Outputs.RestApiStageArn
         RestApiNames: !Join
           - ','
-          - - !GetAtt DeliveryProgressMicroservicePublicAPI.Outputs.RestApiName
+          - - !GetAtt DeliveryProgressStreamMicroservicePublicAPI.Outputs.RestApiName
 
 Outputs:
   #
