@@ -10,7 +10,7 @@
                 "pn-stream-api-internal.yaml",
                 "pn-stream-api-internal-older-version.yaml"
             ],
-            "servicePath": "delivery-progresses",
+            "servicePath": "delivery-progresses-2",
             "generateBundle": true,
             "mergeBeforeBundleGeneration": true
         }

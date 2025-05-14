@@ -554,7 +554,7 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         OpenApiBucketName: !Ref MicroserviceBucketName
-        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-delivery-progresses-B2B-aws.yaml
+        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-delivery-progresses-2-B2B-aws.yaml
 
   DeliveryProgressStreamMicroservicePublicApiWaf:
     Type: AWS::CloudFormation::Stack
