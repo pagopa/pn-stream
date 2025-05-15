@@ -411,7 +411,7 @@ Parameters:
   DeliveryProgressesApiPathNew:
     Type: String
     Description: Variable containing the new api path of the endpoint delivery-progresses
-    Default: 'delivery-progresses-new'
+    Default: 'delivery-progresses'
 
   ApiDnsName:
     Type: String

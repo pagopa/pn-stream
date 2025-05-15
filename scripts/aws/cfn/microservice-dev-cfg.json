@@ -26,6 +26,6 @@
     "SaveEventMaxConcurrency": "100",
     "EnableStreamStats": "true",
     "DeliveryProgressesApiPath": "delivery-progresses-2",
-    "DeliveryProgressesApiPathNew": "delivery-progresses-new"
+    "DeliveryProgressesApiPathNew": "delivery-progresses"
   }
 }
