@@ -1,6 +1,6 @@
 let options = {
   "sonar.organization": "pagopa",
-  "sonar.projectKey": "pagopa_pn-stream-versioningV1V2Stream",
+  "sonar.projectKey": "pagopa_pn-stream-versioningV1V2Webhook",
 };
 
 if (process.env.PR_NUM) {
