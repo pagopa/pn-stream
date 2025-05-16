@@ -3,7 +3,6 @@ package it.pagopa.pn.stream.service.impl;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
@@ -228,7 +227,7 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV27.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV28.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");

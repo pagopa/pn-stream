@@ -1731,7 +1731,7 @@ paths:
       tags:
         - Streams
       operationId: createEventStreamV27
-      x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
+      x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       requestBody:
         required: true
@@ -1778,7 +1778,7 @@ paths:
       tags:
         - Streams
       operationId: listEventStreamsV27
-      x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
+      x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       responses:
         '200':
@@ -1815,7 +1815,7 @@ paths:
         - Streams
       operationId: getEventStreamV27                             # NO EXTERNAL
       #      operationId: retrieveEventStreamV27                       # ONLY EXTERNAL
-      x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
+      x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       responses:
         '200':
@@ -1856,7 +1856,7 @@ paths:
       tags:
         - Streams
       operationId: updateEventStreamV27
-      x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
+      x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       requestBody:
         required: true
@@ -1905,7 +1905,7 @@ paths:
         - Streams
       operationId: deleteEventStreamV27                          # NO EXTERNAL
       #      operationId: removeEventStreamV27                         # ONLY EXTERNAL
-      x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
+      x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       responses:
         '204':
@@ -1959,7 +1959,7 @@ paths:
       tags:
         - Streams
       operationId: disableEventStreamV27
-      x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
+      x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       parameters:
       responses:
@@ -2009,7 +2009,7 @@ paths:
       tags:
         - Events
       operationId: consumeEventStreamV27
-      x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
+      x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       parameters:
       responses:
