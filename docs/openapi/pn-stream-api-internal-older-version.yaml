@@ -1806,6 +1806,7 @@ paths:
 
   '/delivery-progresses-2/v2.7/streams/{streamId}':
     parameters:
+      - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
       summary: Leggi metadata dello stream
@@ -1962,6 +1963,7 @@ paths:
       x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       parameters:
+        - $ref: '#/components/parameters/pathStreamId'
       responses:
         '200':
           description: OK
@@ -2012,6 +2014,8 @@ paths:
       x-pagopa-lambda-name: 'pn-versioningV1V2StreamLambda:live'
       x-pagopa-lambda-account: core
       parameters:
+        - $ref: '#/components/parameters/pathStreamId'
+        - $ref: '#/components/parameters/queryLastEventId'
       responses:
         '200':
           description: OK
