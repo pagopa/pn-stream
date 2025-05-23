@@ -8,7 +8,6 @@ info:
   title: 'Piattaforma Notifiche: API B2B avanzamento notifiche'
   x-summary: 'API B2B avanzamento notifiche'
   version: '2.3.0'
-  x-api-id: pn-stream-api-internal-b2b-stream # NO EXTERNAL
   #  x-api-id: pn-stream-api-external-b2b-stream # ONLY EXTERNAL
   contact:
     name: 'SEND: supporto enti'
@@ -349,12 +348,6 @@ paths:
     ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
     ############################################################################################
   '/delivery-progresses-2/v2.8/streams':
-    parameters:                                               # NO EXTERNAL
-      - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
-      - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
-      - $ref: '#/components/parameters/cxIdAuthFleet'         # NO EXTERNAL
-      - $ref: '#/components/parameters/cxGroupsAuthFleet'         # NO EXTERNAL
-      - $ref: '#/components/parameters/headerApiVersion'         # NO EXTERNAL
     post:
       summary: EXPERIMENTAL - Crea nuovo stream di eventi
       description: >-
@@ -439,11 +432,6 @@ paths:
     ############################################################################################
   '/delivery-progresses-2/v2.8/streams/{streamId}':
     parameters:
-      - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
-      - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
-      - $ref: '#/components/parameters/cxIdAuthFleet'         # NO EXTERNAL
-      - $ref: '#/components/parameters/cxGroupsAuthFleet'         # NO EXTERNAL
-      - $ref: '#/components/parameters/headerApiVersion'         # NO EXTERNAL
       - $ref: '#/components/parameters/pathStreamId'
     get:
       summary: EXPERIMENTAL - Leggi metadata dello stream
@@ -452,7 +440,6 @@ paths:
         Lettura delle configurazioni di uno stream di eventi.
       tags:
         - Streams
-      operationId: getEventStreamV28                             # NO EXTERNAL
       #      operationId: retrieveEventStreamV28                       # ONLY EXTERNAL
       responses:
         '200':
@@ -538,7 +525,6 @@ paths:
         associati allo stream e non ancora consumati.
       tags:
         - Streams
-      operationId: deleteEventStreamV28                          # NO EXTERNAL
       #      operationId: removeEventStreamV28                         # ONLY EXTERNAL
       responses:
         '204':
@@ -593,11 +579,6 @@ paths:
         - Streams
       operationId: disableEventStreamV28
       parameters:
-        - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
-        - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
-        - $ref: '#/components/parameters/cxIdAuthFleet'         # NO EXTERNAL
-        - $ref: '#/components/parameters/cxGroupsAuthFleet'         # NO EXTERNAL
-        - $ref: '#/components/parameters/headerApiVersion'         # NO EXTERNAL
         - $ref: '#/components/parameters/pathStreamId'
       responses:
         '200':
@@ -647,11 +628,6 @@ paths:
         - Events
       operationId: consumeEventStreamV28
       parameters:
-        - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
-        - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
-        - $ref: '#/components/parameters/cxIdAuthFleet'         # NO EXTERNAL
-        - $ref: '#/components/parameters/cxGroupsAuthFleet'         # NO EXTERNAL
-        - $ref: '#/components/parameters/headerApiVersion'         # NO EXTERNAL
         - $ref: '#/components/parameters/pathStreamId'
         - $ref: '#/components/parameters/queryLastEventId'
       responses:
@@ -712,49 +688,8 @@ paths:
     ###                INVIO DI EVENTI DA PARTE DELLA PUBBLICA AMMNISTRAZIONE                ###
     ############################################################################################
 
-  '/delivery-progresses-2/events':                                                              # NOT YET IMPLEMENTED
-    post:                                                                                     # NOT YET IMPLEMENTED
-      summary: Invio eventi da parte della PA                                                 # NOT YET IMPLEMENTED
-      description: >-                                                                         # NOT YET IMPLEMENTED
-        Questa API è a disposizione della Pubblica Amministrazione per inviare eventi, come   # NOT YET IMPLEMENTED
-        quello di chiusura di una posizione debitoria con pagamento tramite F24, che possono  # NOT YET IMPLEMENTED
-        avvenire fuori dal controllo di PagoPA. <br/>                                         # NOT YET IMPLEMENTED
 
-        L'elaborazione può avvenire in maniera parziale, quindi ogni evento deve avere un     # NOT YET IMPLEMENTED
-        identificativo univoco (generato dalla PA). In caso di fallimento vanno ritrasmessi   # NOT YET IMPLEMENTED
-        gli eventi con lo stesso identificativo. Sarà Piattaforma Notifica ad identificare    # NOT YET IMPLEMENTED
-        quelli già elaborati ed evitare duplicazioni. <br/>                                   # NOT YET IMPLEMENTED
 
-        Allo stato attuale gli unici eventi sono quelli di pagamento                          # NOT YET IMPLEMENTED
-      tags:                                                                                   # NOT YET IMPLEMENTED
-        - Events                                                                              # NOT YET IMPLEMENTED
-      operationId: informOnExternalEvent                                                      # NOT YET IMPLEMENTED
-      parameters:                                                                             # NOT YET IMPLEMENTED
-        - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL                 # NOT YET IMPLEMENTED
-        - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL                 # NOT YET IMPLEMENTED
-        - $ref: '#/components/parameters/cxIdAuthFleet'         # NO EXTERNAL                 # NOT YET IMPLEMENTED
-        - $ref: '#/components/parameters/cxGroupsAuthFleet'     # NO EXTERNAL                 # NOT YET IMPLEMENTED
-      requestBody:                                                                            # NOT YET IMPLEMENTED
-        required: true                                                                        # NOT YET IMPLEMENTED
-        content:                                                                              # NOT YET IMPLEMENTED
-          application/json:                                                                   # NOT YET IMPLEMENTED
-            schema:                                                                         # NOT YET IMPLEMENTED
-              $ref: "#/components/schemas/ExternalEventsRequest"                            # NOT YET IMPLEMENTED
-      responses:                                                                              # NOT YET IMPLEMENTED
-        '204':                                                                                # NOT YET IMPLEMENTED
-          description: OK                                                                     # NOT YET IMPLEMENTED
-        '400':                                                                                # NOT YET IMPLEMENTED
-          description: Invalid input                                                          # NOT YET IMPLEMENTED
-          content:                                                                            # NOT YET IMPLEMENTED
-            application/problem+json:                                                         # NOT YET IMPLEMENTED
-              schema:                                                                         # NOT YET IMPLEMENTED
-                $ref: 'remote-refs.yaml#/components/schemas/Problem'                 # NOT YET IMPLEMENTED
-        '500':                                                                                # NOT YET IMPLEMENTED
-          description: Internal Server Error                                                  # NOT YET IMPLEMENTED
-          content:                                                                            # NOT YET IMPLEMENTED
-            application/problem+json:                                                         # NOT YET IMPLEMENTED
-              schema:                                                                         # NOT YET IMPLEMENTED
-                $ref: 'remote-refs.yaml#/components/schemas/Problem'                 # NOT YET IMPLEMENTED
 
 components:
 
@@ -762,14 +697,6 @@ components:
     ############################################################################################
     ###                     PARAMETRI DI AUTENTICAZIONE E AUTORIZZAZIONE                     ###
     ############################################################################################
-    cxTypeAuthFleet:                                                                                                                                            # NO EXTERNAL
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/a1f457ddc112983ec79be0be93256476dd11102c/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/cxTypeAuthFleet'  # NO EXTERNAL
-    cxIdAuthFleet:                                                                                                                                              # NO EXTERNAL
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/a1f457ddc112983ec79be0be93256476dd11102c/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/cxIdAuthFleet'    # NO EXTERNAL
-    uidAuthFleet:                                                                                                                                               # NO EXTERNAL
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/a1f457ddc112983ec79be0be93256476dd11102c/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/uidAuthFleet'     # NO EXTERNAL
-    cxGroupsAuthFleet:                                                                                                                                          # NO EXTERNAL
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-auth-fleet/a1f457ddc112983ec79be0be93256476dd11102c/docs/openapi/authenticationParameters-v1.yaml#/components/parameters/cxGroupsAuthFleet' # NO EXTERNAL
 
 
     ############################################################################################
@@ -798,14 +725,6 @@ components:
         format: uuid
         #minLength: 36
         #maxLength: 36
-    headerApiVersion:                                                                                     # NO EXTERNAL
-      name: x-pagopa-pn-api-version                                                                       # NO EXTERNAL
-      in: header                                                                                          # NO EXTERNAL
-      description: Api version                                                                            # NO EXTERNAL
-      required: false                                                                                     # NO EXTERNAL
-      schema:                                                                                             # NO EXTERNAL
-        type: string                                                                                      # NO EXTERNAL
-        pattern: ^v\d\d\d?$                                                                               # NO EXTERNAL
 
 
   schemas:
@@ -977,114 +896,20 @@ components:
           $ref: './schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
         element:
           $ref: './schemas-pn-timeline.yaml#/components/schemas/TimelineElementV27'
-        # proprietà necessarie per retro compatibilità nel transitorio, ma che non saranno esposte nella V24 # NO EXTERNAL
-        # potranno essere eliminate (assieme al RefusedReason) quando non saranno più presenti eventi della v1 # NO EXTERNAL
-        timestamp:                                                                                         # NO EXTERNAL
-          type: string                                                                                     # NO EXTERNAL
-          format: date-time                                                                                # NO EXTERNAL
-        timelineEventCategory:                                                                             # NO EXTERNAL
-          $ref: './schemas-pn-timeline.yaml#/components/schemas/TimelineElementCategoryV27'                # NO EXTERNAL
-        recipientIndex:                                                                                    # NO EXTERNAL
-          type: integer                                                                                    # NO EXTERNAL
-          format: int32                                                                                    # NO EXTERNAL
-          minimum: 0                                                                                       # NO EXTERNAL
-        analogCost:                                                                                        # NO EXTERNAL
-          type: integer                                                                                    # NO EXTERNAL
-          format: int32                                                                                    # NO EXTERNAL
-        channel:                                                                                           # NO EXTERNAL
-          type: string                                                                                     # NO EXTERNAL
-        legalfactIds:                                                                                      # NO EXTERNAL
-          type: array                                                                                      # NO EXTERNAL
-          items:                                                                                           # NO EXTERNAL
-            type: string                                                                                   # NO EXTERNAL
-          example: ["PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q", "PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9E"]  # NO EXTERNAL
-          description: chiavi degli eventuali allegati associati all'evento                                # NO EXTERNAL
-        validationErrors:                                                                                  # NO EXTERNAL
-          type: array                                                                                      # NO EXTERNAL
-          description: eventuali errori di validazione associati all'evento                                # NO EXTERNAL
-          items:                                                                                           # NO EXTERNAL
-            $ref: '#/components/schemas/RefusedReason'                                                     # NO EXTERNAL
 
-    RefusedReason:                                                                                         # NO EXTERNAL
-      type: object                                                                                         # NO EXTERNAL
-      properties:                                                                                          # NO EXTERNAL
-        errorCode:                                                                                         # NO EXTERNAL
-          type: string                                                                                     # NO EXTERNAL
-        detail:                                                                                            # NO EXTERNAL
-          type: string                                                                                     # NO EXTERNAL
 
     ###  - EVENTI GENERATI DALLA P.A.
     ###################################
-    ExternalEventsRequest:                                                              # NOT YET IMPLEMENTED
-      title: Invio eventi da P.A. a P.N.                                                # NOT YET IMPLEMENTED
-      description: >-                                                                   # NOT YET IMPLEMENTED
-        Richiesta contenente un array di eventi di cui una Pubblica Amministrazione     # NOT YET IMPLEMENTED
-        deve avvisare Piattaforma Notifiche.                                            # NOT YET IMPLEMENTED
-      type: object                                                                      # NOT YET IMPLEMENTED
-      required:                                                                         # NOT YET IMPLEMENTED
-        - events                                                                        # NOT YET IMPLEMENTED
-      properties:                                                                       # NOT YET IMPLEMENTED
-        events:                                                                         # NOT YET IMPLEMENTED
-          description: Elenco degli eventi                                              # NOT YET IMPLEMENTED
-          type: array                                                                   # NOT YET IMPLEMENTED
-          items:                                                                        # NOT YET IMPLEMENTED
-            $ref: '#/components/schemas/ExternalEvent'                                  # NOT YET IMPLEMENTED
-
-    ExternalEvent:                                                                      # NOT YET IMPLEMENTED
-      title: Un evento generato all'esterno di PN.                                      # NOT YET IMPLEMENTED
-      description: >-                                                                   # NOT YET IMPLEMENTED
-        Un evento riguardante la notifica generato all'esterno di Piattaforma Notifiche come, # NOT YET IMPLEMENTED
-        ad esempio, il pagamento che può avvenire anche tramite F24. <br/>                    # NOT YET IMPLEMENTED
-                                                                                              # NOT YET IMPLEMENTED
-        Deve essere valorizzata una solo campo, quello specifico del tipo di evento.          # NOT YET IMPLEMENTED
-      type: object                                                                      # NOT YET IMPLEMENTED
-      properties:                                                                       # NOT YET IMPLEMENTED
-        payment:                                                                        # NOT YET IMPLEMENTED
-          $ref: '#/components/schemas/PaymentEvent'                                     # NOT YET IMPLEMENTED
-
-    PaymentEvent:                                                                       # NOT YET IMPLEMENTED
-      title: Evento di pagamento                                                        # NOT YET IMPLEMENTED
-      description: >-                                                                   # NOT YET IMPLEMENTED
-        Comprende: <br/>                                                                # NOT YET IMPLEMENTED
-          - data e ora del pagamento, <br/>                                             # NOT YET IMPLEMENTED
-          - modalità di pagamento (PAGOPA / F24), <br/>                                 # NOT YET IMPLEMENTED
-          - lo _IUN_ della notifica pagata, <br/>                                       # NOT YET IMPLEMENTED
-          - il codice fiscale del destinatario pagatore, <br/>                          # NOT YET IMPLEMENTED
-          - e la tipologia del destinatario pagatore (PF / PG). <br/>                   # NOT YET IMPLEMENTED
-      type: object                                                                      # NOT YET IMPLEMENTED
-      required:                                                                         # NOT YET IMPLEMENTED
-        - iun                                                                           # NOT YET IMPLEMENTED
-        - recipientTaxId                                                                # NOT YET IMPLEMENTED
-        - recipientType                                                                 # NOT YET IMPLEMENTED
-        - paymentType                                                                   # NOT YET IMPLEMENTED
-        - timestamp                                                                     # NOT YET IMPLEMENTED
-      properties:                                                                       # NOT YET IMPLEMENTED
-        iun:                                                                            # NOT YET IMPLEMENTED
-          type: string                                                                  # NOT YET IMPLEMENTED
-          maxLength: 25                                                                 # NOT YET IMPLEMENTED
-          pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$              # NOT YET IMPLEMENTED
-        recipientTaxId:                                                                 # NOT YET IMPLEMENTED
-          type: string                                                                  # NOT YET IMPLEMENTED
-          minLength: 11                                                                 # NOT YET IMPLEMENTED
-          maxLength: 16                                                                 # NOT YET IMPLEMENTED
-          pattern: ^([A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{2}[A-Z]{1}[0-9LMNPQRSTUV]{3}[A-Z]{1})|([0-9]{11})$ # NOT YET IMPLEMENTED
-        recipientType:                                                                  # NOT YET IMPLEMENTED
-          $ref: './schemas-pn-notification.yaml#/components/schemas/RecipientType'      # NOT YET IMPLEMENTED
-        paymentType:                                                                    # NOT YET IMPLEMENTED
-          type: string                                                                  # NOT YET IMPLEMENTED
-          enum:                                                                        # NOT YET IMPLEMENTED
-            - PAGOPA                                                                    # NOT YET IMPLEMENTED
-        timestamp:                                                                      # NOT YET IMPLEMENTED
-          type: string                                                                  # NOT YET IMPLEMENTED
-          format: date-time                                                             # NOT YET IMPLEMENTED
 
 
-#  securitySchemes:        # ONLY EXTERNAL
-#    ApiKeyAuth:           # ONLY EXTERNAL
-#      type: apiKey        # ONLY EXTERNAL
-#      in: header          # ONLY EXTERNAL
-#      name: x-api-key     # ONLY EXTERNAL
 
-#security:                 # ONLY EXTERNAL
-#  - ApiKeyAuth: [] # use the same name as under securitySchemes    # ONLY EXTERNAL
+
+  securitySchemes:        # ONLY EXTERNAL
+    ApiKeyAuth:           # ONLY EXTERNAL
+      type: apiKey        # ONLY EXTERNAL
+      in: header          # ONLY EXTERNAL
+      name: x-api-key     # ONLY EXTERNAL
+
+security:                 # ONLY EXTERNAL
+  - ApiKeyAuth: [] # use the same name as under securitySchemes    # ONLY EXTERNAL
 

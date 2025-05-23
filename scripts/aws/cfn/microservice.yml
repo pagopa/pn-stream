@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: 'Example microservice deploy'
+Transform:
+  - UpdateDeploymentTransform
+
 
 Parameters:
   ProjectName:
@@ -212,14 +215,6 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing stream notifications'
 
-  StreamStatsTableName:
-    Type: String
-    Description: 'Name of dynamodb table containing stream stats'
-
-  StreamStatsTableArn:
-    Type: String
-    Description: 'ARN of dynamodb table containing stream stats'
-
   StreamNotificationTtl:
     Type: Number
     Description: 'TTL offset for stream notifications'
@@ -239,19 +234,19 @@ Parameters:
     Description: 'Stop timestamp for read stream'
     Default: "2099-01-01T00:00:00Z"
 
-  StreamsTableName:
+  PnStreamWebhookStreamsTableName:
     Type: String
     Description: 'Name of dynamodb table containing stream'
 
-  StreamsTableArn:
+  PnStreamWebhookStreamsTableArn:
     Type: String
     Description: 'ARN of dynamodb table containing stream'
 
-  EventsTableName:
+  PnStreamWebhookEventsTableName:
     Type: String
     Description: 'Name of dynamodb table containing events'
 
-  EventsTableArn:
+  PnStreamWebhookEventsTableArn:
     Type: String
     Description: 'ARN of dynamodb table containing events'
 
@@ -325,26 +320,6 @@ Parameters:
     Type: Number
     Description: 'Maximum number of retries for notification lambda function'
     Default: 5
-
-  StreamStatsTimeUnit:
-    Type: String
-    Description: 'Time units for statistics'
-    Default: 'HOURS'
-    AllowedValues: [ DAYS, HOURS, MINUTES ]
-
-  StreamStatsSpanUnit:
-    Type: Number
-    Description: 'Time interval for statistics'
-    Default: 1
-
-  StreamStatsTtl:
-    Type: String
-    Description: 'TTL in days offset for Stream Stats'
-    Default: '365d'
-
-  CustomStatsTtlParameterName:
-    Type: String
-    Description: 'Custom parameter name for Stream Stats TTL'
 
   VersioningV1V2StreamLambdaName:
     Type: String
@@ -428,11 +403,28 @@ Parameters:
     Description: 'Max concurrency for save events on streams'
     Default: 100
 
-  EnableStreamStats:
+  DeliveryProgressesApiPath:
     Type: String
-    Description: 'Enable stream stats'
-    Default: 'true'
-    AllowedValues: [ true, false ]
+    Description: Variable containing the api path of the endpoint delivery-progresses
+    Default: 'delivery-progresses-2'
+
+  DeliveryProgressesApiPathNew:
+    Type: String
+    Description: Variable containing the new api path of the endpoint delivery-progresses
+    Default: 'delivery-progresses'
+
+  ApiDnsName:
+    Type: String
+    Description: 'The DNS name used for B2B rest API.'
+
+  DestApiDnsName:
+    Type: String
+    Description: 'The DNS name used for B2B PG rest API.'
+
+  LogsKinesisSourceStreamArn:
+    Type: String
+    Description: 'Kinesis stream that receive logs'
+
 
 Resources:
 
@@ -467,8 +459,8 @@ Resources:
         ContainerEnvEntry5: !Sub 'PN_STREAM_MAXSTREAMS=${MaxStreams}'
         ContainerEnvEntry6: !Sub 'PN_STREAM_MAXLENGTH=${MaxLength}'
         ContainerEnvEntry7: !Sub 'PN_STREAM_EXTERNALREGISTRYBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
-        ContainerEnvEntry8: !Sub 'PN_STREAM_DAO_EVENTSTABLENAME=${EventsTableName}'
-        ContainerEnvEntry9: !Sub 'PN_STREAM_DAO_STREAMSTABLENAME=${StreamsTableName}'
+        ContainerEnvEntry8: !Sub 'PN_STREAM_DAO_EVENTSTABLENAME=${PnStreamWebhookEventsTableName}'
+        ContainerEnvEntry9: !Sub 'PN_STREAM_DAO_STREAMSTABLENAME=${PnStreamWebhookStreamsTableName}'
         ContainerEnvEntry10: 'PN_STREAM_DATAVAULTBASEURL=http://alb.confidential.pn.internal:8080'
         ContainerEnvEntry11: !Sub 'PN_STREAM_RETRYPARAMETERPREFIX=${RetryParameterPrefix}'
         ContainerEnvEntry12: !Sub 'PN_STREAM_RETRYAFTERENABLED=${RetryAfterEnabled}'
@@ -484,14 +476,8 @@ Resources:
         ContainerEnvEntry22: !Sub 'PN_STREAM_NOTIFICATIONSLA=${notificationSla}'
         ContainerEnvEntry23: !Sub 'PN_STREAM_MAXWRITTENCOUNTER=${MaxWrittenCounter}'
         ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
-        ContainerEnvEntry25: !Sub 'PN_STREAM_DAO_STREAMSTATSTABLENAME=${StreamStatsTableName}'
-        ContainerEnvEntry26: !Sub 'PN_STREAM_STATS_TIMEUNIT=${StreamStatsTimeUnit}'
-        ContainerEnvEntry27: !Sub 'PN_STREAM_STATS_SPANUNIT=${StreamStatsSpanUnit}'
-        ContainerEnvEntry28: !Sub 'PN_STREAM_STATS_TTL=${StreamStatsTtl}'
-        ContainerEnvEntry29: !Sub 'PN_STREAM_STATS_CUSTOMTTLPARAMETERNAME=${CustomStatsTtlParameterName}'
-        ContainerEnvEntry30: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
-        ContainerEnvEntry31: !Sub 'PN_STREAM_ENABLESTREAMSTATS=${EnableStreamStats}'
-        ContainerEnvEntry32: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
+        ContainerEnvEntry25: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
+        ContainerEnvEntry26: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -521,18 +507,16 @@ Resources:
               - dynamodb:Query
               - dynamodb:BatchGetItem
             Resource:
-              - !Sub "${StreamsTableArn}"
-              - !Sub "${StreamsTableArn}/*"
-              - !Sub "${EventsTableArn}"
-              - !Sub "${EventsTableArn}/*"
+              - !Sub "${PnStreamWebhookStreamsTableArn}"
+              - !Sub "${PnStreamWebhookStreamsTableArn}/*"
+              - !Sub "${PnStreamWebhookEventsTableArn}"
+              - !Sub "${PnStreamWebhookEventsTableArn}/*"
               - !Sub "${StreamNotificationTableArn}"
               - !Sub "${StreamNotificationTableArn}/*"
               - !Sub "${EventsQuarantineTableArn}"
               - !Sub "${EventsQuarantineTableArn}/*"
               - !Sub "${NotificationUnlockedTableArn}"
               - !Sub "${NotificationUnlockedTableArn}/*"
-              - !Sub "${StreamStatsTableArn}"
-              - !Sub "${StreamStatsTableArn}/*"
           - Effect: Allow
             Action:
               - sqs:ChangeMessageVisibility
@@ -553,10 +537,37 @@ Resources:
               - ssm:GetParameter
               - ssm:GetParameters
             Resource:
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${CustomStatsTtlParameterName}'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RetryParameterPrefix}*'
 
 
+  # Expose PN-Delivery-progress microservice public API with API-GW for B2B usage
+  DeliveryProgressStreamMicroservicePublicAPI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service-openapi.yaml"
+      Parameters:
+        MicroServiceUniqueName: !Sub '${ProjectName}-stream-delivery-progress'
+        IntendedUsage: B2B
+        DnsName: !Ref ApiDnsName
+        ProjectName: !Ref ProjectName
+        ServiceApiPathOverride: !Ref DeliveryProgressesApiPathNew
+        ServiceApiPath: !Ref DeliveryProgressesApiPath
+        NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
+        ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
+        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
+        CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
+        OpenApiBucketName: !Ref MicroserviceBucketName
+        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-delivery-progresses-2-B2B-aws.yaml
+
+  DeliveryProgressStreamMicroservicePublicApiWaf:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-waf-acl.yaml"
+      Parameters:
+        WAFName: !Sub '${ProjectName}-delivery-progress-2-b2b'
+        IntendedUsage: B2B
+        APIGatewayARNs: !GetAtt DeliveryProgressStreamMicroservicePublicAPI.Outputs.APIGatewayARN
+        Limit: 600000
 
 
   #########################################################
@@ -800,7 +811,8 @@ Resources:
       Environment:
         Variables:
           REGION: !Sub ${AWS::Region}
-          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/delivery-progresses/v2.6"
+          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/${DeliveryProgressesApiPath}/v2.8"
+          BASE_PATH: !Sub "http://${ApplicationLoadBalancerDomain}:8080"
           NUM_RETRY: !Ref NumRetry
           ATTEMPT_TIMEOUT_SEC: !Ref AttemptTimeoutSec
       TracingConfig:
@@ -904,11 +916,16 @@ Resources:
         DynamoDBTableNames: !Join
           - ','
           - - !Ref StreamNotificationTableName
-            - !Ref StreamStatsTableName
-            - !Ref StreamsTableName
-            - !Ref EventsTableName
+            - !Ref PnStreamWebhookStreamsTableName
+            - !Ref PnStreamWebhookEventsTableName
             - !Ref EventsQuarantineTableName
             - !Ref NotificationUnlockedTableName
+        RestApiStageArns: !Join
+          - ','
+          - - !GetAtt DeliveryProgressStreamMicroservicePublicAPI.Outputs.RestApiStageArn
+        RestApiNames: !Join
+          - ','
+          - - !GetAtt DeliveryProgressStreamMicroservicePublicAPI.Outputs.RestApiName
 
 Outputs:
   #

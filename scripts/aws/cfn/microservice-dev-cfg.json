@@ -4,10 +4,6 @@
     "StopReadStreamTimestamp": "2099-12-01T00:00:00Z",
     "StreamEventManagerLambdaMaximumBatchingWindowInSeconds": "20",
     "StreamEventManagerLambdaBatchSize": "60",
-    "StreamsTableName": "pn-WebhookStreams",
-    "StreamsTableArn": "arn:aws:dynamodb:eu-south-1:830192246553:table/pn-WebhookStreams",
-    "EventsTableName": "pn-WebhookEvents",
-    "EventsTableArn": "arn:aws:dynamodb:eu-south-1:830192246553:table/pn-WebhookEvents",
     "PnNotificationTableName": "pn-Notifications",
     "PnTimelinesTableName": "pn-Timelines",
     "MemoryAmount": "2GB",
@@ -24,14 +20,12 @@
     "notificationSla": "1d",
     "MaxWrittenCounter": "2",
     "QueryEventQuarantineLimit": "100",
-    "StreamStatsTimeUnit": "HOURS",
-    "StreamStatsSpanUnit": "1",
-    "StreamStatsTtl":"365d",
-    "CustomStatsTtlParameterName": "/pn-stream/stats/custom-ttl",
     "NumRetry": "3",
     "AttemptTimeoutSec": "7",
     "VersioningV1V2StreamLambdaProvisionedConcurrency": "1",
     "SaveEventMaxConcurrency": "100",
-    "EnableStreamStats": "true"
+    "EnableStreamStats": "true",
+    "DeliveryProgressesApiPath": "delivery-progresses-2",
+    "DeliveryProgressesApiPathNew": "delivery-progresses"
   }
 }

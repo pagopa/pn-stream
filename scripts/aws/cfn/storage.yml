@@ -93,6 +93,55 @@ Resources:
         HasDLQ: "false"
         QueueHasAlarm: "true"
 
+  # WebhookStreams table
+  PnStreamWebhookStreamsTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-WebhookStreams'
+      AttributeDefinitions:
+        - AttributeName: "hashKey"
+          AttributeType: "S"
+        - AttributeName: "sortKey"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "hashKey"
+          KeyType: "HASH"
+        - AttributeName: "sortKey"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+      KinesisStreamSpecification:
+        StreamArn: !Ref CdcKinesisSourceStreamArn
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # WebhookEvents table
+  PnStreamWebhookEventsTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-WebhookEvents'
+      AttributeDefinitions:
+        - AttributeName: "hashKey"
+          AttributeType: "S"
+        - AttributeName: "sortKey"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "hashKey"
+          KeyType: "HASH"
+        - AttributeName: "sortKey"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
   # Webhook Notification Table
   StreamNotificationTable:
@@ -164,29 +213,6 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
-  StreamStatsTable:
-    Type: AWS::DynamoDB::Table
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      TableName: !Sub '${ProjectName}-WebhookStats'
-      AttributeDefinitions:
-        - AttributeName: "pk"
-          AttributeType: "S"
-        - AttributeName: "sk"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "pk"
-          KeyType: "HASH"
-        - AttributeName: "sk"
-          KeyType: "RANGE"
-      BillingMode: "PAY_PER_REQUEST"
-      TimeToLiveSpecification:
-        AttributeName: "ttl"
-        Enabled: true
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
-
   PnStreamLogGroup:
     Type: AWS::CloudFormation::Stack
     UpdateReplacePolicy: Retain
@@ -250,18 +276,26 @@ Resources:
 
 Outputs:
 
+  PnStreamWebhookStreamsTableName:
+    Description: Name of dynamodb table containing
+    Value: !Ref PnStreamWebhookStreamsTable
+  PnStreamWebhookStreamsTableArn:
+    Description: ARN of dynamodb table containing
+    Value: !Sub '${PnStreamWebhookStreamsTable.Arn}'
+
+  PnStreamWebhookEventsTableName:
+    Description: Name of dynamodb table containing
+    Value: !Ref PnStreamWebhookEventsTable
+  PnStreamWebhookEventsTableArn:
+    Description: ARN of dynamodb table containing
+    Value: !Sub '${PnStreamWebhookEventsTable.Arn}'
+
   StreamNotificationTableName:
     Description: Name of dynamodb table containing
     Value: !Ref StreamNotificationTable
   StreamNotificationTableArn:
     Description: ARN of dynamodb table containing
     Value: !Sub '${StreamNotificationTable.Arn}'
-  StreamStatsTableName:
-    Description: Name of dynamodb table containing
-    Value: !Ref StreamStatsTable
-  StreamStatsTableArn:
-    Description: ARN of dynamodb table containing
-    Value: !Sub '${StreamStatsTable.Arn}'
 
   EventsQuarantineTableName:
     Description: Name of dynamodb table containing quarantined events

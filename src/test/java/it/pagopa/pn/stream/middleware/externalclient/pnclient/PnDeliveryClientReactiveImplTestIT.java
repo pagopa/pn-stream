@@ -3,7 +3,7 @@ package it.pagopa.pn.stream.middleware.externalclient.pnclient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV24;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery_reactive.api.InternalOnlyApi;
 import it.pagopa.pn.stream.MockAWSObjectsTest;
 import it.pagopa.pn.stream.exceptions.PnNotFoundException;
@@ -62,7 +62,7 @@ class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
     void getSentNotification() throws JsonProcessingException {
         //Given
         String iun ="iunTest";
-        SentNotificationV24 notification = new SentNotificationV24();
+        SentNotificationV25 notification = new SentNotificationV25();
         notification.setIun(iun);
 
         when(pnDeliveryApi.getSentNotificationPrivate(anyString())).thenReturn(Mono.just(notification));
@@ -82,9 +82,9 @@ class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
                         .withContentType(MediaType.APPLICATION_JSON)
                         .withStatusCode(200));
         
-        Mono<SentNotificationV24> response = client.getSentNotification(iun);
+        Mono<SentNotificationV25> response = client.getSentNotification(iun);
 
-        SentNotificationV24 notificationResponse = response.block();
+        SentNotificationV25 notificationResponse = response.block();
         Assertions.assertNotNull(notificationResponse);
         Assertions.assertEquals(notification, notificationResponse);
     }
@@ -93,7 +93,7 @@ class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
     void getSentNotificationError(){
         //Given
         String iun ="iunTest";
-        SentNotificationV24 notification = new SentNotificationV24();
+        SentNotificationV25 notification = new SentNotificationV25();
         notification.setIun(iun);
 
         when(pnDeliveryApi.getSentNotificationPrivate(anyString()))
@@ -122,7 +122,7 @@ class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
     void getSentNotificationError404(){
         //Given
         String iun ="iunTest";
-        SentNotificationV24 notification = new SentNotificationV24();
+        SentNotificationV25 notification = new SentNotificationV25();
         notification.setIun(iun);
 
         String path = "/delivery-private/notifications/{iun}"
@@ -150,12 +150,12 @@ class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
 
     @Test
     void getSentNotification_returnsNotification() {
-        SentNotificationV24 notification = new SentNotificationV24();
+        SentNotificationV25 notification = new SentNotificationV25();
         notification.setIun("iunTest");
 
         when(pnDeliveryApi.getSentNotificationPrivate(anyString())).thenReturn(Mono.just(notification));
 
-        Mono<SentNotificationV24> result = client.getSentNotification("iunTest");
+        Mono<SentNotificationV25> result = client.getSentNotification("iunTest");
 
         StepVerifier.create(result)
                 .expectNext(notification)
@@ -167,7 +167,7 @@ class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
         when(pnDeliveryApi.getSentNotificationPrivate(anyString()))
                 .thenReturn(Mono.error(new WebClientResponseException(HttpStatus.NOT_FOUND.value(), "Not Found", null, null, null)));
 
-        Mono<SentNotificationV24> result = client.getSentNotification("iunTest");
+        Mono<SentNotificationV25> result = client.getSentNotification("iunTest");
 
         StepVerifier.create(result)
                 .expectError(PnStreamNotFoundException.class)
@@ -179,7 +179,7 @@ class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
         when(pnDeliveryApi.getSentNotificationPrivate(anyString()))
                 .thenReturn(Mono.error(new WebClientResponseException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", null, null, null)));
 
-        Mono<SentNotificationV24> result = client.getSentNotification("iunTest");
+        Mono<SentNotificationV25> result = client.getSentNotification("iunTest");
 
         StepVerifier.create(result)
                 .expectError(PnInternalException.class)

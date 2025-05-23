@@ -3,7 +3,7 @@ package it.pagopa.pn.stream.rest;
 import it.pagopa.pn.commons.utils.MDCUtils;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.CxTypeAuthFleet;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ExternalEventsRequest;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV27;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV28;
 import it.pagopa.pn.stream.service.StreamEventsService;
 import it.pagopa.pn.stream.utils.MdcKey;
 import it.pagopa.pn.stream.generated.openapi.server.v1.api.EventsApi;
@@ -29,7 +29,7 @@ public class PnEventsController implements EventsApi {
     private final StreamEventsService streamEventsService;
 
     @Override
-    public Mono<ResponseEntity<Flux<ProgressResponseElementV27>>> consumeEventStreamV27(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, String lastEventId, final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Flux<ProgressResponseElementV28>>> consumeEventStreamV28(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, String lastEventId, final ServerWebExchange exchange) {
         log.info("[enter] getEventStream xPagopaPnCxId={} streamId={} lastEventID={}", xPagopaPnCxId, streamId.toString(), lastEventId);
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
 
