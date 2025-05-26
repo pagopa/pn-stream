@@ -52,9 +52,11 @@ class GetEventStreamHandler extends EventHandler {
             case 24:
             case 25:
             case 26:
-            case 27:
                 transformedObject = createStreamMetadataResponseV26(response.data);
-            break;
+                break;
+            case 27:
+                transformedObject = response.data;
+                break;
             default:
                 console.error('Invalid version ', version)
             break;
