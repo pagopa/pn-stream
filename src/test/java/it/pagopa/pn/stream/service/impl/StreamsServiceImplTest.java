@@ -40,6 +40,7 @@ class StreamsServiceImplTest {
     private SchedulerService schedulerService;
     private StreamsServiceImpl webhookService;
     private PnExternalRegistryClient pnExternalRegistryClient;
+    private StreamUtils streamUtils;
 
     private final int maxStreams = 5;
 
@@ -49,7 +50,7 @@ class StreamsServiceImplTest {
         Mockito.mock( EventEntityDao.class );
         pnStreamConfigs = Mockito.mock( PnStreamConfigs.class );
         schedulerService = Mockito.mock(SchedulerService.class);
-        Mockito.mock(StreamUtils.class);
+        streamUtils = Mockito.mock(StreamUtils.class);
         pnExternalRegistryClient = Mockito.mock(PnExternalRegistryClient.class);
 
         when(pnStreamConfigs.getScheduleInterval()).thenReturn(1000L);
@@ -62,7 +63,7 @@ class StreamsServiceImplTest {
         when(pnStreamConfigs.getCurrentVersion()).thenReturn("v26");
         when(pnStreamConfigs.getDeltaCounter()).thenReturn(1000);
 
-        webhookService = new StreamsServiceImpl(streamEntityDao, schedulerService, mock(StreamUtils.class), pnStreamConfigs
+        webhookService = new StreamsServiceImpl(streamEntityDao, schedulerService, streamUtils, pnStreamConfigs
             ,pnExternalRegistryClient);
 
         new DtoToEntityStreamMapper(pnStreamConfigs);
@@ -101,6 +102,7 @@ class StreamsServiceImplTest {
 
         Mockito.when(streamEntityDao.findByPa(Mockito.anyString())).thenReturn(Flux.fromIterable(List.of(pentity)));
         Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -147,6 +149,7 @@ class StreamsServiceImplTest {
 
         Mockito.when(streamEntityDao.findByPa(Mockito.anyString())).thenReturn(Flux.fromIterable(List.of(pentity)));
         Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -192,6 +195,7 @@ class StreamsServiceImplTest {
 
         Mockito.when(streamEntityDao.findByPa(Mockito.anyString())).thenReturn(Flux.fromIterable(List.of(pentity)));
         Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -281,6 +285,7 @@ class StreamsServiceImplTest {
 
         Mockito.when(streamEntityDao.findByPa(Mockito.anyString())).thenReturn(Flux.fromIterable(sss));
         Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
         //WHEN
         Mono<StreamMetadataResponseV28> mono = webhookService.createEventStream(xpagopapnuid, xpagopacxid,null,null, Mono.just(req));
@@ -333,6 +338,7 @@ class StreamsServiceImplTest {
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(sss));
         Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
         //WHEN
         Mono<StreamMetadataResponseV28> mono = webhookService.createEventStream(xpagopapnuid, xpagopacxid,null,null, Mono.just(req));
@@ -351,6 +357,7 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Collections.singletonList("gruppo1"));
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Collections.singletonList("gruppo1"));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -371,6 +378,7 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Collections.emptyList());
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Collections.emptyList());
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -389,6 +397,8 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Collections.emptyList());
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Collections.emptyList());
+        Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Collections.emptyList());
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -407,6 +417,7 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Collections.emptyList());
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Collections.emptyList());
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -427,6 +438,7 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Arrays.asList("gruppo1", "gruppo2"));
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Arrays.asList("gruppo1", "gruppo2","gruppo3"));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -447,6 +459,7 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Arrays.asList("gruppo1", "gruppo2", "gruppo3", "gruppo4"));
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Arrays.asList("gruppo1", "gruppo2","gruppo3"));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -692,6 +705,7 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Arrays.asList("gruppo1", "gruppo2"));
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Arrays.asList("gruppo1", "gruppo2","gruppo3"));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN
@@ -716,6 +730,7 @@ class StreamsServiceImplTest {
         StreamCreationRequestV28 req = createEventStreamRequest(Collections.emptyList());
 
         Mockito.when(pnExternalRegistryClient.getGroups(xpagopapnuid, xpagopacxid)).thenReturn(Arrays.asList("gruppo1", "gruppo2","gruppo3"));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
 
         //WHEN

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
-import it.pagopa.pn.stream.dto.CustomMaxStreamsNumberParameter;
+import it.pagopa.pn.stream.dto.CustomPaConfiguration;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
@@ -148,8 +148,9 @@ public class StreamUtils {
     }
 
     public int retrieveMaxStreamsNumber(String xPagopaPnCxId) {
-        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getMaxStreamsNumberPrefix() + xPagopaPnCxId, CustomMaxStreamsNumberParameter.class)
-                .map(parameter -> Integer.parseInt(parameter.getMaxStreamsNumber()))
+        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getPaConfigurationsPrefix(), CustomPaConfiguration.class)
+                .flatMap(customPaConfiguration -> customPaConfiguration.getPaConfigurations().stream().filter(configuration -> configuration.getPaId().equals(xPagopaPnCxId)).findFirst())
+                .map(configuration -> Integer.parseInt(configuration.getMaxStreamsNumber()))
                 .orElse(pnStreamConfigs.getMaxStreams());
     }
 
