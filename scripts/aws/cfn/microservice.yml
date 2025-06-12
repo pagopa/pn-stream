@@ -293,6 +293,10 @@ Parameters:
     Type: String
     Description: 'Retry parameter prefix'
 
+  MaxStreamsNumberPrefix:
+    Type: String
+    Description: 'Max streams number prefix for retry parameters'
+
   RetryAfterEnabled:
     Type: String
     Description: 'Allow to enable or disable retry after exception'
@@ -478,6 +482,7 @@ Resources:
         ContainerEnvEntry24: !Sub 'PN_STREAM_QUERYEVENTQUARANTINELIMIT=${QueryEventQuarantineLimit}'
         ContainerEnvEntry25: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
         ContainerEnvEntry26: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
+        ContainerEnvEntry27: !Sub 'PN_STREAM_MAXSTREAMSNUMBERPREFIX=${MaxStreamsNumberPrefix}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses-2/*'
         ECSClusterName: !Ref ECSClusterName
@@ -538,6 +543,7 @@ Resources:
               - ssm:GetParameters
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RetryParameterPrefix}*'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${MaxStreamsNumberPrefix}*'
 
 
   # Expose PN-Delivery-progress microservice public API with API-GW for B2B usage
