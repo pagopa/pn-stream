@@ -32,6 +32,7 @@ public class PnStreamConfigs {
     private String firstVersion;
     private String currentVersion;
     private String retryParameterPrefix;
+    private String paConfigurationsPrefix;
     private Boolean retryAfterEnabled;
     private Long streamNotificationTtl;
     private List<String> listCategoriesPa;

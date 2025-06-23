@@ -101,6 +101,11 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 	\"NUMBER_OF_EMPTY_READINGS\":{\"ttl\":\"50d\",\"spanUnit\":\"5\",\"timeUnit\":\"HOURS\"}}}"\
 	--type String \
 
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+	ssm put-parameter \
+	--name "/pn-stream/paConfigurations/" \
+	--value "{\"paConfigurations\":[{\"maxStreamsNumber\":\"200\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\"}]}"\
+	--type String \
 
 echo "Initialization terminated"
 
