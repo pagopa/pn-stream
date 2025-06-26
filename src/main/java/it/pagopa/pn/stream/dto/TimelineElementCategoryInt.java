@@ -55,7 +55,8 @@ public enum TimelineElementCategoryInt {
     NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST(TimelineElementCategoryInt.VERSION_25),
     ANALOG_WORKFLOW_RECIPIENT_DECEASED(TimelineElementCategoryInt.VERSION_26),
     PUBLIC_REGISTRY_VALIDATION_CALL(TimelineElementCategoryInt.VERSION_27),
-    PUBLIC_REGISTRY_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_27);
+    PUBLIC_REGISTRY_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_27),
+    SEND_ANALOG_TIMEOUT_CREATION_REQUEST(TimelineElementCategoryInt.VERSION_27);
 
 
     private final int version;
@@ -78,7 +79,8 @@ public enum TimelineElementCategoryInt {
         VALIDATE_F24_REQUEST,
         GENERATED_F24,
         GENERATE_F24_REQUEST,
-        NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST
+        NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST,
+        SEND_ANALOG_TIMEOUT_CREATION_REQUEST
     }
 
     public enum UnlockTimelineElementCategory {
