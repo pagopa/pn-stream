@@ -46,3 +46,4 @@ node_modules/
 .nyc_output/
 coverage/
 .scannerwork
+.DS_Store

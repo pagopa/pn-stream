@@ -22,14 +22,16 @@ Parameters:
     --filename, -f      File con i record da aggiornare
     --inputDate, -d     Data di attivazione degli stream, obbligatoriamente nel formato UTC
     -tableName, -t      Nome della tabella degli stream
+    --testMode -m.      non aggiorna il campo
     --help, -h          Display this help message`;
 
     const args = parseArgs({
         options: {
-            envName: { type: "string", short: "e" },
+            envName:  {type: "string", short: "e"},
             filename: {type: "string", short: "f"},
-            inputDate: {type: "string", short: "d"},
-            tableName: {type: "string", short: "t"},
+            testMode: {type: "boolean", short: "m"},
+            inputDate:{type: "string", short: "d"},
+            tableName:{type: "string", short: "t"},
             help: { type: "boolean", short: "h" }
         },
         strict: true
@@ -63,6 +65,10 @@ Parameters:
         args.values.tableName = DEFAULT_TABLE;
         
     }
+
+    args.values.testMode = args.values.testMode;
+    console.info(`Test Mode: ${args.values.testMode}`);
+        
     console.log("updated stream table : ", args.values.tableName)
     console.log("inputDate : ", args.values.inputDate)
 
@@ -125,7 +131,7 @@ function printSummary(stats) {
  */
 async function main() {
     const args = validateArgs();
-    const { envName, filename, inputDate, tableName } = args;
+    const { envName, filename, inputDate, tableName, testMode } = args;
 
     // Initialize AWS client
     const coreClient = new AwsClientsWrapper('core', envName);
@@ -186,9 +192,12 @@ async function main() {
                 }
               });
             
-            await coreClient._dynamoClient.send(command);
-
-            console.log(`Migrated succeded for stream: ${record.streamId} on table ${tableName}`);
+            if (!testMode) {
+                await coreClient._dynamoClient.send(command);
+                console.log(`Migration succes for stream: ${record.streamId} on table ${tableName}`);
+            }
+            else
+                console.log(`Simulation succes for stream: ${record.streamId} created at ${stream.activationDate.S} on table ${tableName}`);
             stats.updated++;
         } catch (error) {
             console.error(`Error processing ${record.streamId}:`, error);
