@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
+import it.pagopa.pn.stream.dto.CustomPaConfiguration;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
+import it.pagopa.pn.stream.dto.PaConfiguration;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV20;
@@ -243,6 +245,31 @@ class StreamUtilsTest {
 
         Instant retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
         assertNotNull(retryAfter);
+    }
+
+    @Test
+    void retrieveMaxStreamsNumbers() {
+        CustomPaConfiguration customPaConfiguration = new CustomPaConfiguration();
+        PaConfiguration paConfiguration = new PaConfiguration();
+        paConfiguration.setPaId("xPagopaPnCxId");
+        paConfiguration.setMaxStreamsNumber("5");
+        customPaConfiguration.setPaConfigurations(new ArrayList<>(List.of(paConfiguration)));
+
+        when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
+                .thenReturn(Optional.of(customPaConfiguration));
+
+        Integer maxStreamsNumber = streamUtils.retrieveMaxStreamsNumber("xPagopaPnCxId");
+        assertNotNull(maxStreamsNumber);
+    }
+
+    @Test
+    void retrieveMaxStreamsNumbersDefault() {
+
+        when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
+                .thenReturn(Optional.empty());
+
+        Integer maxStreamsNumber = streamUtils.retrieveMaxStreamsNumber("xPagopaPnCxId");
+        assertNotNull(maxStreamsNumber);
     }
 
     @Test

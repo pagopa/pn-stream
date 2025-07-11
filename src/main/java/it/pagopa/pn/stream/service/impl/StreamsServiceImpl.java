@@ -227,7 +227,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 .filter(entity -> !entity.getStreamId().startsWith(RETRY_PREFIX))
                 .filter(streamEntity -> streamEntity.getDisabledDate() == null)
                 .collectList().flatMap(list -> {
-                    if (list.size() >= pnStreamConfigs.getMaxStreams()) {
+                    if (list.size() >= streamUtils.retrieveMaxStreamsNumber(xPagopaPnCxId)) {
                         return Mono.error(new PnStreamMaxStreamsCountReachedException());
                     } else {
                         return Mono.just(Boolean.TRUE);
