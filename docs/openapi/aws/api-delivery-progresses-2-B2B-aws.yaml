@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: GiOFNJfNRsZ7DnKz+9CzAjj2wKMsQLg4LVdC8FU7H8o=
+  version: 41A2TyHIYjPjRdvk4Vv2IRez4rmcxb2qWdOCwww2UeU=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -5517,8 +5517,9 @@ components:
           maxLength: 128
           description: Chiave per recupero da safe-storage del documento aar
         notificationCost:
+          description: costo notifica in euro cents
+          example: 1220
           type: number
-          description: Costo notifica digitale
     TimelineElementDetailsV28:
       description: The raw event payload that will be different based on the event.
       oneOf:
