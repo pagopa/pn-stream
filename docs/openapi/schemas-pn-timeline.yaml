@@ -1448,6 +1448,7 @@ components:
           maxLength: 128
           description: Chiave per recupero da safe-storage del documento aar
         notificationCost:
+          description: costo notifica in euro cents
+          example: 1220
           type: integer
-          description: Costo notifica digitale
-          format: int32
+          format: int64
