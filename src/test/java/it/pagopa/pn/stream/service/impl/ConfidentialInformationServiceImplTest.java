@@ -7,7 +7,7 @@ import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.AddressDto;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.AnalogDomicile;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.ConfidentialTimelineElementDto;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV28;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.datavault.PnDataVaultClientReactive;
 import it.pagopa.pn.stream.service.ConfidentialInformationService;
 import org.junit.jupiter.api.Assertions;
@@ -49,7 +49,7 @@ class ConfidentialInformationServiceImplTest {
         timelineElementInternal.setTimestamp(Instant.now());
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setStatusInfo(StatusInfoInternal.builder().build());
-        timelineElementInternal.setLegalFactId(List.of(new LegalFactsIdV20()));
+        timelineElementInternal.setLegalFactId(List.of(new LegalFactsIdV28()));
 
         ConfidentialTimelineElementDto confidentialTimelineElementDto = new ConfidentialTimelineElementDto();
         confidentialTimelineElementDto.setTaxId("taxId");
@@ -86,7 +86,7 @@ class ConfidentialInformationServiceImplTest {
         timelineElementInternal.setTimestamp(Instant.now());
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setStatusInfo(StatusInfoInternal.builder().build());
-        timelineElementInternal.setLegalFactId(List.of(new LegalFactsIdV20()));
+        timelineElementInternal.setLegalFactId(List.of(new LegalFactsIdV28()));
 
         Mockito.when(pnDataVaultClientReactive.getNotificationTimelines(Mockito.any())).thenThrow(PnInternalException.class);
 

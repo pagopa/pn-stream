@@ -55,7 +55,11 @@ public enum TimelineElementCategoryInt {
     NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST(TimelineElementCategoryInt.VERSION_25),
     ANALOG_WORKFLOW_RECIPIENT_DECEASED(TimelineElementCategoryInt.VERSION_26),
     PUBLIC_REGISTRY_VALIDATION_CALL(TimelineElementCategoryInt.VERSION_27),
-    PUBLIC_REGISTRY_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_27);
+    PUBLIC_REGISTRY_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_27),
+    SEND_ANALOG_TIMEOUT_CREATION_REQUEST(TimelineElementCategoryInt.VERSION_28),
+    SEND_ANALOG_TIMEOUT(TimelineElementCategoryInt.VERSION_28),
+    ANALOG_FAILURE_WORKFLOW_TIMEOUT(TimelineElementCategoryInt.VERSION_28);
+
 
 
     private final int version;
@@ -72,13 +76,15 @@ public enum TimelineElementCategoryInt {
     public static final int VERSION_26 = 26;
     public static final int VERSION_27 = 27;
     public static final int VERSION_28 = 28;
+    public static final int VERSION_29 = 29;
 
     public enum DiagnosticTimelineElementCategory {
         VALIDATED_F24,
         VALIDATE_F24_REQUEST,
         GENERATED_F24,
         GENERATE_F24_REQUEST,
-        NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST
+        NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST,
+        SEND_ANALOG_TIMEOUT_CREATION_REQUEST
     }
 
     public enum UnlockTimelineElementCategory {
@@ -99,6 +105,7 @@ public enum TimelineElementCategoryInt {
 
     @Getter
     public enum StreamVersions {
+        STREAM_V29(VERSION_29, VERSION_28,VERSION_26),
         STREAM_V28(VERSION_28, VERSION_27,VERSION_26),
         STREAM_V27(VERSION_27, VERSION_26,VERSION_26),
         STREAM_V26(VERSION_26, VERSION_26,VERSION_26),

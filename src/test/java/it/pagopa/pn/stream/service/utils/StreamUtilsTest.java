@@ -9,8 +9,8 @@ import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.PaConfiguration;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV20;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV28;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV28;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.NotificationUnlockedEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
@@ -189,7 +189,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
-                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY1").build(), LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY2").build()))
+                .legalFactId(List.of(LegalFactsIdV28.builder().category(LegalFactCategoryV28.SENDER_ACK).key("KEY1").build(), LegalFactsIdV28.builder().category(LegalFactCategoryV28.SENDER_ACK).key("KEY2").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION)
                 .timestamp(t0.plusMillis(1000))
@@ -198,7 +198,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
-                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
+                .legalFactId(List.of(LegalFactsIdV28.builder().category(LegalFactCategoryV28.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
@@ -207,7 +207,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_ANALOG_DOMICILE.name())
-                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
+                .legalFactId(List.of(LegalFactsIdV28.builder().category(LegalFactCategoryV28.PEC_RECEIPT).key("KEY1").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_ANALOG_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
