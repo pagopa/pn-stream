@@ -2,7 +2,7 @@ package it.pagopa.pn.stream.rest;
 
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.CxTypeAuthFleet;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV26;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV28;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV29;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28;
 import it.pagopa.pn.stream.service.StreamEventsService;
@@ -39,7 +39,7 @@ class PnEventsControllerTest {
                 .timestamp( Instant.now() )
                 .eventId( "event_id" )
                 .iun("")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .build()
         );

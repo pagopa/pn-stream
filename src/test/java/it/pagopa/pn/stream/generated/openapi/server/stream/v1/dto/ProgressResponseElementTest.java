@@ -3,7 +3,7 @@ package it.pagopa.pn.stream.generated.openapi.server.stream.v1.dto;
 import java.time.Instant;
 import java.util.List;
 
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV26;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV28;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV29;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28;
 import org.junit.jupiter.api.Assertions;
@@ -22,7 +22,7 @@ class ProgressResponseElementTest {
         responseElement.setIun("002");
         responseElement.setNotificationRequestId("003");
         responseElement.setTimestamp(instant);
-        responseElement.setNewStatus(NotificationStatusV26.ACCEPTED);
+        responseElement.setNewStatus(NotificationStatusV28.ACCEPTED);
         responseElement.setTimelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED);
         responseElement.setRecipientIndex(1);
         responseElement.setChannel("channel");
@@ -36,7 +36,7 @@ class ProgressResponseElementTest {
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .timestamp(instant)
                 .recipientIndex(1)
@@ -58,7 +58,7 @@ class ProgressResponseElementTest {
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .timestamp(instant)
                 .recipientIndex(1)
@@ -80,7 +80,7 @@ class ProgressResponseElementTest {
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .timestamp(instant)
                 .recipientIndex(1)
@@ -102,7 +102,7 @@ class ProgressResponseElementTest {
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .timestamp(instant)
                 .recipientIndex(1)
@@ -124,19 +124,19 @@ class ProgressResponseElementTest {
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
                 .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
                 .build();
-        Assertions.assertEquals(expected, responseElement.newStatus(NotificationStatusV26.ACCEPTED));
+        Assertions.assertEquals(expected, responseElement.newStatus(NotificationStatusV28.ACCEPTED));
     }
 
     @Test
     void getNewStatus() {
-        Assertions.assertEquals(NotificationStatusV26.ACCEPTED, responseElement.getNewStatus());
+        Assertions.assertEquals(NotificationStatusV28.ACCEPTED, responseElement.getNewStatus());
     }
 
     @Test
@@ -146,7 +146,7 @@ class ProgressResponseElementTest {
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .timestamp(instant)
                 .recipientIndex(1)
@@ -168,7 +168,7 @@ class ProgressResponseElementTest {
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
-                .newStatus(NotificationStatusV26.ACCEPTED)
+                .newStatus(NotificationStatusV28.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
                 .timestamp(instant)
                 .recipientIndex(1)

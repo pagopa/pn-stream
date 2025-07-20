@@ -1,6 +1,6 @@
 package it.pagopa.pn.stream.service.mapper;
 
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV26;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV28;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV29;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.RefusedReason;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28;
@@ -21,7 +21,7 @@ public class ProgressResponseElementMapper {
         progressResponseElement.setEventId(ev.getEventId());
         progressResponseElement.setTimestamp(ev.getTimestamp());
         progressResponseElement.setIun(ev.getIun());
-        progressResponseElement.setNewStatus(ev.getNewStatus() != null ? NotificationStatusV26.valueOf(ev.getNewStatus()) : null);
+        progressResponseElement.setNewStatus(ev.getNewStatus() != null ? NotificationStatusV28.valueOf(ev.getNewStatus()) : null);
         progressResponseElement.setNotificationRequestId(ev.getNotificationRequestId());
         progressResponseElement.setTimelineEventCategory(ev.getTimelineEventCategory() !=null ? TimelineElementCategoryV28.fromValue(ev.getTimelineEventCategory()) : null);
         progressResponseElement.setChannel(ev.getChannel());
