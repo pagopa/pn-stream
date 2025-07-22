@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: qCt0kuN9JSuUo4JS/bc2Ya+ItnuKm2XmVjmXHo4aKpg=
+  version: UBt/DCJJsCn8/wiwihiGtNT7ee1zTBiYabDNxpQYwc8=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -6961,7 +6961,7 @@ components:
           - RECIPIENT_ACCESS <br/>
           - PEC_RECEIPT  <br/>
           - ANALOG_FAILURE_DELIVERY  <br/>
-          - NOTIFICATION_CANCELLED  <br/
+          - NOTIFICATION_CANCELLED  <br/>
       type: string
     LegalFactsIdV20:
       description: Chiavi dei documenti generati durante il processo di consegna cartacea
