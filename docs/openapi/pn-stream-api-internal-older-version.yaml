@@ -50,7 +50,7 @@ paths:
     ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
     ############################################################################################
 
-  '/delivery-progresses-2/streams':
+  '/delivery-progresses/streams':
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -120,7 +120,7 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
 
-  '/delivery-progresses-2/streams/{streamId}':
+  '/delivery-progresses/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -219,7 +219,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/streams/{streamId}/events':
+  '/delivery-progresses/streams/{streamId}/events':
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -288,7 +288,7 @@ paths:
     ############################################################################################
     ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
     ############################################################################################
-  '/delivery-progresses-2/v2.3/streams':
+  '/delivery-progresses/v2.3/streams':
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -375,7 +375,7 @@ paths:
       ############################################################################################
       ###                        lEGGI METADATA DELLO STREAM                                   ###
       ############################################################################################
-  '/delivery-progresses-2/v2.3/streams/{streamId}':
+  '/delivery-progresses/v2.3/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -509,7 +509,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.3/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.3/streams/{streamId}/action/disable':
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -569,7 +569,7 @@ paths:
   ###                             LETTURA EVENTI DA UNO STREAM                             ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.3/streams/{streamId}/events':
+  '/delivery-progresses/v2.3/streams/{streamId}/events':
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -642,7 +642,7 @@ paths:
   ###                        API VERSIONE 2.4                                              ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.4/streams':
+  '/delivery-progresses/v2.4/streams':
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -729,7 +729,7 @@ paths:
     ############################################################################################
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
-  '/delivery-progresses-2/v2.4/streams/{streamId}':
+  '/delivery-progresses/v2.4/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -863,7 +863,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.4/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.4/streams/{streamId}/action/disable':
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -922,7 +922,7 @@ paths:
     ############################################################################################
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
-  '/delivery-progresses-2/v2.4/streams/{streamId}/events':
+  '/delivery-progresses/v2.4/streams/{streamId}/events':
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -999,7 +999,7 @@ paths:
   ############################################################################################
   ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
   ############################################################################################
-  '/delivery-progresses-2/v2.5/streams':
+  '/delivery-progresses/v2.5/streams':
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -1086,7 +1086,7 @@ paths:
     ############################################################################################
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
-  '/delivery-progresses-2/v2.5/streams/{streamId}':
+  '/delivery-progresses/v2.5/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -1220,7 +1220,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.5/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.5/streams/{streamId}/action/disable':
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -1280,7 +1280,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.5/streams/{streamId}/events':
+  '/delivery-progresses/v2.5/streams/{streamId}/events':
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -1353,7 +1353,7 @@ paths:
   ###                        API VERSIONE 2.6                                              ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.6/streams':
+  '/delivery-progresses/v2.6/streams':
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -1440,7 +1440,7 @@ paths:
     ############################################################################################
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
-  '/delivery-progresses-2/v2.6/streams/{streamId}':
+  '/delivery-progresses/v2.6/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -1574,7 +1574,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.6/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.6/streams/{streamId}/action/disable':
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -1634,7 +1634,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.6/streams/{streamId}/events':
+  '/delivery-progresses/v2.6/streams/{streamId}/events':
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -1716,7 +1716,7 @@ paths:
     ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.7/streams':
+  '/delivery-progresses/v2.7/streams':
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -1804,7 +1804,7 @@ paths:
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.7/streams/{streamId}':
+  '/delivery-progresses/v2.7/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -1940,7 +1940,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.7/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.7/streams/{streamId}/action/disable':
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -2000,7 +2000,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.7/streams/{streamId}/events':
+  '/delivery-progresses/v2.7/streams/{streamId}/events':
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -2076,7 +2076,7 @@ paths:
   ############################################################################################
   ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
   ############################################################################################
-  '/delivery-progresses-2/v2.8/streams':
+  '/delivery-progresses/v2.8/streams':
     post:
       deprecated: true
       summary: EXPERIMENTAL - Crea nuovo stream di eventi
@@ -2165,7 +2165,7 @@ paths:
     ############################################################################################
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
-  '/delivery-progresses-2/v2.8/streams/{streamId}':
+  '/delivery-progresses/v2.8/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -2304,7 +2304,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.8/streams/{streamId}/action/disable':
     post:
       deprecated: true
       summary: EXPERIMENTAL - Disabilita uno stream
@@ -2365,7 +2365,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/events':
+  '/delivery-progresses/v2.8/streams/{streamId}/events':
     get:
       deprecated: true
       summary: EXPERIMENTAL - Leggi progressi notifiche

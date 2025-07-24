@@ -252,7 +252,7 @@ paths:
           description: Ok
         '500':
           description: Internal Server Error
-  /delivery-progresses-2/v2.9/streams:
+  /delivery-progresses/v2.9/streams:
     post:
       summary: Crea nuovo stream di eventi
       description: |-
@@ -324,7 +324,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.9/streams/{streamId}:
+  /delivery-progresses/v2.9/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -438,7 +438,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.9/streams/{streamId}/action/disable:
+  /delivery-progresses/v2.9/streams/{streamId}/action/disable:
     post:
       summary: Disabilita uno stream
       description: |-
@@ -485,7 +485,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.9/streams/{streamId}/events:
+  /delivery-progresses/v2.9/streams/{streamId}/events:
     get:
       summary: EXPERIMENTAL - Leggi progressi notifiche
       description: (EXPERIMENTAL) Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_ e tutti gli eventi precedenti. Tali eventi potranno essere cancellati dallo stream.
@@ -543,7 +543,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/streams:
+  /delivery-progresses/streams:
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -606,7 +606,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/streams/{streamId}:
+  /delivery-progresses/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -695,7 +695,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/streams/{streamId}/events:
+  /delivery-progresses/streams/{streamId}/events:
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -741,7 +741,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.3/streams:
+  /delivery-progresses/v2.3/streams:
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -819,7 +819,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.3/streams/{streamId}:
+  /delivery-progresses/v2.3/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -944,7 +944,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.3/streams/{streamId}/action/disable:
+  /delivery-progresses/v2.3/streams/{streamId}/action/disable:
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -994,7 +994,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.3/streams/{streamId}/events:
+  /delivery-progresses/v2.3/streams/{streamId}/events:
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -1055,7 +1055,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.4/streams:
+  /delivery-progresses/v2.4/streams:
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -1133,7 +1133,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.4/streams/{streamId}:
+  /delivery-progresses/v2.4/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -1258,7 +1258,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.4/streams/{streamId}/action/disable:
+  /delivery-progresses/v2.4/streams/{streamId}/action/disable:
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -1308,7 +1308,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.4/streams/{streamId}/events:
+  /delivery-progresses/v2.4/streams/{streamId}/events:
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -1369,7 +1369,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.5/streams:
+  /delivery-progresses/v2.5/streams:
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -1447,7 +1447,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.5/streams/{streamId}:
+  /delivery-progresses/v2.5/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -1570,7 +1570,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.5/streams/{streamId}/action/disable:
+  /delivery-progresses/v2.5/streams/{streamId}/action/disable:
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -1620,7 +1620,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.5/streams/{streamId}/events:
+  /delivery-progresses/v2.5/streams/{streamId}/events:
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -1681,7 +1681,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.6/streams:
+  /delivery-progresses/v2.6/streams:
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -1759,7 +1759,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.6/streams/{streamId}:
+  /delivery-progresses/v2.6/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -1882,7 +1882,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.6/streams/{streamId}/action/disable:
+  /delivery-progresses/v2.6/streams/{streamId}/action/disable:
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -1932,7 +1932,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.6/streams/{streamId}/events:
+  /delivery-progresses/v2.6/streams/{streamId}/events:
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -1993,7 +1993,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.7/streams:
+  /delivery-progresses/v2.7/streams:
     post:
       deprecated: true
       summary: Crea nuovo stream di eventi
@@ -2071,7 +2071,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.7/streams/{streamId}:
+  /delivery-progresses/v2.7/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -2194,7 +2194,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.7/streams/{streamId}/action/disable:
+  /delivery-progresses/v2.7/streams/{streamId}/action/disable:
     post:
       deprecated: true
       summary: Disabilita uno stream
@@ -2244,7 +2244,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.7/streams/{streamId}/events:
+  /delivery-progresses/v2.7/streams/{streamId}/events:
     get:
       deprecated: true
       summary: Leggi progressi notifiche
@@ -2305,7 +2305,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.8/streams:
+  /delivery-progresses/v2.8/streams:
     post:
       deprecated: true
       summary: EXPERIMENTAL - Crea nuovo stream di eventi
@@ -2383,7 +2383,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.8/streams/{streamId}:
+  /delivery-progresses/v2.8/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -2506,7 +2506,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.8/streams/{streamId}/action/disable:
+  /delivery-progresses/v2.8/streams/{streamId}/action/disable:
     post:
       deprecated: true
       summary: EXPERIMENTAL - Disabilita uno stream
@@ -2556,7 +2556,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /delivery-progresses-2/v2.8/streams/{streamId}/events:
+  /delivery-progresses/v2.8/streams/{streamId}/events:
     get:
       deprecated: true
       summary: EXPERIMENTAL - Leggi progressi notifiche
