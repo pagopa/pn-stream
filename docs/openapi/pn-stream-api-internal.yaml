@@ -348,7 +348,7 @@ paths:
     ############################################################################################
     ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
     ############################################################################################
-  '/delivery-progresses-2/v2.8/streams':
+  '/delivery-progresses/v2.9/streams':
     parameters:                                               # NO EXTERNAL
       - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
       - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
@@ -356,9 +356,8 @@ paths:
       - $ref: '#/components/parameters/cxGroupsAuthFleet'         # NO EXTERNAL
       - $ref: '#/components/parameters/headerApiVersion'         # NO EXTERNAL
     post:
-      summary: EXPERIMENTAL - Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi
       description: >-
-        (EXPERIMENTAL)
         Creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline.
 
@@ -368,20 +367,20 @@ paths:
         invocata l'operazione.
       tags:
         - Streams
-      operationId: createEventStreamV28
+      operationId: createEventStreamV29
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StreamCreationRequestV28"
+              $ref: "#/components/schemas/StreamCreationRequestV29"
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StreamMetadataResponseV28"
+                $ref: "#/components/schemas/StreamMetadataResponseV29"
         '400':
           description: Invalid input
           content:
@@ -407,13 +406,12 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
-      summary: EXPERIMENTAL - Elenca stream di eventi
+      summary: Elenca stream di eventi
       description: >-
-        (EXPERIMENTAL)
         Elenca gli stream di eventi
       tags:
         - Streams
-      operationId: listEventStreamsV28
+      operationId: listEventStreamsV29
       responses:
         '200':
           description: OK
@@ -437,7 +435,7 @@ paths:
     ############################################################################################
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
-  '/delivery-progresses-2/v2.8/streams/{streamId}':
+  '/delivery-progresses/v2.9/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
       - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
@@ -446,21 +444,20 @@ paths:
       - $ref: '#/components/parameters/headerApiVersion'         # NO EXTERNAL
       - $ref: '#/components/parameters/pathStreamId'
     get:
-      summary: EXPERIMENTAL - Leggi metadata dello stream
+      summary: Leggi metadata dello stream
       description: >-
-        (EXPERIMENTAL)
         Lettura delle configurazioni di uno stream di eventi.
       tags:
         - Streams
-      operationId: getEventStreamV28                             # NO EXTERNAL
-      #      operationId: retrieveEventStreamV28                       # ONLY EXTERNAL
+      operationId: getEventStreamV29                             # NO EXTERNAL
+      #      operationId: retrieveEventStreamV29                       # ONLY EXTERNAL
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StreamMetadataResponseV28"
+                $ref: "#/components/schemas/StreamMetadataResponseV29"
         '400':
           description: Invalid input
           content:
@@ -486,26 +483,25 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
-      summary: EXPERIMENTAL - Update Stream metadata
+      summary: Update Stream metadata
       description: >-
-        (EXPERIMENTAL)
         Modifica delle configurazioni dei filtri associati a uno stream di eventi, non è possibile cambiare il valore del flag waitForAccepted.
       tags:
         - Streams
-      operationId: updateEventStreamV28
+      operationId: updateEventStreamV29
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StreamRequestV28"
+              $ref: "#/components/schemas/StreamRequestV29"
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StreamMetadataResponseV28"
+                $ref: "#/components/schemas/StreamMetadataResponseV29"
         '400':
           description: Invalid input
           content:
@@ -531,15 +527,14 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
-      summary: EXPERIMENTAL - Remove Event Stream
+      summary: Remove Event Stream
       description: >-
-        (EXPERIMENTAL)
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
       tags:
         - Streams
-      operationId: deleteEventStreamV28                          # NO EXTERNAL
-      #      operationId: removeEventStreamV28                         # ONLY EXTERNAL
+      operationId: deleteEventStreamV29                          # NO EXTERNAL
+      #      operationId: removeEventStreamV29                         # ONLY EXTERNAL
       responses:
         '204':
           description: OK
@@ -572,11 +567,10 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.9/streams/{streamId}/action/disable':
     post:
-      summary: EXPERIMENTAL - Disabilita uno stream
+      summary: Disabilita uno stream
       description: >-
-        (EXPERIMENTAL)
         Disabilita uno stream.
 
 
@@ -591,7 +585,7 @@ paths:
         eliminato automaticamente dopo <span id="webhookTtlDisabled">14</span> giorni.
       tags:
         - Streams
-      operationId: disableEventStreamV28
+      operationId: disableEventStreamV29
       parameters:
         - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
         - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
@@ -605,7 +599,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StreamMetadataResponseV28"
+                $ref: "#/components/schemas/StreamMetadataResponseV29"
         '400':
           description: Invalid input
           content:
@@ -635,7 +629,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/events':
+  '/delivery-progresses/v2.9/streams/{streamId}/events':
     get:
       summary: EXPERIMENTAL - Leggi progressi notifiche
       description: >-
@@ -645,7 +639,7 @@ paths:
         e tutti gli eventi precedenti. Tali eventi potranno essere cancellati dallo stream.
       tags:
         - Events
-      operationId: consumeEventStreamV28
+      operationId: consumeEventStreamV29
       parameters:
         - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
         - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
@@ -672,7 +666,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProgressResponseV28"
+                $ref: "#/components/schemas/ProgressResponseV29"
         '429':
           description: Too Many Requests
           headers:
@@ -712,7 +706,7 @@ paths:
     ###                INVIO DI EVENTI DA PARTE DELLA PUBBLICA AMMNISTRAZIONE                ###
     ############################################################################################
 
-  '/delivery-progresses-2/events':                                                              # NOT YET IMPLEMENTED
+  '/delivery-progresses/events':                                                              # NOT YET IMPLEMENTED
     post:                                                                                     # NOT YET IMPLEMENTED
       summary: Invio eventi da parte della PA                                                 # NOT YET IMPLEMENTED
       description: >-                                                                         # NOT YET IMPLEMENTED
@@ -813,11 +807,11 @@ components:
     ############################################################################################
     ###                          CREAZIONE E GESTIONE EVENT STREAM                           ###
     ############################################################################################
-    StreamCreationRequestV28:
+    StreamCreationRequestV29:
       description: Richiesta di creazione di uno stream di eventi di avanzamento delle notifiche. Lo stream verrà creato nello stato abilitato
       type: object
       allOf:
-        - $ref: '#/components/schemas/StreamRequestV28'
+        - $ref: '#/components/schemas/StreamRequestV29'
         - type: object
           properties:
             replacedStreamId:
@@ -830,7 +824,7 @@ components:
               type: string
               format: uuid
 
-    StreamRequestV28:
+    StreamRequestV29:
       description: >-
         Struttura comune per eventi di creazione/aggiornamento di uno stream di eventi di avanzamento delle notifiche.
         L'aggiornamento delle proprietà dello stream è soggetta al controllo di autorizzazione dell'apiKey sui gruppi.
@@ -888,10 +882,10 @@ components:
       description: >-
         Identificativo del gruppo.
 
-    StreamMetadataResponseV28:
+    StreamMetadataResponseV29:
       description: Configurazioni di un flusso di eventi
       allOf:
-        - $ref: '#/components/schemas/StreamRequestV28'
+        - $ref: '#/components/schemas/StreamRequestV29'
         - type: object
           required:
             - streamId
@@ -948,12 +942,12 @@ components:
     ###  - EVENTI GENERATI DA PN
     ###################################
 
-    ProgressResponseV28:
+    ProgressResponseV29:
       type: array
       items:
-        $ref: '#/components/schemas/ProgressResponseElementV28'
+        $ref: '#/components/schemas/ProgressResponseElementV29'
 
-    ProgressResponseElementV28:
+    ProgressResponseElementV29:
       type: object
       required:
         - eventId
@@ -974,16 +968,16 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
+          $ref: './schemas-pn-status.yaml#/components/schemas/NotificationStatusV28'
         element:
-          $ref: './schemas-pn-timeline.yaml#/components/schemas/TimelineElementV27'
+          $ref: './schemas-pn-timeline.yaml#/components/schemas/TimelineElementV28'
         # proprietà necessarie per retro compatibilità nel transitorio, ma che non saranno esposte nella V24 # NO EXTERNAL
         # potranno essere eliminate (assieme al RefusedReason) quando non saranno più presenti eventi della v1 # NO EXTERNAL
         timestamp:                                                                                         # NO EXTERNAL
           type: string                                                                                     # NO EXTERNAL
           format: date-time                                                                                # NO EXTERNAL
         timelineEventCategory:                                                                             # NO EXTERNAL
-          $ref: './schemas-pn-timeline.yaml#/components/schemas/TimelineElementCategoryV27'                # NO EXTERNAL
+          $ref: './schemas-pn-timeline.yaml#/components/schemas/TimelineElementCategoryV28'                # NO EXTERNAL
         recipientIndex:                                                                                    # NO EXTERNAL
           type: integer                                                                                    # NO EXTERNAL
           format: int32                                                                                    # NO EXTERNAL

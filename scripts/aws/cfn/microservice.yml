@@ -484,7 +484,7 @@ Resources:
         ContainerEnvEntry26: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
         ContainerEnvEntry27: !Sub 'PN_STREAM_PACONFIGURATIONSPREFIX=${PaConfigurationsPrefix}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
-        MappedPaths: '/delivery-progresses-2/*'
+        MappedPaths: '/delivery-progresses/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref VpcEgressSubnetsIds ]
         VpcId: !Ref VpcId
@@ -563,7 +563,7 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         OpenApiBucketName: !Ref MicroserviceBucketName
-        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-delivery-progresses-2-B2B-aws.yaml
+        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-delivery-progresses-B2B-aws.yaml
 
   DeliveryProgressStreamMicroservicePublicApiWaf:
     Type: AWS::CloudFormation::Stack
@@ -817,7 +817,7 @@ Resources:
       Environment:
         Variables:
           REGION: !Sub ${AWS::Region}
-          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/${DeliveryProgressesApiPath}/v2.8"
+          PN_STREAM_URL: !Sub "http://${ApplicationLoadBalancerDomain}:8080/${DeliveryProgressesApiPath}/v2.9"
           BASE_PATH: !Sub "http://${ApplicationLoadBalancerDomain}:8080"
           NUM_RETRY: !Ref NumRetry
           ATTEMPT_TIMEOUT_SEC: !Ref AttemptTimeoutSec
