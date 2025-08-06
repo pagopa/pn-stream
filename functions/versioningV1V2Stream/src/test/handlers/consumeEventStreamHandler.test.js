@@ -1430,6 +1430,138 @@ describe("ConsumeEventStreamHandler", () => {
 
             expect(mock.history.get.length).to.equal(1);
         });
+
+        it("successful request V29 to V28", async () => {
+            const streamId = "12345";
+            const event = {
+                path: "/delivery-progresses/v2.8/streams/"+ streamId +"/events",
+                pathParameters : { streamId: streamId },
+                queryStringParameters: null,
+                httpMethod: "GET",
+                headers: {},
+                requestContext: {
+                    authorizer: {},
+                },
+            }
+
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
+            let urlNotification = `${process.env.BASE_PATH}/delivery-private/notifications/LNWV-GRMV-KPWV-202503-W-1`;
+            let urlStatusHistory = `${process.env.BASE_PATH}/delivery-push-private/LNWV-GRMV-KPWV-202503-W-1/history`;
+
+            const responseBodyV29 = [
+                {
+                    eventId: "01234567890123456789012345678901234567",
+                    notificationRequestId: "abcd1234",
+                    iun: "LNWV-GRMV-KPWV-202503-W-1",
+                    newStatus: "IN_VALIDATION",
+                    element: {
+                        elementId: "abcdef1234567890",
+                        timestamp: "2024-02-06T12:34:56Z",
+                        ingestionTimestamp: "2025-02-06T12:34:56Z",
+                        eventTimestamp: "2023-02-06T12:34:56Z",
+                        notificationSentAt: "2026-02-06T12:34:56Z",
+                        legalFactsIds: [
+                            {
+                                key: "safestorage://PN_LEGAL_FACTS-9c3eba7e5fb14c5b9f59635a8edd5714.pdf",
+                                category: "NOTIFICATION_CANCELLED"
+                            }
+                        ],
+                        category: "NOTIFICATION_CANCELLED",
+                        details: {
+                            recIndex: 1,
+                            digitalAddress: {
+                                type: "EMAIL",
+                                address: "rec@example.com"
+                            },
+                            endWorkflowStatus: {},
+                            completionWorkflowDate: ""
+                        },
+                    }
+                },
+                {
+                    eventId: "98765432109876543210987654321098765432",
+                    notificationRequestId: "efgh5678",
+                    iun: "LNWV-GRMV-KPWV-202503-W-1",
+                    newStatus: "DELIVERY_TIMEOUT",
+                    element: {
+                        elementId: "ghijkl0987654321",
+                        timestamp: "2024-02-07T14:45:32Z",
+                        ingestionTimestamp: "2025-02-06T12:34:56Z",
+                        eventTimestamp: "2023-02-06T12:34:56Z",
+                        notificationSentAt: "2026-02-06T12:34:56Z",
+                        legalFactsIds: [
+                            {
+                                key: "safestorage://PN_LEGAL_FACTS-9c3eba7e5fb14c5b9f59635a8edd5714.pdf",
+                                category: "DIGITAL_DELIVERY"
+                            }
+                        ],
+                        category: "SEND_DIGITAL_DOMICILE",
+                        details: {
+                            recIndex: 2,
+                            digitalAddress: {
+                                type: "PEC",
+                                address: "rec@example.com",
+                            },
+                            endWorkflowStatus: {},
+                            completionWorkflowDate: "",
+                        },
+                    },
+                }
+            ]
+
+            const responseNotification = {
+                iun: "LNWV-GRMV-KPWV-202503-W-1",
+                recipients: [
+                    {
+                        denomination: "Mario Cucumber",
+                    }
+                ],
+                senderPaId: "e955a1a1-86f0-4d7d-9c2a-f90783f6067c",
+                senderTaxId: "03509990788",
+                sentAt: "2024-03-22T01:14:00.526096073Z",
+            }
+
+            const responseStatusHistory = {
+                notificationStatus: "VIEWED",
+                notificationStatusHistory: [
+                {
+                    status: "ACCEPTED",
+                    activeFrom: "2025-04-11T07:47:36.928130418Z"
+                },
+                {
+                    status: "DELIVERING",
+                    activeFrom: "2024-03-22T01:18:05.244324794Z"
+                },
+                {
+                    status: "DELIVERED",
+                    activeFrom: "2024-03-22T01:18:20.244324794Z"
+                },
+                {
+                    status: "VIEWED",
+                    activeFrom: "2024-03-22T01:18:34.706278143Z"
+                },
+                {
+                    status: "RETURNED_TO_SENDER",
+                    activeFrom: "2024-03-22T01:19:21.622217766Z"
+                },
+                {
+                    status: "DELIVERY_TIMEOUT",
+                    activeFrom: "2024-03-22T01:19:21.622217766Z"
+                }
+                ]
+            }
+
+            mock.onGet(url).reply(200, responseBodyV29);
+            mock.onGet(urlNotification).reply(200, responseNotification);
+            mock.onGet(urlStatusHistory).reply(200, responseStatusHistory);
+
+            const context = {};
+            const response = await consumeEventStreamHandler.handlerEvent(event, context);
+
+            expect(response.statusCode).to.equal(200);
+            expect(response.body).to.not.contain("DELIVERY_TIMEOUT");
+        });
+
     });
 
 });

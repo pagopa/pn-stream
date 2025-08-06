@@ -1,9 +1,9 @@
 const transformProgressResponseUtils = require('./transformProgressResponseUtils.js');
 
-exports.createProgressResponseV25 = async (responseBody) => {
-    console.debug("createProgressResponseV25")
+exports.createProgressResponseV28 = async (responseBody) => {
+    console.debug("createProgressResponseV28")
 
-    if (responseBody.newStatus === 'RETURNED_TO_SENDER') {
+    if (responseBody.newStatus === 'DELIVERY_TIMEOUT') {
         const notification = await getNotificationFromDelivery(responseBody)
         const statusHistory = await getStatusHistory(notification)
         responseBody.newStatus = statusHistory.data.notificationStatusHistory[statusHistory.data.notificationStatusHistory.length-2].status
@@ -16,6 +16,6 @@ async function getNotificationFromDelivery(responseBody) {
     return transformProgressResponseUtils.getNotificationFromDelivery(responseBody);
 }
 
-async function getStatusHistory(notification) {    
+async function getStatusHistory(notification) {
     return transformProgressResponseUtils.getStatusHistory(notification);
 }

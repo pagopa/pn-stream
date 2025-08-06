@@ -66,6 +66,9 @@ class DisableEventStreamHandler extends EventHandler {
             case 27:
                 transformedObject = createStreamMetadataResponseV26(response.data);
             break;
+            case 28:
+                transformedObject = createStreamMetadataResponseV26(response.data);
+            break;
             default:
                 console.error('Invalid version ', version)
             break;
