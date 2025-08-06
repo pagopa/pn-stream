@@ -6,6 +6,7 @@ const {createProgressResponseV23} = require("./mapper/transformProgressResponseF
 const {createProgressResponseV24} = require("./mapper/transformProgressResponseFromV25ToV24");
 const {createProgressResponseV25} = require("./mapper/transformProgressResponseFromV26ToV25");
 const {createProgressResponseV27} = require("./mapper/transformProgressResponseFromV28ToV27");
+const {createProgressResponseV28} = require("./mapper/transformProgressResponseFromV29ToV28");
 
 class ConsumeEventStreamHandler extends EventHandler {
     constructor() {
@@ -56,27 +57,32 @@ class ConsumeEventStreamHandler extends EventHandler {
                 switch(version) {
                     case 10:
                         console.debug('Mapping to v10')
-                        responseBody.push(createProgressResponseV10(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(data))))));
+                        responseBody.push(createProgressResponseV10(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(await createProgressResponseV28(data)))))));
                     break;
                     case 23:
                         console.debug('Mapping to v23')
-                        responseBody.push(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(data)))));
+                        responseBody.push(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(await createProgressResponseV28(data))))));
                     break;
                     case 24:
                         console.debug('Mapping to v24')
-                        responseBody.push(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(data))));
+                        responseBody.push(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(await createProgressResponseV28(data)))));
                     break;
                     case 25:
                         console.debug('Mapping to v25')
-                        responseBody.push(await createProgressResponseV25(createProgressResponseV27(data)));
+                        responseBody.push(await createProgressResponseV25(createProgressResponseV27(await createProgressResponseV28(data))));
                     break;
                     case 26:
                         console.debug('Mapping to v26')
-                        responseBody.push(createProgressResponseV27(data));
+                        responseBody.push(createProgressResponseV27(await createProgressResponseV28(data)));
                     break;
                     case 27:
                         console.debug('Mapping to v27')
-                        responseBody.push(createProgressResponseV27(data));
+                        responseBody.push(createProgressResponseV27(await createProgressResponseV28(data)));
+                    break;
+                    case 28:
+                        console.debug('Mapping to v28')
+                        responseBody.push(await createProgressResponseV28(data));
+                    break;
                     default:
                         console.error('Invalid version ', version)
                     break;
