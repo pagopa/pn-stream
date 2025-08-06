@@ -77,6 +77,11 @@ class ConsumeEventStreamHandler extends EventHandler {
                     case 27:
                         console.debug('Mapping to v27')
                         responseBody.push(createProgressResponseV27(data));
+                    break;
+                    case 28:
+                        console.debug('Mapping to v28')
+                        responseBody.push(createProgressResponseV27(data));
+                    break;
                     default:
                         console.error('Invalid version ', version)
                     break;
