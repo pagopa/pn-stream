@@ -1,7 +1,7 @@
 package it.pagopa.pn.stream.middleware.dao.dynamo.mapper;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV28;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV29;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +17,11 @@ public class EntityToDtoStreamMapper {
         firstVersion = pnStreamConfigs.getFirstVersion();
     }
 
-    public static StreamMetadataResponseV28 entityToDto(StreamEntity entity ) {
-        StreamMetadataResponseV28 streamMetadataResponse = new StreamMetadataResponseV28();
+    public static StreamMetadataResponseV29 entityToDto(StreamEntity entity ) {
+        StreamMetadataResponseV29 streamMetadataResponse = new StreamMetadataResponseV29();
         streamMetadataResponse.setStreamId(UUID.fromString(entity.getStreamId()));
         streamMetadataResponse.setActivationDate(entity.getActivationDate());
-        streamMetadataResponse.setEventType(StreamMetadataResponseV28.EventTypeEnum.valueOf(entity.getEventType()));
+        streamMetadataResponse.setEventType(StreamMetadataResponseV29.EventTypeEnum.valueOf(entity.getEventType()));
         streamMetadataResponse.setTitle(entity.getTitle());
         streamMetadataResponse.setFilterValues(List.copyOf(Objects.requireNonNullElse(entity.getFilterValues(), new HashSet<>())));
         streamMetadataResponse.setGroups(entity.getGroups());
