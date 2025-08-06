@@ -35,6 +35,7 @@ class CreateEventStreamHandler extends EventHandler {
                 requestBody = createStreamCreationRequestV26(requestBody);
                 break;
             case 27:
+            case 28:
                 requestBody = requestBody;
             default:
                 console.error('Invalid version ', version)
