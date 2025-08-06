@@ -2,8 +2,8 @@ package it.pagopa.pn.stream.middleware.dao.dynamo.mapper;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV28;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV28;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV29;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV29;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import java.util.Set;
 import org.springframework.beans.BeanUtils;
@@ -18,7 +18,7 @@ public class DtoToEntityStreamMapper {
         currentVersion = pnStreamConfigs.getCurrentVersion();
     }
 
-    public static StreamEntity dtoToEntity(String paId, String streamId, String version, StreamCreationRequestV28 dto) {
+    public static StreamEntity dtoToEntity(String paId, String streamId, String version, StreamCreationRequestV29 dto) {
         StreamEntity streamEntity = new StreamEntity(paId, streamId);
         streamEntity.setEventType(dto.getEventType().getValue());
         streamEntity.setTitle(dto.getTitle());
@@ -32,10 +32,10 @@ public class DtoToEntityStreamMapper {
         return streamEntity;
     }
 
-    public static StreamEntity dtoToEntity(String paId, String streamId, String version, StreamRequestV28 dto) {
-        StreamCreationRequestV28 creationRequestv23 = new StreamCreationRequestV28();
+    public static StreamEntity dtoToEntity(String paId, String streamId, String version, StreamRequestV29 dto) {
+        StreamCreationRequestV29 creationRequestv23 = new StreamCreationRequestV29();
         BeanUtils.copyProperties(dto, creationRequestv23);
-        creationRequestv23.setEventType(StreamCreationRequestV28.EventTypeEnum.fromValue(dto.getEventType().getValue()));
+        creationRequestv23.setEventType(StreamCreationRequestV29.EventTypeEnum.fromValue(dto.getEventType().getValue()));
         return dtoToEntity(paId, streamId, version, creationRequestv23);
     }
 }

@@ -26,7 +26,7 @@
     "VersioningV1V2StreamLambdaProvisionedConcurrency": "1",
     "SaveEventMaxConcurrency": "100",
     "EnableStreamStats": "true",
-    "DeliveryProgressesApiPath": "delivery-progresses-2",
+    "DeliveryProgressesApiPath": "delivery-progresses",
     "DeliveryProgressesApiPathNew": "delivery-progresses"
   }
 }
