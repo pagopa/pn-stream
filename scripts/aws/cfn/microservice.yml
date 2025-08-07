@@ -289,10 +289,6 @@ Parameters:
     Type: String
     Description: 'Max elements quantity for each stream call'
 
-  RetryParameterPrefix:
-    Type: String
-    Description: 'Retry parameter prefix'
-
   PaConfigurationsPrefix:
     Type: String
     Description: 'Max streams number prefix for retry parameters'
@@ -466,7 +462,6 @@ Resources:
         ContainerEnvEntry8: !Sub 'PN_STREAM_DAO_EVENTSTABLENAME=${PnStreamWebhookEventsTableName}'
         ContainerEnvEntry9: !Sub 'PN_STREAM_DAO_STREAMSTABLENAME=${PnStreamWebhookStreamsTableName}'
         ContainerEnvEntry10: 'PN_STREAM_DATAVAULTBASEURL=http://alb.confidential.pn.internal:8080'
-        ContainerEnvEntry11: !Sub 'PN_STREAM_RETRYPARAMETERPREFIX=${RetryParameterPrefix}'
         ContainerEnvEntry12: !Sub 'PN_STREAM_RETRYAFTERENABLED=${RetryAfterEnabled}'
         ContainerEnvEntry13: !Sub 'PN_STREAM_TOPICS_EVENT=${EventQueueName}'
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${EventQueueName},${ScheduledActionsQueueName},${EventScheduleQueueName}'
@@ -542,7 +537,6 @@ Resources:
               - ssm:GetParameter
               - ssm:GetParameters
             Resource:
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RetryParameterPrefix}*'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${PaConfigurationsPrefix}*'
 
 

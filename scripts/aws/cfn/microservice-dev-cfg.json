@@ -10,7 +10,6 @@
     "ScheduleInterval": "60000",
     "MaxLength": "50",
     "MaxStreams": "70",
-    "RetryParameterPrefix": "/pn-stream/retry/",
     "PaConfigurationsPrefix": "/pn-stream/paConfigurations",
     "RetryAfterEnabled": "false",
     "StreamNotificationTtl": "7889400",
