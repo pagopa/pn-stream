@@ -563,7 +563,7 @@ class EventsServiceImplTest {
         when(eventEntityDao.findByStreamId(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(eventEntityBatch));
         when(webhookUtils.getVersion(xPagopaPnApiVersion)).thenReturn(10);
         when(streamEntityDao.updateStreamRetryAfter(any())).thenReturn(Mono.empty());
-        when(webhookUtils.retrieveRetryAfter(any())).thenReturn(Instant.now());
+        when(webhookUtils.retrieveRetryAfter(any())).thenReturn(Long.parseLong("1000"));
 
         //WHEN
         ProgressResponseElementDto res = webhookEventsService.consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, uuidd, lasteventid).block(d);

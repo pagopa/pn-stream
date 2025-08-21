@@ -140,13 +140,12 @@ public class StreamUtils {
         }
     }
 
-    public Instant retrieveRetryAfter(String xPagopaPnCxId) {
+    public Long retrieveRetryAfter(String xPagopaPnCxId){
         return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getPaConfigurationsPrefix(), CustomPaConfiguration.class)
                 .flatMap(customPaConfiguration -> customPaConfiguration.getPaConfigurations().stream()
                         .filter(configuration -> configuration.getPaId().equals(xPagopaPnCxId) && StringUtils.hasText(configuration.getRetryAfter())).findFirst())
                 .map(configuration -> Long.parseLong(configuration.getRetryAfter()))
-                .map(retryAfter -> Instant.now().plusMillis(retryAfter))
-                .orElse(Instant.now().plusMillis(pnStreamConfigs.getScheduleInterval()));
+                .orElse(pnStreamConfigs.getScheduleInterval());
     }
 
     public int retrieveMaxStreamsNumber(String xPagopaPnCxId) {

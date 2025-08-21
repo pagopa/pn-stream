@@ -249,7 +249,7 @@ class StreamUtilsTest {
         when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
                 .thenReturn(Optional.of(customPaConfiguration));
 
-        Instant retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
+        Long retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
         assertNotNull(retryAfter);
     }
 
@@ -262,7 +262,7 @@ class StreamUtilsTest {
         when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
                 .thenReturn(Optional.of(customPaConfiguration));
 
-        Instant retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
+        Long retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
         assertNotNull(retryAfter);
     }
 
@@ -278,7 +278,7 @@ class StreamUtilsTest {
         when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
                 .thenReturn(Optional.of(customPaConfiguration));
 
-        Instant retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
+        Long retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
         assertNotNull(retryAfter);
     }
 
