@@ -453,7 +453,7 @@ paths:
       tags:
         - Streams
       operationId: getEventStreamV28                             # NO EXTERNAL
-      #      operationId: retrieveEventStreamV28                       # ONLY EXTERNAL
+#      operationId: retrieveEventStreamV28                       # ONLY EXTERNAL
       responses:
         '200':
           description: OK
@@ -539,7 +539,7 @@ paths:
       tags:
         - Streams
       operationId: deleteEventStreamV28                          # NO EXTERNAL
-      #      operationId: removeEventStreamV28                         # ONLY EXTERNAL
+#      operationId: removeEventStreamV28                         # ONLY EXTERNAL
       responses:
         '204':
           description: OK
