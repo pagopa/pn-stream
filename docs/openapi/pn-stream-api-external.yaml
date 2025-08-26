@@ -347,7 +347,7 @@ paths:
     ############################################################################################
     ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
     ############################################################################################
-  '/delivery-progresses-2/v2.8/streams':
+  '/delivery-progresses/v2.8/streams':
     post:
       summary: EXPERIMENTAL - Crea nuovo stream di eventi
       description: >-
@@ -430,7 +430,7 @@ paths:
     ############################################################################################
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
-  '/delivery-progresses-2/v2.8/streams/{streamId}':
+  '/delivery-progresses/v2.8/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
@@ -558,7 +558,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.8/streams/{streamId}/action/disable':
     post:
       summary: EXPERIMENTAL - Disabilita uno stream
       description: >-
@@ -616,7 +616,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/events':
+  '/delivery-progresses/v2.8/streams/{streamId}/events':
     get:
       summary: EXPERIMENTAL - Leggi progressi notifiche
       description: >-
