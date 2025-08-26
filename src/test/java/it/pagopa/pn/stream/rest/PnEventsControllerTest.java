@@ -23,6 +23,7 @@ import java.util.UUID;
 
 @WebFluxTest(PnEventsController.class)
 class PnEventsControllerTest {
+    public static final String API_VERSION = "v2.8";
 
     @Autowired
     WebTestClient webTestClient;
@@ -51,7 +52,7 @@ class PnEventsControllerTest {
 
 
         webTestClient.get()
-                .uri( "/delivery-progresses-2/v2.8/streams/{streamId}/events".replace("{streamId}", streamId) )
+                .uri( "/delivery-progresses/"+ API_VERSION +"/streams/{streamId}/events".replace("{streamId}", streamId) )
                 .header(HttpHeaders.ACCEPT, "application/json")
                 .headers(httpHeaders -> {
                     httpHeaders.set("x-pagopa-pn-uid","test");
@@ -71,7 +72,7 @@ class PnEventsControllerTest {
     @Test
     void informOnExternalEvent() {
         webTestClient.post()
-                .uri( "/delivery-progresses-2/events" )
+                .uri( "/delivery-progresses/events" )
                 .contentType(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> {
                     httpHeaders.set("x-pagopa-pn-uid","test");

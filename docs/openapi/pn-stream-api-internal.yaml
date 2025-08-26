@@ -348,7 +348,7 @@ paths:
     ############################################################################################
     ###                        CREAZIONE E CANCELLAZIONE STREAM EVENTI                       ###
     ############################################################################################
-  '/delivery-progresses-2/v2.8/streams':
+  '/delivery-progresses/v2.8/streams':
     parameters:                                               # NO EXTERNAL
       - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
       - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
@@ -437,7 +437,7 @@ paths:
     ############################################################################################
     ###                        lEGGI METADATA DELLO STREAM                                   ###
     ############################################################################################
-  '/delivery-progresses-2/v2.8/streams/{streamId}':
+  '/delivery-progresses/v2.8/streams/{streamId}':
     parameters:
       - $ref: '#/components/parameters/uidAuthFleet'          # NO EXTERNAL
       - $ref: '#/components/parameters/cxTypeAuthFleet'       # NO EXTERNAL
@@ -453,7 +453,7 @@ paths:
       tags:
         - Streams
       operationId: getEventStreamV28                             # NO EXTERNAL
-      #      operationId: retrieveEventStreamV28                       # ONLY EXTERNAL
+#      operationId: retrieveEventStreamV28                       # ONLY EXTERNAL
       responses:
         '200':
           description: OK
@@ -539,7 +539,7 @@ paths:
       tags:
         - Streams
       operationId: deleteEventStreamV28                          # NO EXTERNAL
-      #      operationId: removeEventStreamV28                         # ONLY EXTERNAL
+#      operationId: removeEventStreamV28                         # ONLY EXTERNAL
       responses:
         '204':
           description: OK
@@ -572,7 +572,7 @@ paths:
   ###                             DISABILITARE UNO STREAM                                  ###
   ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/action/disable':
+  '/delivery-progresses/v2.8/streams/{streamId}/action/disable':
     post:
       summary: EXPERIMENTAL - Disabilita uno stream
       description: >-
@@ -635,7 +635,7 @@ paths:
     ###                             LETTURA EVENTI DA UNO STREAM                             ###
     ############################################################################################
 
-  '/delivery-progresses-2/v2.8/streams/{streamId}/events':
+  '/delivery-progresses/v2.8/streams/{streamId}/events':
     get:
       summary: EXPERIMENTAL - Leggi progressi notifiche
       description: >-
@@ -712,7 +712,7 @@ paths:
     ###                INVIO DI EVENTI DA PARTE DELLA PUBBLICA AMMNISTRAZIONE                ###
     ############################################################################################
 
-  '/delivery-progresses-2/events':                                                              # NOT YET IMPLEMENTED
+  '/delivery-progresses/events':                                                              # NOT YET IMPLEMENTED
     post:                                                                                     # NOT YET IMPLEMENTED
       summary: Invio eventi da parte della PA                                                 # NOT YET IMPLEMENTED
       description: >-                                                                         # NOT YET IMPLEMENTED
