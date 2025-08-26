@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: P9/GrrCw01qLsHfLw/CZBR37D/avI26Ug3+uNtuHudo=
+  version: JbxTZVX51XSMA+ed3fNSYqu5hi6ygBK7AMZhb9sbjaA=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -151,6 +151,7 @@ paths:
       description: (EXPERIMENTAL) Lettura delle configurazioni di uno stream di eventi.
       tags:
         - Streams
+      operationId: retrieveEventStreamV28
       responses:
         '200':
           description: OK
@@ -282,6 +283,7 @@ paths:
         consumati.
       tags:
         - Streams
+      operationId: removeEventStreamV28
       responses:
         '204':
           description: OK
@@ -2029,6 +2031,7 @@ paths:
       description: Lettura delle configurazioni di uno stream di eventi.
       tags:
         - Streams
+      operationId: retrieveEventStreamV25
       x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
@@ -2162,6 +2165,7 @@ paths:
         tutti gli eventi associati allo stream e non ancora consumati.
       tags:
         - Streams
+      operationId: removeEventStreamV25
       x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
@@ -2528,6 +2532,7 @@ paths:
       description: Lettura delle configurazioni di uno stream di eventi.
       tags:
         - Streams
+      operationId: retrieveEventStreamV26
       x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
@@ -2661,6 +2666,7 @@ paths:
         tutti gli eventi associati allo stream e non ancora consumati.
       tags:
         - Streams
+      operationId: removeEventStreamV26
       x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
@@ -3027,6 +3033,7 @@ paths:
       description: Lettura delle configurazioni di uno stream di eventi.
       tags:
         - Streams
+      operationId: retrieveEventStreamV27
       x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
@@ -3160,6 +3167,7 @@ paths:
         tutti gli eventi associati allo stream e non ancora consumati.
       tags:
         - Streams
+      operationId: removeEventStreamV27
       x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
