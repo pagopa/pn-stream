@@ -132,7 +132,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                     }
                                     // ritorno gli eventi successivi all'evento di buffer, FILTRANDO quello con lastEventId visto che l'ho sicuramente già ritornato
                                     return ProgressResponseElementDto.builder()
-                                            .retryAfter(tuple2.getT2().intValue())
+                                            .retryAfter(currentRetryAfter)
                                             .progressResponseElementList(tuple2.getT1())
                                             .build();
                                 })
