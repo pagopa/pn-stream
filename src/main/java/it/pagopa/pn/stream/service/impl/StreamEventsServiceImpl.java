@@ -118,9 +118,11 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .map(this::getProgressResponseFromEventTimeline)
                                 .sort(Comparator.comparing(ProgressResponseElementV28::getEventId))
                                 .collectList()
-                                .flatMap(eventList -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, eventList).thenReturn(eventList))
-                                .map(eventList -> {
-                                    var retryAfter = pnStreamConfigs.getScheduleInterval().intValue();
+                                .zipWith(Mono.just(streamUtils.retrieveRetryAfter(xPagopaPnCxId)))
+                                .flatMap(tuple2 -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, tuple2.getT1(), tuple2.getT2()).thenReturn(tuple2))
+                                .map(tuple2 -> {
+                                    var retryAfter = tuple2.getT2().intValue();
+                                    var eventList = tuple2.getT1();
                                     int currentRetryAfter = res.getLastEventIdRead() == null ? retryAfter : 0;
                                     if (StringUtils.hasText(lastEventId)) {
                                         var purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
@@ -130,8 +132,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                     }
                                     // ritorno gli eventi successivi all'evento di buffer, FILTRANDO quello con lastEventId visto che l'ho sicuramente già ritornato
                                     return ProgressResponseElementDto.builder()
-                                            .retryAfter(currentRetryAfter)
-                                            .progressResponseElementList(eventList)
+                                            .retryAfter(tuple2.getT2().intValue())
+                                            .progressResponseElementList(tuple2.getT1())
                                             .build();
                                 })
                                 .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={}", progressResponseElementDto.getProgressResponseElementList().size()).log())
@@ -139,10 +141,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 );
     }
 
-    private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV28> eventList) {
+    private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV28> eventList, Long retryAfter) {
         if (eventList.isEmpty()) {
             log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
-            return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId));
+            return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId, Instant.now().plusMillis(retryAfter)));
         }
         log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_READINGS.name(), eventList.size(), Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_READINGS.name());
         return Mono.empty();
@@ -174,8 +176,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         }
     }
 
-    private StreamRetryAfter constructNewRetryAfterEntity(String xPagopaPnCxId, UUID streamId) {
-        Instant retryAfter = streamUtils.retrieveRetryAfter(xPagopaPnCxId);
+    private StreamRetryAfter constructNewRetryAfterEntity(String xPagopaPnCxId, UUID streamId, Instant retryAfter) {
         StreamRetryAfter retryAfterEntity = new StreamRetryAfter();
         retryAfterEntity.setPaId(xPagopaPnCxId);
         retryAfterEntity.setStreamId(streamId.toString());
