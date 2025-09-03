@@ -123,7 +123,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .map(tuple2 -> {
                                     var retryAfter = tuple2.getT2().intValue();
                                     var eventList = tuple2.getT1();
-                                    int currentRetryAfter = res.getLastEventIdRead() == null ? retryAfter : 0;
+                                    int currentRetryAfter = eventList.isEmpty() ? retryAfter : 0;
                                     if (StringUtils.hasText(lastEventId)) {
                                         var purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
                                         log.info("consumeEventStream lastEventId={} streamId={} size={} returnedlastEventId={} retryAfter={}", lastEventId, streamId, eventList.size(), (!eventList.isEmpty() ? eventList.get(eventList.size() - 1).getEventId() : "ND"), currentRetryAfter);
