@@ -6,4 +6,5 @@ import lombok.Data;
 public class PaConfiguration {
     private String paId;
     private String maxStreamsNumber;
+    private String retryAfter;
 }
