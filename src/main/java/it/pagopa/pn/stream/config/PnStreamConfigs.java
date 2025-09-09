@@ -31,7 +31,6 @@ public class PnStreamConfigs {
     private Duration disableTtl;
     private String firstVersion;
     private String currentVersion;
-    private String retryParameterPrefix;
     private String paConfigurationsPrefix;
     private Boolean retryAfterEnabled;
     private Long streamNotificationTtl;

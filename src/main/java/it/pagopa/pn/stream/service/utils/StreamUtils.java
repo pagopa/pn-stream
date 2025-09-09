@@ -5,7 +5,6 @@ import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
 import it.pagopa.pn.stream.dto.CustomPaConfiguration;
-import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
@@ -141,15 +140,18 @@ public class StreamUtils {
         }
     }
 
-    public Instant retrieveRetryAfter(String xPagopaPnCxId) {
-        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getRetryParameterPrefix() + xPagopaPnCxId, CustomRetryAfterParameter.class)
-                .map(customRetryAfterParameter -> Instant.now().plusMillis(customRetryAfterParameter.getRetryAfter()))
-                .orElse(Instant.now().plusMillis(pnStreamConfigs.getScheduleInterval()));
+    public Long retrieveRetryAfter(String xPagopaPnCxId){
+        return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getPaConfigurationsPrefix(), CustomPaConfiguration.class)
+                .flatMap(customPaConfiguration -> customPaConfiguration.getPaConfigurations().stream()
+                        .filter(configuration -> configuration.getPaId().equals(xPagopaPnCxId) && StringUtils.hasText(configuration.getRetryAfter())).findFirst())
+                .map(configuration -> Long.parseLong(configuration.getRetryAfter()))
+                .orElse(pnStreamConfigs.getScheduleInterval());
     }
 
     public int retrieveMaxStreamsNumber(String xPagopaPnCxId) {
         return ssmParameterConsumerActivation.getParameterValue(pnStreamConfigs.getPaConfigurationsPrefix(), CustomPaConfiguration.class)
-                .flatMap(customPaConfiguration -> customPaConfiguration.getPaConfigurations().stream().filter(configuration -> configuration.getPaId().equals(xPagopaPnCxId)).findFirst())
+                .flatMap(customPaConfiguration -> customPaConfiguration.getPaConfigurations().stream()
+                        .filter(configuration -> configuration.getPaId().equals(xPagopaPnCxId) && StringUtils.hasText(configuration.getMaxStreamsNumber())).findFirst())
                 .map(configuration -> Integer.parseInt(configuration.getMaxStreamsNumber()))
                 .orElse(pnStreamConfigs.getMaxStreams());
     }

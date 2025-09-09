@@ -26,6 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,9 +61,9 @@ class StreamUtilsTest {
         webhook.setMaxStreams(10);
         webhook.setTtl(Duration.ofDays(30));
         webhook.setCurrentVersion("v23");
-        webhook.setRetryParameterPrefix("retryParameterPrefix");
         webhook.setNotificationSla(Duration.ofDays(2));
         webhook.setUnlockedEventTtl(Duration.ofDays(1));
+        webhook.setScheduleInterval(10L);
 
         EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper = new EntityToDtoWebhookTimelineMapper();
         streamUtils = new StreamUtils(timelineMapper, entityToDtoTimelineMapper, timelineElementJsonConverter, webhook, ssmParameterConsumerActivation);
@@ -237,13 +238,47 @@ class StreamUtilsTest {
     }
 
     @Test
-    void retrieveRetryAfterWithValidInputs() {
-        CustomRetryAfterParameter customRetryAfterParameter = new CustomRetryAfterParameter();
-        customRetryAfterParameter.setRetryAfter(1000L);
-        when(ssmParameterConsumerActivation.getParameterValue("retryParameterPrefix" + "xPagopaPnCxId", CustomRetryAfterParameter.class))
-                .thenReturn(Optional.of(customRetryAfterParameter));
+    void retrieveRetryAfterWhenPaIdIsPresent() {
+        CustomPaConfiguration customPaConfiguration = new CustomPaConfiguration();
+        PaConfiguration paConfiguration = new PaConfiguration();
+        paConfiguration.setPaId("xPagopaPnCxId");
+        paConfiguration.setMaxStreamsNumber("5");
+        paConfiguration.setRetryAfter("1000L");
+        customPaConfiguration.setPaConfigurations(new ArrayList<>(List.of(paConfiguration)));
 
-        Instant retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
+        when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
+                .thenReturn(Optional.of(customPaConfiguration));
+
+        Long retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
+        assertNotNull(retryAfter);
+    }
+
+
+    @Test
+    void retrieveRetryAfterWhenPaIdIsNotPresent() {
+        CustomPaConfiguration customPaConfiguration = new CustomPaConfiguration();
+        customPaConfiguration.setPaConfigurations(new ArrayList<>(Collections.emptyList()));
+
+        when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
+                .thenReturn(Optional.of(customPaConfiguration));
+
+        Long retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
+        assertNotNull(retryAfter);
+    }
+
+
+    @Test
+    void retrieveRetryAfterWhenPaIdIsPresentWithoutRetryAfter() {
+        CustomPaConfiguration customPaConfiguration = new CustomPaConfiguration();
+        PaConfiguration paConfiguration = new PaConfiguration();
+        paConfiguration.setPaId("xPagopaPnCxId");
+        paConfiguration.setMaxStreamsNumber("5");
+        customPaConfiguration.setPaConfigurations(new ArrayList<>(List.of(paConfiguration)));
+
+        when(ssmParameterConsumerActivation.getParameterValue("paConfigurations", CustomPaConfiguration.class))
+                .thenReturn(Optional.of(customPaConfiguration));
+
+        Long retryAfter = streamUtils.retrieveRetryAfter("xPagopaPnCxId");
         assertNotNull(retryAfter);
     }
 
