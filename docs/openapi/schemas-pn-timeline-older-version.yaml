@@ -428,7 +428,7 @@ components:
         - "$ref": "#/components/schemas/SendDigitalProgressDetailsV23"
         - "$ref": "#/components/schemas/BaseAnalogDetails"
         - "$ref": "#/components/schemas/SendAnalogDetails"
-        - "$ref": "./schemas-pn-timeline.yaml#/components/schemas/SendAnalogFeedbackDetailsV25"
+        - "$ref": "#/components/schemas/SendAnalogFeedbackDetailsV25"
         - "$ref": "#/components/schemas/BaseRegisteredLetterDetails"
         - "$ref": "#/components/schemas/SimpleRegisteredLetterDetails"
         - "$ref": "#/components/schemas/AarCreationRequestDetails"
@@ -473,7 +473,7 @@ components:
         - "$ref": "#/components/schemas/SendDigitalProgressDetailsV23"
         - "$ref": "#/components/schemas/BaseAnalogDetails"
         - "$ref": "#/components/schemas/SendAnalogDetails"
-        - "$ref": "./schemas-pn-timeline.yaml#/components/schemas/SendAnalogFeedbackDetailsV25"
+        - "$ref": "#/components/schemas/SendAnalogFeedbackDetailsV25"
         - "$ref": "#/components/schemas/BaseRegisteredLetterDetails"
         - "$ref": "#/components/schemas/SimpleRegisteredLetterDetails"
         - "$ref": "#/components/schemas/AarCreationRequestDetails"
@@ -1150,6 +1150,58 @@ components:
           type: string
           description: Codice della raccomandata
           maxLength: 128
+
+    SendAnalogFeedbackDetailsV25:
+      type: object
+      required:
+        - recIndex
+        - physicalAddress
+        - serviceLevel
+        - sentAttemptMade
+        - responseStatus
+      properties:
+        recIndex:
+          type: integer
+          description: Index destinatario notifica digitale
+          format: int32
+        physicalAddress:
+          $ref: "./schemas-addresses.yaml#/components/schemas/PhysicalAddress"
+        serviceLevel:
+          "$ref": "#/components/schemas/ServiceLevel"
+        sentAttemptMade:
+          type: integer
+          description: numero dei tentativi effettuati
+          format: int32
+        newAddress:
+          $ref: "./schemas-addresses.yaml#/components/schemas/PhysicalAddress"
+        responseStatus:
+          $ref: '#/components/schemas/ResponseStatus'
+        notificationDate:
+          type: string
+          format: date-time
+        deliveryFailureCause:
+          type: string
+          maxLength: 10
+          description: >
+            i codici delle motivazioni di mancata consegna possono essere consultati alla seguente [pagina](https://developer.pagopa.it/send/guides/knowledge-base/v2.5/readme/creazione-e-gestione-degli-stream/stream-di-timeline/decodifiche-send_analog#decodifica-deliveryfailurecause)
+        deliveryDetailCode:
+          type: string
+          maxLength: 20
+          description: >
+            i codici di decodifica degli eventi di invio cartaceo possono essere consultati alla seguente [pagina](https://developer.pagopa.it/send/guides/knowledge-base/v2.5/readme/creazione-e-gestione-degli-stream/stream-di-timeline/decodifiche-send_analog#codici-send_analog_progress-comuni-a-tutte-le-tipologie)
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachmentDetails'
+        sendRequestId:
+          type: string
+          description: RequestId della richiesta d'invio
+          maxLength: 512
+        registeredLetterCode:
+          type: string
+          description: Codice della raccomandata
+          maxLength: 128
+
 
     BaseRegisteredLetterDetails:
       type: object
