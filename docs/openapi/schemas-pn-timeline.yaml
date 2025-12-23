@@ -1383,7 +1383,6 @@ components:
         - recIndex
         - sentAttemptMade
         - invalidatedTimelineAndStatusHistory
-        - categoryType
       properties:
         recIndex:
           type: integer
@@ -1398,5 +1397,3 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/NotificationStatusHistoryInvalidatedElement"
-        categoryType:
-          type: string
