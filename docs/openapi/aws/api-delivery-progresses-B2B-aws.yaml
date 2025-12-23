@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: iKLXHXoKyRM6GJcZl9bE9+DbNul1/EEvG6iPk7kjFoA=
+  version: NutXQFDP+oXHj4iR7gu57bGiFSmIEiKE3vn3EMsAjas=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -4561,6 +4561,7 @@ components:
           type: string
           maxLength: 128
         taxId:
+          x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           maxLength: 128
         operatorUuid:
@@ -4570,6 +4571,7 @@ components:
           type: string
           maxLength: 128
         denomination:
+          x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           maxLength: 128
         delegateType:
