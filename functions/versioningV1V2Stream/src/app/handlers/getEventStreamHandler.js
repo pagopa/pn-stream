@@ -57,6 +57,9 @@ class GetEventStreamHandler extends EventHandler {
             case 27:
                 transformedObject = response.data;
                 break;
+            case 28:
+                transformedObject = response.data;
+                break;
             default:
                 console.error('Invalid version ', version)
             break;

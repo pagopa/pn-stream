@@ -1430,6 +1430,227 @@ describe("ConsumeEventStreamHandler", () => {
 
             expect(mock.history.get.length).to.equal(1);
         });
+
+        it("successful request V29 to V28", async () => {
+            const streamId = "12345";
+            const event = {
+                path: "/delivery-progresses/v2.8/streams/"+ streamId +"/events",
+                pathParameters : { streamId: streamId },
+                queryStringParameters: null,
+                httpMethod: "GET",
+                headers: {},
+                requestContext: {
+                    authorizer: {},
+                },
+            }
+
+            let url = `${process.env.PN_STREAM_URL}/streams/${streamId}/events`;
+
+            const responseBodyV29 = [
+                {
+                    eventId: "01234567890123456789012345678901234567",
+                    notificationRequestId: "abcd1234",
+                    iun: "ABCD-EFGH-IJKL-123456-M-7",
+                    newStatus: "ACCEPTED",
+                    element: {
+                        timelineElementId: "COMPLETELY_UNREACHABLE_CREATION_REQUEST.IUN_ABCD-EFGH-IJKL-123456-M-7",
+                        iun: "ABCD-EFGH-IJKL-123456-M-7",
+                        statusInfo: {
+                            actual: "ACCEPTED",
+                            statusChangeTimestamp: "2025-04-23T04:43:22.982127473Z",
+                            statusChanged: true
+                        },
+                        notificationSentAt: "2025-04-23T04:38:41.007054121Z",
+                        ingestionTimestamp: "2025-04-23T04:43:22.945549968Z",
+                        paId: "17ff3e25-9d77-4f82-ad13-dc67c6b5f7f2",
+                        legalFactId: [
+                            {
+                                key: "safestorage://PN_LEGAL_FACTS-bbfaa285ed4b433197d70973758d3373.pdf",
+                                category: "SENDER_ACK"
+                            }
+                        ],
+                        details: {
+                            nextSourceAttemptsMade: 0,
+                            notificationRequestId: "abcd1234",
+                            paProtocolNumber: "1234567890",
+                            idempotenceToken: "abcdef1234567890"
+                        },
+                        category: "COMPLETELY_UNREACHABLE_CREATION_REQUEST",
+                        timestamp: "2025-04-23T04:43:22.945549968Z",
+                        eventTimestamp: "2025-04-23T04:43:22.945549968Z"
+                    }
+                },
+                {
+                    eventId: "98765432109876543210987654321098765432",
+                    notificationRequestId: "efgh5678",
+                    iun: "EFGH-IJKL-MNOP-123456-N-8",
+                    newStatus: "REFUSED",
+                    element: {
+                        iun: "EFGH-IJKL-MNOP-123456-N-8",
+                        timelineElementId: "DIGITAL_DELIVERY_CREATION_REQUEST.IUN_EFGH-IJKL-MNOP-123456-N-8",
+                        category: "DIGITAL_DELIVERY_CREATION_REQUEST",
+                        details: {
+                            nextSourceAttemptsMade: 0,
+                            notificationCost: 100,
+                            numberOfRecipients: 2,
+                            refusalReasons: [
+                                {
+                                    detail: "Address not found for recipient index: 0",
+                                    errorCode: "ADDRESS_NOT_FOUND",
+                                    recIndex: 0
+                                },
+                                {
+                                    detail: "Address search for recipient index: 1, encountered an error",
+                                    errorCode: "ADDRESS_SEARCH_FAILED",
+                                    recIndex: 1
+                                }
+                            ],
+                            notificationRequestId: "abcd1234",
+                            paProtocolNumber: "1234567890",
+                            idempotenceToken: "abcdef1234567890"
+                        },
+                        legalFactId: [],
+                        notificationSentAt: "2023-10-16T10:49:01.805828075Z",
+                        paId: "8bdd616c-6130-4f8b-b450-1035714433b5",
+                        statusInfo: {
+                            actual: "REFUSED",
+                            statusChanged: true,
+                            statusChangeTimestamp: "2023-10-16T10:49:25.481508477Z"
+                        },
+                        timestamp: "2023-10-16T10:49:25.430475874Z"
+                    },
+                },
+                {
+                    eventId: "98765432109876543210987654321098765432",
+                    notificationRequestId: "efgh5678",
+                    iun: "ZMNA-TREW-LOPI-123456-B-2",
+                    newStatus: "REFUSED",
+                    element: {
+                        iun: "ZMNA-TREW-LOPI-123456-B-2",
+                        timelineElementId: "NOTIFICATION_VIEWED_CREATION_REQUEST.IUN_ZMNA-TREW-LOPI-123456-B-2",
+                        category: "NOTIFICATION_VIEWED_CREATION_REQUEST",
+                        details: {
+                            nextSourceAttemptsMade: 0,
+                            notificationCost: 100,
+                            numberOfRecipients: 2,
+                            // caso impossibile senza refusalReasons
+                        },
+                        legalFactId: [],
+                        notificationSentAt: "2023-10-16T10:49:01.805828075Z",
+                        paId: "8bdd616c-6130-4f8b-b450-1035714433b5",
+                        statusInfo: {
+                            actual: "REFUSED",
+                            statusChanged: true,
+                            statusChangeTimestamp: "2023-10-16T10:49:25.481508477Z"
+                        },
+                        timestamp: "2023-10-16T10:49:25.430475874Z"
+                    },
+                }
+            ]
+
+            const responseBodyV28 = [
+                {
+                    eventId: "01234567890123456789012345678901234567",
+                    notificationRequestId: "abcd1234",
+                    iun: "ABCD-EFGH-IJKL-123456-M-7",
+                    newStatus: "ACCEPTED",
+                    element: {
+                        timelineElementId: "COMPLETELY_UNREACHABLE_CREATION_REQUEST.IUN_ABCD-EFGH-IJKL-123456-M-7",
+                        iun: "ABCD-EFGH-IJKL-123456-M-7",
+                        statusInfo: {
+                            actual: "ACCEPTED",
+                            statusChangeTimestamp: "2025-04-23T04:43:22.982127473Z",
+                            statusChanged: true
+                        },
+                        notificationSentAt: "2025-04-23T04:38:41.007054121Z",
+                        ingestionTimestamp: "2025-04-23T04:43:22.945549968Z",
+                        paId: "17ff3e25-9d77-4f82-ad13-dc67c6b5f7f2",
+                        details: {
+                            nextSourceAttemptsMade: 0,
+                            notificationRequestId: "abcd1234",
+                            paProtocolNumber: "1234567890",
+                            idempotenceToken: "abcdef1234567890"
+                        },
+                        category: "COMPLETELY_UNREACHABLE_CREATION_REQUEST",
+                        timestamp: "2025-04-23T04:43:22.945549968Z",
+                        eventTimestamp: "2025-04-23T04:43:22.945549968Z"
+                    }
+                },
+                {
+                    eventId: "98765432109876543210987654321098765432",
+                    notificationRequestId: "efgh5678",
+                    iun: "EFGH-IJKL-MNOP-123456-N-8",
+                    newStatus: "REFUSED",
+                    element: {
+                        iun: "EFGH-IJKL-MNOP-123456-N-8",
+                        timelineElementId: "DIGITAL_DELIVERY_CREATION_REQUEST.IUN_EFGH-IJKL-MNOP-123456-N-8",
+                        category: "DIGITAL_DELIVERY_CREATION_REQUEST",
+                        details: {
+                            nextSourceAttemptsMade: 0,
+                            notificationCost: 100,
+                            numberOfRecipients: 2,
+                            refusalReasons: [
+                                {
+                                    detail: "Address not found for recipient index: 0",
+                                    errorCode: "ADDRESS_NOT_FOUND",
+                                    recIndex: 0
+                                },
+                                {
+                                    detail: "Address search for recipient index: 1, encountered an error",
+                                    errorCode: "ADDRESS_SEARCH_FAILED",
+                                    recIndex: 1
+                                }
+                            ],
+                            notificationRequestId: "abcd1234",
+                            paProtocolNumber: "1234567890",
+                            idempotenceToken: "abcdef1234567890"
+                        },
+                        notificationSentAt: "2023-10-16T10:49:01.805828075Z",
+                        paId: "8bdd616c-6130-4f8b-b450-1035714433b5",
+                        statusInfo: {
+                            actual: "REFUSED",
+                            statusChanged: true,
+                            statusChangeTimestamp: "2023-10-16T10:49:25.481508477Z"
+                        },
+                        timestamp: "2023-10-16T10:49:25.430475874Z"
+                    },
+                },
+                {
+                    eventId: "98765432109876543210987654321098765432",
+                    notificationRequestId: "efgh5678",
+                    iun: "ZMNA-TREW-LOPI-123456-B-2",
+                    newStatus: "REFUSED",
+                    element: {
+                        iun: "ZMNA-TREW-LOPI-123456-B-2",
+                        timelineElementId: "NOTIFICATION_VIEWED_CREATION_REQUEST.IUN_ZMNA-TREW-LOPI-123456-B-2",
+                        category: "NOTIFICATION_VIEWED_CREATION_REQUEST",
+                        details: {
+                            nextSourceAttemptsMade: 0,
+                            notificationCost: 100,
+                            numberOfRecipients: 2,
+                            // caso impossibile senza refusalReasons
+                        },
+                        notificationSentAt: "2023-10-16T10:49:01.805828075Z",
+                        paId: "8bdd616c-6130-4f8b-b450-1035714433b5",
+                        statusInfo: {
+                            actual: "REFUSED",
+                            statusChanged: true,
+                            statusChangeTimestamp: "2023-10-16T10:49:25.481508477Z"
+                        },
+                        timestamp: "2023-10-16T10:49:25.430475874Z"
+                    },
+                }
+            ]
+
+            mock.onGet(url).reply(200, responseBodyV29);
+
+            const context = {};
+            const response = await consumeEventStreamHandler.handlerEvent(event, context);
+            expect(response.statusCode).to.equal(200);
+            expect(response.body).to.equal(JSON.stringify(responseBodyV28));
+
+            expect(mock.history.get.length).to.equal(1);
+        });
     });
 
 });
