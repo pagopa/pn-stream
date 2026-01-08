@@ -30,7 +30,7 @@ public enum ConfidentialInformationEnum {
     public enum CustomCategory {
         NORMALIZED_ADDRESS,
         SEND_ANALOG_FEEDBACK,
-        PREPARE_ANALOG_DOMICILE_FAILURE;
+        PREPARE_ANALOG_DOMICILE_FAILURE
 
     }
 

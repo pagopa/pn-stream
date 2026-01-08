@@ -5,5 +5,5 @@ public enum StreamEventType {
 
     PURGE_STREAM,
 
-    REGISTER_EVENT;
+    REGISTER_EVENT
 }
