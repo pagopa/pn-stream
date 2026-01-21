@@ -26,6 +26,9 @@
     "SaveEventMaxConcurrency": "100",
     "EnableStreamStats": "true",
     "DeliveryProgressesApiPath": "delivery-progresses",
-    "DeliveryProgressesApiPathNew": "delivery-progresses"
+    "DeliveryProgressesApiPathNew": "delivery-progresses",
+    "PnCronAnalyzer": "* */1 * * * *",
+    "WireTapLogActivation": "false",
+    "MountEfs": "false"
   }
 }

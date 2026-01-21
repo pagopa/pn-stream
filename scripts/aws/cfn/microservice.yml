@@ -120,11 +120,17 @@ Parameters:
     Type: String
     Description: Whether to mount EFS (true/false)
     Default: 'false'
+    AllowedValues:
+      - "true"
+      - "false"
 
   WireTapLogActivation:
     Type: String
     Description: Whether to activate wiretap logging (true/false)
     Default: 'false'
+    AllowedValues:
+      - true
+      - false
 
   AlbSecurityGroup:
     Type: String
@@ -425,6 +431,10 @@ Parameters:
     Type: String
     Description: 'Kinesis stream that receive logs'
 
+  PnCronAnalyzer:
+    Type: String
+    Default: '-'
+    Description: Cron for which you send the metric to CloudWatch
 
 Resources:
 
@@ -478,6 +488,8 @@ Resources:
         ContainerEnvEntry25: !Sub 'PN_STREAM_SAVEEVENTMAXCONCURRENCY=${SaveEventMaxConcurrency}'
         ContainerEnvEntry26: !Sub 'LOGGING_LEVEL_IT_PAGOPA_PN_COMMONS_ABSTRACTIONS_IMPL=${ParameterStoreLoggingLevel}'
         ContainerEnvEntry27: !Sub 'PN_STREAM_PACONFIGURATIONSPREFIX=${PaConfigurationsPrefix}'
+        ContainerEnvEntry28: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
+        ContainerEnvEntry29: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses/*'
         ECSClusterName: !Ref ECSClusterName
