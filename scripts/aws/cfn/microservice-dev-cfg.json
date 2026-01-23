@@ -27,7 +27,7 @@
     "EnableStreamStats": "true",
     "DeliveryProgressesApiPath": "delivery-progresses",
     "DeliveryProgressesApiPathNew": "delivery-progresses",
-    "PnCronAnalyzer": "* */1 * * * *",
+    "PnCronAnalyzer": "-",
     "WireTapLogActivation": "false",
     "MountEfs": "false"
   }
