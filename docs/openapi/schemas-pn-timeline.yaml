@@ -1357,7 +1357,7 @@ components:
                   - REGISTRO_IMPRESE
               maxLength: 128
 
-    NotificationStatusHistoryInvalidatedElement:
+    NotificationStatusHistoryInvalidatedStreamElement:
       description: elenco degli avanzamenti effettuati dal processo di notifica
       type: object
       required:
@@ -1396,4 +1396,4 @@ components:
           description: elenco degli avanzamenti effettuati dal processo di notifica prima dell'invalidazione
           type: array
           items:
-            $ref: "#/components/schemas/NotificationStatusHistoryInvalidatedElement"
+            $ref: "#/components/schemas/NotificationStatusHistoryInvalidatedStreamElement"

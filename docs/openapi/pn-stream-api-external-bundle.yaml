@@ -4847,7 +4847,7 @@ components:
               maxLength: 128
     TimelineElementId:
       type: string
-    NotificationStatusHistoryInvalidatedElement:
+    NotificationStatusHistoryInvalidatedStreamElement:
       description: elenco degli avanzamenti effettuati dal processo di notifica
       type: object
       required:
@@ -4885,7 +4885,7 @@ components:
           description: elenco degli avanzamenti effettuati dal processo di notifica prima dell'invalidazione
           type: array
           items:
-            $ref: '#/components/schemas/NotificationStatusHistoryInvalidatedElement'
+            $ref: '#/components/schemas/NotificationStatusHistoryInvalidatedStreamElement'
     TimelineElementDetailsV28:
       description: The raw event payload that will be different based on the event.
       oneOf:

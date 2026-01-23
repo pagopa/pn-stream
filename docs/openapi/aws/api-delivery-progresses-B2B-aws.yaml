@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: FymyIr0TXKT8E1fwqL33z4vWGaQF8mjbJ2YRLM+xtfU=
+  version: SrDkUouV3uSvlZ4MF+qHnwEKMpGEoazsW8daYz1gIZY=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -5482,7 +5482,7 @@ components:
               maxLength: 128
     TimelineElementId:
       type: string
-    NotificationStatusHistoryInvalidatedElement:
+    NotificationStatusHistoryInvalidatedStreamElement:
       description: elenco degli avanzamenti effettuati dal processo di notifica
       type: object
       required:
@@ -5520,7 +5520,8 @@ components:
             dell'invalidazione
           type: array
           items:
-            $ref: '#/components/schemas/NotificationStatusHistoryInvalidatedElement'
+            $ref: >-
+              #/components/schemas/NotificationStatusHistoryInvalidatedStreamElement
     TimelineElementDetailsV28:
       description: The raw event payload that will be different based on the event.
       oneOf:
