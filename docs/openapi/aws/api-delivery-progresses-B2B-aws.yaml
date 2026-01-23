@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: SrDkUouV3uSvlZ4MF+qHnwEKMpGEoazsW8daYz1gIZY=
+  version: uR5Y/+zmp2so9Lad+WGm54g+iomTE1aSg7JdXIJtLuo=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -5480,9 +5480,7 @@ components:
                   - ANPR
                   - REGISTRO_IMPRESE
               maxLength: 128
-    TimelineElementId:
-      type: string
-    NotificationStatusHistoryInvalidatedStreamElement:
+    NotificationStatusHistoryInvalidatedElement:
       description: elenco degli avanzamenti effettuati dal processo di notifica
       type: object
       required:
@@ -5496,12 +5494,12 @@ components:
           type: string
           description: data e ora di raggiungimento dello stato di avanzamento
           format: date-time
-        relatedTimelineElements:
+        relatedTimelineElementIds:
           type: array
-          description: Eventi avvenuti nello stato
+          description: Id degli eventi avvenuti nello stato
           items:
-            $ref: '#/components/schemas/TimelineElementId'
-    NotificationTimelineReworkedStreamDetails:
+            type: string
+    NotificationTimelineReworkedDetails:
       type: object
       required:
         - recIndex
@@ -5520,8 +5518,7 @@ components:
             dell'invalidazione
           type: array
           items:
-            $ref: >-
-              #/components/schemas/NotificationStatusHistoryInvalidatedStreamElement
+            $ref: '#/components/schemas/NotificationStatusHistoryInvalidatedElement'
     TimelineElementDetailsV28:
       description: The raw event payload that will be different based on the event.
       oneOf:
@@ -5569,7 +5566,7 @@ components:
         - $ref: '#/components/schemas/AnalogWorkflowRecipientDeceasedDetailsV26'
         - $ref: '#/components/schemas/PublicRegistryValidationCallDetails'
         - $ref: '#/components/schemas/PublicRegistryValidationResponseDetails'
-        - $ref: '#/components/schemas/NotificationTimelineReworkedStreamDetails'
+        - $ref: '#/components/schemas/NotificationTimelineReworkedDetails'
     TimelineElementV28:
       type: object
       additionalProperties: false

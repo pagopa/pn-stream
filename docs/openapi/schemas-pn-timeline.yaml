@@ -196,7 +196,7 @@ components:
         - "$ref": "#/components/schemas/AnalogWorkflowRecipientDeceasedDetailsV26"
         - "$ref": "#/components/schemas/PublicRegistryValidationCallDetails"
         - "$ref": "#/components/schemas/PublicRegistryValidationResponseDetails"
-        - "$ref": "#/components/schemas/NotificationTimelineReworkedStreamDetails"
+        - "$ref": "#/components/schemas/NotificationTimelineReworkedDetails"
 
     NotificationRequestAcceptedDetailsV28:
       type: object
@@ -1357,7 +1357,7 @@ components:
                   - REGISTRO_IMPRESE
               maxLength: 128
 
-    NotificationStatusHistoryInvalidatedStreamElement:
+    NotificationStatusHistoryInvalidatedElement:
       description: elenco degli avanzamenti effettuati dal processo di notifica
       type: object
       required:
@@ -1371,13 +1371,13 @@ components:
           type: string
           description: data e ora di raggiungimento dello stato di avanzamento
           format: date-time
-        relatedTimelineElements:
+        relatedTimelineElementIds:
           type: array
-          description: Eventi avvenuti nello stato
+          description: Id degli eventi avvenuti nello stato
           items:
-            $ref: "./schemas-pn-timeline.yaml#/components/schemas/TimelineElementId"
+            type: string
 
-    NotificationTimelineReworkedStreamDetails:
+    NotificationTimelineReworkedDetails:
       type: object
       required:
         - recIndex
@@ -1396,4 +1396,4 @@ components:
           description: elenco degli avanzamenti effettuati dal processo di notifica prima dell'invalidazione
           type: array
           items:
-            $ref: "#/components/schemas/NotificationStatusHistoryInvalidatedStreamElement"
+            $ref: "#/components/schemas/NotificationStatusHistoryInvalidatedElement"
