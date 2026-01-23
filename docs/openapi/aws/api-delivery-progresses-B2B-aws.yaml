@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: jstRkbzaLUnI41ltJblhO5fx2w9U5c5tqbIusoShggI=
+  version: FymyIr0TXKT8E1fwqL33z4vWGaQF8mjbJ2YRLM+xtfU=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -5501,7 +5501,7 @@ components:
           description: Eventi avvenuti nello stato
           items:
             $ref: '#/components/schemas/TimelineElementId'
-    NotificationTimelineReworkedDetails:
+    NotificationTimelineReworkedStreamDetails:
       type: object
       required:
         - recIndex
@@ -5568,7 +5568,7 @@ components:
         - $ref: '#/components/schemas/AnalogWorkflowRecipientDeceasedDetailsV26'
         - $ref: '#/components/schemas/PublicRegistryValidationCallDetails'
         - $ref: '#/components/schemas/PublicRegistryValidationResponseDetails'
-        - $ref: '#/components/schemas/NotificationTimelineReworkedDetails'
+        - $ref: '#/components/schemas/NotificationTimelineReworkedStreamDetails'
     TimelineElementV28:
       type: object
       additionalProperties: false

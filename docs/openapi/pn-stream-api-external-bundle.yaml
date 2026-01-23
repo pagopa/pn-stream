@@ -4866,7 +4866,7 @@ components:
           description: Eventi avvenuti nello stato
           items:
             $ref: '#/components/schemas/TimelineElementId'
-    NotificationTimelineReworkedDetails:
+    NotificationTimelineReworkedStreamDetails:
       type: object
       required:
         - recIndex
@@ -4933,7 +4933,7 @@ components:
         - $ref: '#/components/schemas/AnalogWorkflowRecipientDeceasedDetailsV26'
         - $ref: '#/components/schemas/PublicRegistryValidationCallDetails'
         - $ref: '#/components/schemas/PublicRegistryValidationResponseDetails'
-        - $ref: '#/components/schemas/NotificationTimelineReworkedDetails'
+        - $ref: '#/components/schemas/NotificationTimelineReworkedStreamDetails'
     TimelineElementV28:
       type: object
       additionalProperties: false

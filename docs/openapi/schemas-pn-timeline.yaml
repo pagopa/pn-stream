@@ -196,7 +196,7 @@ components:
         - "$ref": "#/components/schemas/AnalogWorkflowRecipientDeceasedDetailsV26"
         - "$ref": "#/components/schemas/PublicRegistryValidationCallDetails"
         - "$ref": "#/components/schemas/PublicRegistryValidationResponseDetails"
-        - "$ref": "#/components/schemas/NotificationTimelineReworkedDetails"
+        - "$ref": "#/components/schemas/NotificationTimelineReworkedStreamDetails"
 
     NotificationRequestAcceptedDetailsV28:
       type: object
@@ -1377,7 +1377,7 @@ components:
           items:
             $ref: "./schemas-pn-timeline.yaml#/components/schemas/TimelineElementId"
 
-    NotificationTimelineReworkedDetails:
+    NotificationTimelineReworkedStreamDetails:
       type: object
       required:
         - recIndex
