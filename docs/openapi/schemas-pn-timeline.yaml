@@ -1375,7 +1375,7 @@ components:
           type: array
           description: Eventi avvenuti nello stato
           items:
-            $ref: "./schemas-pn-timeline.yaml#/components/schemas/TimelineElementId"
+            $ref: "#/components/schemas/TimelineElementV28"
 
     NotificationTimelineReworkedDetails:
       type: object
