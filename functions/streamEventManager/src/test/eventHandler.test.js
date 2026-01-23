@@ -5,7 +5,8 @@ describe("event handler tests", function () {
 
   process.env = Object.assign(process.env, {
     START_READ_STREAM_TIMESTAMP: "1999-01-01T00:00:00Z",
-    STOP_READ_STREAM_TIMESTAMP: "2099-01-01T00:00:00Z"
+    STOP_READ_STREAM_TIMESTAMP: "2099-01-01T00:00:00Z",
+    PN_TIMELINES_TABLE_NAME: "pn-Timelines"
   });
 
   it("test Ok", async () => {

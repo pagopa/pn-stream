@@ -317,6 +317,10 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing'
 
+  PnTimelinesTableArn:
+    Type: String
+    Description: 'Name of dynamodb table containing'
+
   MaximumRetryAttemptsValueStream:
     Type: Number
     Description: 'Maximum number of retries for stream lambda function'
@@ -638,6 +642,10 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
+              - dynamodb:BatchGetItem
+            Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${PnTimelinesTableName}'
+          - Effect: Allow
+            Action:
               - kinesis:DescribeStream
               - kinesis:DescribeStreamSummary
               - kinesis:GetShardIterator
@@ -710,6 +718,7 @@ Resources:
           TTL_OFFSET: !Sub '${StreamNotificationTtl}'
           START_READ_STREAM_TIMESTAMP: !Sub '${StartReadStreamTimestamp}'
           STOP_READ_STREAM_TIMESTAMP: !Sub '${StopReadStreamTimestamp}'
+          PN_TIMELINES_TABLE_NAME: !Sub '${PnTimelinesTableName}'
       TracingConfig:
         Mode: Active
       Layers:
