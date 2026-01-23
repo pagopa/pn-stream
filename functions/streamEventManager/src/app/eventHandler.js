@@ -1,5 +1,9 @@
 const { extractKinesisData } = require("./lib/kinesis.js");
-const { mapEvents } = require("./lib/eventMapper.js");
+const {
+  mapEvents,
+  enrichReworkedItemsWithTimelineElements
+} = require("./lib/eventMapper.js");
+
 const { SQSClient, SendMessageBatchCommand } = require("@aws-sdk/client-sqs");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
@@ -19,30 +23,59 @@ exports.handleEvent = async (event) => {
   }else{
     let batchItemFailures = [];
     while(cdcEvents.length > 0){
-      let currentCdcEvents = cdcEvents.splice(0,10);
-      if (currentCdcEvents.length == 0) {
-        return batchItemFailures;
-      }
-      let filteredItems = currentCdcEvents
+        let currentCdcEvents = cdcEvents.splice(0,10);
+        if (currentCdcEvents.length == 0) {
+            return batchItemFailures;
+        }
+        let filteredItems = currentCdcEvents
         .map(event => ({timelineObject : {...unmarshall(event.dynamodb.NewImage)}, kinesisSeqNumber: event.kinesisSeqNumber}))
         .filter((eventItem) => new Date(eventItem.timelineObject.timestamp) >= new Date(`${process.env.START_READ_STREAM_TIMESTAMP}`) && new Date(eventItem.timelineObject.timestamp) < new Date(`${process.env.STOP_READ_STREAM_TIMESTAMP}`))
-      try{
-        let processedItems = mapEvents(filteredItems);
+
+        const reworkedItems = filteredItems.filter(
+          item => item.timelineObject.category === "NOTIFICATION_TIMELINE_REWORKED"
+        );
+
+        console.log(JSON.stringify(reworkedItems));
+
+        let finalFilteredItems = filteredItems;
+
+        if (reworkedItems.length > 0) {
+          const iun = reworkedItems[0]?.timelineObject?.iun;
+
+          if (!iun) {
+            throw new Error("iun not found in reworkedItems");
+          }
+
+          const remappedReworkedItems = await enrichReworkedItemsWithTimelineElements(
+              iun,
+              reworkedItems
+            );
+
+          finalFilteredItems = [
+            ...filteredItems.filter(
+              item => item.timelineObject.category !== "NOTIFICATION_TIMELINE_REWORKED"
+            ),
+            ...remappedReworkedItems
+          ];
+        }
+
+    try{
+        let processedItems = mapEvents(finalFilteredItems);
         if (processedItems.length > 0){
           let responseError = await sendMessages(processedItems);
 
           if(responseError.length > 0){
-            console.log('Error in persist current cdcEvents: ', filteredItems);
+            console.log('Error in persist current cdcEvents: ', finalFilteredItems);
             batchItemFailures = batchItemFailures.concat(responseError.map((i) => {
             return { itemIdentifier: i.kinesisSeqNumber };
             }));
           }
         }else{
-          console.log('No events to persist in current cdcEvents: ',filteredItems);
+          console.log('No events to persist in current cdcEvents: ',finalFilteredItems);
         }
       }catch(exc){
-        console.log('Error in persist current cdcEvents: ', filteredItems);
-        batchItemFailures = batchItemFailures.concat(filteredItems.map((i) => {
+        console.log('Error in persist current cdcEvents: ', finalFilteredItems);
+        batchItemFailures = batchItemFailures.concat(finalFilteredItems.map((i) => {
           return { itemIdentifier: i.kinesisSeqNumber };
         }));
       }
