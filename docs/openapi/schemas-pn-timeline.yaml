@@ -1376,6 +1376,11 @@ components:
           description: Id degli eventi avvenuti nello stato
           items:
             type: string
+        relatedTimelineElements:
+          type: array
+          description: Eventi avvenuti nello stato
+          items:
+            $ref: "#/components/schemas/TimelineElementV28"
 
     NotificationTimelineReworkedDetails:
       type: object
