@@ -2001,7 +2001,6 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /delivery-progresses/v2.7/streams:
     post:
-      deprecated: true
       summary: Crea nuovo stream di eventi
       description: |-
         Creazione di un flusso di eventi specificando se gli eventi saranno relativi ai cambi di stato o agli eventi di timeline.
@@ -2081,7 +2080,6 @@ paths:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
-      deprecated: true
       summary: Leggi metadata dello stream
       description: Lettura delle configurazioni di uno stream di eventi.
       tags:
@@ -2204,7 +2202,6 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /delivery-progresses/v2.7/streams/{streamId}/action/disable:
     post:
-      deprecated: true
       summary: Disabilita uno stream
       description: |-
         Disabilita uno stream.
@@ -2254,7 +2251,6 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /delivery-progresses/v2.7/streams/{streamId}/events:
     get:
-      deprecated: true
       summary: Leggi progressi notifiche
       description: Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_ e tutti gli eventi precedenti. Tali eventi potranno essere cancellati dallo stream.
       tags:

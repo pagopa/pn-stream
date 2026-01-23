@@ -1717,7 +1717,6 @@ paths:
 
   '/delivery-progresses/v2.7/streams':
     post:
-      deprecated: true
       summary: Crea nuovo stream di eventi
       description: >-
         Creazione di un flusso di eventi specificando se gli eventi saranno
@@ -1807,7 +1806,6 @@ paths:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
-      deprecated: true
       summary: Leggi metadata dello stream
       description: >-
         Lettura delle configurazioni di uno stream di eventi.
@@ -1939,7 +1937,6 @@ paths:
 
   '/delivery-progresses/v2.7/streams/{streamId}/action/disable':
     post:
-      deprecated: true
       summary: Disabilita uno stream
       description: >-
         Disabilita uno stream.
@@ -1999,7 +1996,6 @@ paths:
 
   '/delivery-progresses/v2.7/streams/{streamId}/events':
     get:
-      deprecated: true
       summary: Leggi progressi notifiche
       description: >-
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
