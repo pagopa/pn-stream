@@ -317,10 +317,6 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing'
 
-  PnTimelinesTableArn:
-    Type: String
-    Description: 'Name of dynamodb table containing'
-
   MaximumRetryAttemptsValueStream:
     Type: Number
     Description: 'Maximum number of retries for stream lambda function'
