@@ -14,9 +14,7 @@ import it.pagopa.pn.stream.dto.timeline.StatusInfoInternal;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.exceptions.PnTooManyRequestException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV20;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV29;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
@@ -34,16 +32,17 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import reactor.util.function.Tuples;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
-import static it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28.AAR_GENERATION;
-import static it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28.REQUEST_ACCEPTED;
+import static it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -853,6 +852,65 @@ class EventsServiceImplTest {
 
         Assertions.assertThrows(PnInternalException.class, resp::blockFirst);
     }
+
+    @Test
+    void checkIfReworkElementAndAddConfidentialInfoToRelated_enrichesRework() {
+        ConfidentialTimelineElementDtoInt confidentialTimelineElementDtoInt = ConfidentialTimelineElementDtoInt.builder()
+                .timelineElementId("elementId")
+                .taxId("taxId")
+                .denomination("denomination")
+                .digitalAddress("digitalAddress")
+                .physicalAddress(PhysicalAddressInt.builder().address("via address").build())
+                .build();
+
+        TimelineElementV28 reworkElement = new TimelineElementV28();
+        TimelineElementDetailsV28 detail = new TimelineElementDetailsV28();
+        TimelineElementV28 timelineElementV28 = new TimelineElementV28();
+        timelineElementV28.setElementId("elementId");
+        timelineElementV28.setCategory(SEND_ANALOG_FEEDBACK);
+        List<TimelineElementV28> relatedTimelineElements = List.of(timelineElementV28);
+
+        NotificationStatusHistoryInvalidatedElement historyElement = new NotificationStatusHistoryInvalidatedElement();
+        historyElement.setRelatedTimelineElements(relatedTimelineElements);
+
+        List<NotificationStatusHistoryInvalidatedElement> invalidatedTimelineAndStatusHistory = List.of(historyElement);
+
+        detail.setInvalidatedTimelineAndStatusHistory(invalidatedTimelineAndStatusHistory);
+
+        reworkElement.setCategory(NOTIFICATION_TIMELINE_REWORKED);
+        reworkElement.setDetails(detail);
+        ProgressResponseElementV29 element = new ProgressResponseElementV29();
+        element.setElement(reworkElement);
+
+        List<ProgressResponseElementV29> progressResponseElementsV29 = List.of(element);
+
+        Flux<ConfidentialTimelineElementDtoInt> flux = Flux.just(confidentialTimelineElementDtoInt);
+
+        when(confidentialInformationService.getTimelineConfidentialInformationFromConfidentialElementIds(any()))
+                .thenReturn(flux);
+
+        List<ProgressResponseElementV29> resultList = webhookEventsService.checkIfReworkElementAndAddConfidentialInfoToRelated(progressResponseElementsV29).block();
+
+        Assertions.assertNotNull(resultList);
+
+        ProgressResponseElementV29 dto = resultList.stream().findFirst().get();
+
+        assert dto != null;
+//        Assertions.assertEquals("eventId", dto.getEventEntity().getEventId());
+//        Assertions.assertEquals("iun", dto.getEventEntity().getIun());
+//        Assertions.assertEquals("element", dto.getEventEntity().getElement());
+//        Assertions.assertEquals("newStatus", dto.getEventEntity().getNewStatus());
+//        Assertions.assertEquals(REQUEST_ACCEPTED.getValue(), dto.getEventEntity().getTimelineEventCategory());
+//        Assertions.assertEquals("streamId", dto.getEventEntity().getStreamId());
+//        Assertions.assertEquals("channel", dto.getEventEntity().getChannel());
+//        Assertions.assertEquals("notificationRequestId", dto.getEventEntity().getNotificationRequestId());
+//
+//        Assertions.assertEquals("elementId", dto.getTimelineElementInternal().getTimelineElementId());
+//        Assertions.assertEquals(REQUEST_ACCEPTED.getValue(), dto.getTimelineElementInternal().getCategory());
+//        Assertions.assertEquals("paId", dto.getTimelineElementInternal().getPaId());
+//        Assertions.assertEquals("actual", dto.getTimelineElementInternal().getStatusInfo().getActual());
+    }
+
 
     @Test
     void saveEventNothingToDo() {

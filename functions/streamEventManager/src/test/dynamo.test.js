@@ -43,15 +43,15 @@ describe("updateRework (dynamo.js)", () => {
     let response = {Responses: { [TABLE_NAME]: [ { timelineElementId: "elementId1" }, { timelineElementId: "elementId12" } ] } }
     sendStub.resolves(response);
     const res = await dynamo.batchGetTimelineElements(iun, ["elementId1", "elementId12"]);
-    expect(res).to.deep.equal({elementId1: { timelineElementId: "elementId1" }, elementId12: { timelineElementId: "elementId12" }});
+    expect(res).to.deep.equal({elementId1: { elementId: "elementId1" }, elementId12: { elementId: "elementId12" }});
     expect(BatchGetCommandStub.calledOnce).to.be.true;
 
     const sent = BatchGetCommandStub.firstCall.args[0];
     expect(sent.RequestItems["pn-Timelines"].Keys).to.to.have.length(2);
     expect(sent.RequestItems["pn-Timelines"].Keys[0].iun).to.deep.equal("IUN_PROVA");
-    expect(sent.RequestItems["pn-Timelines"].Keys[0].timelineElementId).to.deep.equal("elementId1");
+    expect(sent.RequestItems["pn-Timelines"].Keys[0].timelineElementId).to.deep.equal(res["elementId1"].elementId);
     expect(sent.RequestItems["pn-Timelines"].Keys[1].iun).to.deep.equal("IUN_PROVA");
-    expect(sent.RequestItems["pn-Timelines"].Keys[1].timelineElementId).to.deep.equal("elementId12");
+    expect(sent.RequestItems["pn-Timelines"].Keys[1].timelineElementId).to.deep.equal(res["elementId12"].elementId);
     expect(sendStub.calledOnce).to.be.true;
   });
 });
