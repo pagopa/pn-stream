@@ -51,7 +51,9 @@ async function batchGetTimelineElements(iun, elementIds = []) {
 
       const items = response.Responses?.[TABLE_NAME] ?? [];
       for (const item of items) {
-        resultMap[item.timelineElementId] = item;
+        item.elementId = item.timelineElementId;
+        delete item.timelineElementId;
+        resultMap[item.elementId] = item;
       }
 
       requestItems = response.UnprocessedKeys;

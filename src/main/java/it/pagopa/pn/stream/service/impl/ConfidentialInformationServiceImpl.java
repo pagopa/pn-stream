@@ -28,6 +28,12 @@ public class ConfidentialInformationServiceImpl implements ConfidentialInformati
                 .map( ConfidentialTimelineElementDtoMapper::externalToInternal);
     }
 
+    @Override
+    public Flux<ConfidentialTimelineElementDtoInt> getTimelineConfidentialInformationFromConfidentialElementIds(List<ConfidentialTimelineElementId> request) {
+        return this.pnDataVaultClientReactive.getNotificationTimelines(request)
+                .map( ConfidentialTimelineElementDtoMapper::externalToInternal);
+    }
+
     private ConfidentialTimelineElementId getConfidentialElementId(TimelineElementInternal internal) {
         return ConfidentialTimelineElementId.builder()
                 .iun(internal.getIun())

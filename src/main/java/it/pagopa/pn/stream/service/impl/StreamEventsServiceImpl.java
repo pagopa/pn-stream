@@ -14,9 +14,8 @@ import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStat
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV29;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV29;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV28;
+import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.ConfidentialTimelineElementId;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
@@ -41,6 +40,7 @@ import reactor.util.function.Tuples;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
 import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
@@ -116,6 +116,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 })
                                 // converto l'eventTimelineInternalDTO in ProgressResponseElementV29
                                 .map(this::getProgressResponseFromEventTimeline)
+                                .collectList()
+                                .flatMap(this::checkIfReworkElementAndAddConfidentialInfoToRelated)
+                                .flatMapIterable(progressResponseElementV29s -> progressResponseElementV29s)
                                 .sort(Comparator.comparing(ProgressResponseElementV29::getEventId))
                                 .collectList()
                                 .zipWith(Mono.just(streamUtils.retrieveRetryAfter(xPagopaPnCxId)))
@@ -458,4 +461,48 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .collectList()
                 .flatMapMany(item -> Flux.fromStream(eventEntities.stream()));
     }
+
+    protected Mono<List<ProgressResponseElementV29>> checkIfReworkElementAndAddConfidentialInfoToRelated(List<ProgressResponseElementV29> progressResponseElementsV29) {
+        List<ProgressResponseElementV29> reworkElements = progressResponseElementsV29.stream()
+                .filter(element -> element.getElement().getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED))
+                .toList();
+
+        if(CollectionUtils.isEmpty(reworkElements)){
+            return Mono.just(progressResponseElementsV29);
+        }
+
+        List<ConfidentialTimelineElementId> elementIds = getConfidentialElementIds(reworkElements, reworkElements.stream().findAny().get().getIun());
+
+        return confidentialInformationService.getTimelineConfidentialInformationFromConfidentialElementIds(elementIds)
+            .map(confidentialInfo -> reworkElements.stream()
+                .map(rework -> rework.getElement().getDetails().getInvalidatedTimelineAndStatusHistory())
+                .flatMap(Collection::stream)
+                .map(NotificationStatusHistoryInvalidatedElement::getRelatedTimelineElements)
+                .flatMap(Collection::stream)
+                .filter(i -> i.getElementId().equals(confidentialInfo.getTimelineElementId()))
+                .findFirst()
+                .map(timelineElementInternal -> {
+                    timelineService.enrichTimelineElementWithConfidentialInformation(timelineElementInternal.getCategory().getValue(), timelineElementInternal.getDetails(), confidentialInfo);
+                    return timelineElementInternal;
+                })
+                .orElse(null)
+            ).then(Mono.just(progressResponseElementsV29));
+    }
+
+    private List<ConfidentialTimelineElementId> getConfidentialElementIds(List<ProgressResponseElementV29> reworkElements, String iun) {
+        return reworkElements.stream()
+                .map(rework -> rework.getElement().getDetails().getInvalidatedTimelineAndStatusHistory())
+                .flatMap(Collection::stream)
+                .map(NotificationStatusHistoryInvalidatedElement::getRelatedTimelineElements)
+                .flatMap(Collection::stream)
+                .map(TimelineElementV28::getElementId)
+                .map(id -> {
+                    ConfidentialTimelineElementId c = new ConfidentialTimelineElementId();
+                    c.setTimelineElementId(id);
+                    c.setIun(iun);
+                    return c;
+                })
+                .collect(Collectors.toList());
+    }
+
 }

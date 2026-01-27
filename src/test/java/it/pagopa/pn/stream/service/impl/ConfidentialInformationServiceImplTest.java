@@ -7,6 +7,7 @@ import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.AddressDto;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.AnalogDomicile;
 import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.ConfidentialTimelineElementDto;
+import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.ConfidentialTimelineElementId;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.datavault.PnDataVaultClientReactive;
 import it.pagopa.pn.stream.service.ConfidentialInformationService;
@@ -92,4 +93,44 @@ class ConfidentialInformationServiceImplTest {
 
         assertThrows(PnInternalException.class, () -> confidentialInformationService.getTimelineConfidentialInformation(List.of(timelineElementInternal)).blockFirst());
     }
+
+    @Test
+    void getTimelineConfidentialInformationFromConfidentialElementIdsOk() {
+        ConfidentialTimelineElementId elementId = ConfidentialTimelineElementId.builder()
+                .iun("iunTest")
+                .timelineElementId("timelineElementIdTest")
+                .build();
+
+        ConfidentialTimelineElementDto confidentialTimelineElementDto = new ConfidentialTimelineElementDto();
+        confidentialTimelineElementDto.setTaxId("taxIdTest");
+        confidentialTimelineElementDto.setDenomination("denominationTest");
+        confidentialTimelineElementDto.setTimelineElementId("timelineElementIdTest");
+
+        Mockito.when(pnDataVaultClientReactive.getNotificationTimelines(Mockito.any()))
+                .thenReturn(Flux.just(confidentialTimelineElementDto));
+
+        Flux<ConfidentialTimelineElementDtoInt> fluxDto = confidentialInformationService
+                .getTimelineConfidentialInformationFromConfidentialElementIds(List.of(elementId));
+        Assertions.assertNotNull(fluxDto);
+
+        ConfidentialTimelineElementDtoInt dto = fluxDto.blockFirst();
+        Assertions.assertEquals("denominationTest", dto.getDenomination());
+        Assertions.assertEquals("timelineElementIdTest", dto.getTimelineElementId());
+        Assertions.assertEquals("taxIdTest", dto.getTaxId());
+    }
+
+    @Test
+    void getTimelineConfidentialInformationFromConfidentialElementIdsKo() {
+        ConfidentialTimelineElementId elementId = ConfidentialTimelineElementId.builder()
+                .iun("iunTest")
+                .timelineElementId("timelineElementIdTest")
+                .build();
+
+        Mockito.when(pnDataVaultClientReactive.getNotificationTimelines(Mockito.any()))
+                .thenThrow(PnInternalException.class);
+
+        assertThrows(PnInternalException.class, () -> confidentialInformationService
+                .getTimelineConfidentialInformationFromConfidentialElementIds(List.of(elementId)).blockFirst());
+    }
+
 }
