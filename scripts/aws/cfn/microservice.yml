@@ -603,6 +603,7 @@ Resources:
           QUEUE_URL: !Ref EventQueueURL
           START_READ_STREAM_TIMESTAMP: !Sub '${StartReadStreamTimestamp}'
           STOP_READ_STREAM_TIMESTAMP: !Sub '${StopReadStreamTimestamp}'
+          PN_TIMELINES_TABLE_NAME: !Sub '${PnTimelinesTableName}'
       TracingConfig:
         Mode: Active
       Layers:
@@ -714,7 +715,6 @@ Resources:
           TTL_OFFSET: !Sub '${StreamNotificationTtl}'
           START_READ_STREAM_TIMESTAMP: !Sub '${StartReadStreamTimestamp}'
           STOP_READ_STREAM_TIMESTAMP: !Sub '${StopReadStreamTimestamp}'
-          PN_TIMELINES_TABLE_NAME: !Sub '${PnTimelinesTableName}'
       TracingConfig:
         Mode: Active
       Layers:
