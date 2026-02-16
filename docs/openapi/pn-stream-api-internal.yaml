@@ -167,19 +167,24 @@ info:
       - [Cancellazione](#/Streams/removeEventStream)
       - [Disabilitazione](#/Streams/disableEventStream)
 
-    ## Procedura di migrazione agli stream v2.3
+    ## Procedura di aggiornamento alla nuova versione degli stream
 
-    Per migrare uno stream dalla versione precedente è sufficiente indicare nel parametro _replacedId_ l'identificativo
-    dello stream precedente in fase di creazione.
+    All'aggiornamento di versione di uno stream non è possibile. Se si vuole passare ad una versione più recente di stream, per recuperare i nuovi stati/eventi mancanti nella versione attuale, è necessario creare un nuovo stream utilizzando di seguenti passaggi:
 
+    - 1 <b>Identificazione Stream Originale</b>: È necesssario identificare lo streamId dello stream che si vuole aggiornare alla nuova versione. Lo streamId è reperibile tramite l'API
+    "Elenca stream di eventi" (es: GET /delivery-progresses/streams)
 
-    Il nuovo stream viene creato e contemporaneamente lo stream precedente viene disabilitato.
+    
+    - 2 <b>Creazione nuovo stream </b>: creare un nuovo stream utilizzando l’ultima versione dell’API di creazione (es: POST /delivery-progresses/v2.8/streams) indicando col parametro replaceStreamId il valore streamId dello stream originale recuperato al passaggio precedente.
+    In risposta alla chiamata viene restituito il nuovo stream .
+    Contestualmente lo stream precedente (identificato da replaceStreamId) viene disabilitato e non riceverà più eventi, ma rimarrà accessibile per la lettura degli eventi per un periodo di 14 giorni.
+    
+    - 3 <b>Lettura ad esaurimento degli eventi sullo stream precedente</b>: al fine di recuperare tutti gli eventi è necessario continuare la lettura del vecchio stream finché il valore di retryAfter non restituisce un valore diverso da 0 per un tempo adeguato (es: 5 minuti o 5 chiamate successive). 
+    Al termine dell'operazione di lettura di tutti gli eventi si può procedere con la rimozione dello stream, che comunque viene eliminato automaticamente dopo 14 giorni dalla sua disabilitazione.
 
+    - 4 <b>Lettura degli eventi sul nuovo stream</b>: attivare la lettura degli eventi sul nuovo stream avendo l'accortezza di indicare lastEventId vuoto per la prima lettura e la consapevolezza che potrebbero esserci, in casi sporadici, eventi duplicati sullo stream nuovo, già recuperati sul vecchio.
 
-    Il mittente deve mantenere attiva la lettura sullo stream precedente fino a consumare tutti gli eventi contenuti e
-    poi migrare la lettura sul nuovo stream.
-
-
+    
     ## Disabilitazione di uno stream (dalla versione 2.3)
 
     Dalla versione 2.3 è possibile disabilitare uno stream tramite la chiamata alla API _disableEventStream_.
