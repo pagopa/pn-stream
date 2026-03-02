@@ -65,7 +65,7 @@ class ConsumeEventStreamHandler extends EventHandler {
                         return createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data))));
                     case 25:
                         console.debug('Mapping to v25')
-                        return await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)));
+                        return createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)));
                     case 26:
                         console.debug('Mapping to v26')
                         return createProgressResponseV27(createProgressResponseV28(data));
@@ -77,7 +77,7 @@ class ConsumeEventStreamHandler extends EventHandler {
                         return createProgressResponseV28(data);
                     default:
                         console.error('Invalid version ', version)
-                        return null;
+                        return Promise.reject("unknown case");
                   }
             } else {
                 delete data.element;
