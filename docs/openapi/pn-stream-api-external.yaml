@@ -139,9 +139,11 @@ info:
       
       <details>
         <summary>Eventi di timeline - v2.6 (tutti gli elementi v1 + v2 + v2.3 + gli elementi seguenti)</summary>
+
       | Categoria | Descrizione |
       |-----------|-------------|
       |__ANALOG_WORKFLOW_RECIPIENT_DECEASED__ | Destinatario deceduto |
+
       </details>
 
     ## Segregazione per gruppi (dalla versione 2.3)
