@@ -51,47 +51,41 @@ class ConsumeEventStreamHandler extends EventHandler {
 
         // RESPONSE BODY
         // Il controllo della presenza di element avviene solo nel transitorio
-        let responseBody = [];
-        for(const data of response.data) {
+        const responseBodyPromises = response.data.map(async (data) => {
             if (data.element){
                 switch(version) {
                     case 10:
                         console.debug('Mapping to v10')
-                        responseBody.push(createProgressResponseV10(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)))))));
-                    break;
+                        return createProgressResponseV10(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data))))));
                     case 23:
                         console.debug('Mapping to v23')
-                        responseBody.push(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data))))));
-                    break;
+                        return createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)))));
                     case 24:
                         console.debug('Mapping to v24')
-                        responseBody.push(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)))));
-                    break;
+                        return createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data))));
                     case 25:
                         console.debug('Mapping to v25')
-                        responseBody.push(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data))));
-                    break;
+                        return createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)));
                     case 26:
                         console.debug('Mapping to v26')
-                        responseBody.push(createProgressResponseV27(createProgressResponseV28(data)));
-                    break;
+                        return createProgressResponseV27(createProgressResponseV28(data));
                     case 27:
                         console.debug('Mapping to v27')
-                        responseBody.push(createProgressResponseV27(createProgressResponseV28(data)));
-                    break;
+                        return createProgressResponseV27(createProgressResponseV28(data));
                     case 28:
                         console.debug('Mapping to v28')
-                        responseBody.push(createProgressResponseV28(data));
-                    break;
+                        return createProgressResponseV28(data);
                     default:
                         console.error('Invalid version ', version)
-                    break;
+                        return Promise.reject("unknown case");
                   }
             } else {
                 delete data.element;
-                responseBody.push(data);
+                return data;
             }
-        }
+        });
+
+        const responseBody = await Promise.all(responseBodyPromises);
 
         return {
             statusCode: response.status,
