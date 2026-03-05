@@ -65,34 +65,6 @@ Resources:
         MaxReceiveCount: 10
         DelaySeconds: 1
 
-  # internal queues DLQ
-  NotificationStreamManagerDLQ:
-    Type: AWS::CloudFormation::Stack
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
-      Parameters:
-        QueueName: !Sub '${ProjectName}-notification_stream_manager_DLQ'
-        DelaySeconds: 1
-        AlarmSNSTopicName: !Ref AlarmSNSTopicName
-        HasDLQ: "false"
-        QueueHasAlarm: "true"
-
-  # internal queues DLQ
-  StreamEventManagerDLQ:
-    Type: AWS::CloudFormation::Stack
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
-      Parameters:
-        QueueName: !Sub '${ProjectName}-stream_event_manager_DLQ'
-        DelaySeconds: 1
-        AlarmSNSTopicName: !Ref AlarmSNSTopicName
-        HasDLQ: "false"
-        QueueHasAlarm: "true"
-
   # WebhookStreams table
   PnStreamWebhookStreamsTable:
     Type: AWS::DynamoDB::Table
@@ -359,24 +331,6 @@ Outputs:
     Value: !Sub "${ProjectName}-notificationStreamManagerLambda"
   StreamEventManagerLambdaName:
     Value: !Sub "${ProjectName}-streamEventManagerLambda"
-
-  # Stream Step Manager DLQ
-  NotificationStreamManagerName:
-    Value: !GetAtt NotificationStreamManagerDLQ.Outputs.QueueName
-    Description: pn-delivery-push_webhook_event_manager_DLQ queue name
-  NotificationStreamManagerDLQURL:
-    Value: !GetAtt NotificationStreamManagerDLQ.Outputs.QueueURL
-    Description: pn-delivery-push_webhook_event_manager_DLQ queue URL
-  NotificationStreamManagerDLQARN:
-    Value: !GetAtt NotificationStreamManagerDLQ.Outputs.QueueARN
-    Description: pn-delivery-push_webhook_event_manager_DLQ queue ARN
-  NotificationStreamManagerDLQAlarmARN:
-    Value: !GetAtt NotificationStreamManagerDLQ.Outputs.SqsDLQAlarmArn
-    Description: pn-delivery-push_webhook_event_manager_DLQ alarm ARN
-
-  StreamEventManagerDLQARN:
-    Value: !GetAtt StreamEventManagerDLQ.Outputs.QueueARN
-    Description: pn-stream_event_manager_DLQ queue ARN
 
   EcsLogGroup:
     Value: !GetAtt PnStreamLogGroup.Outputs.LogGroupName

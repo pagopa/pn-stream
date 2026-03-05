@@ -161,14 +161,6 @@ Parameters:
     Default: ''
     Description: 'Base key of the microservice in the s3 bucket'
 
-  NotificationStreamManagerDLQAlarmARN:
-    Type: String
-    Description: 'DLQ Alarm ARN for NotificationStreamManagerLambda'
-
-  NotificationStreamManagerDLQARN:
-    Type: String
-    Description: 'DLQ ARN for NotificationStreamManagerLambda'
-
   EventQueueAlarmARN:
     Type: String
     Description: stream actions queue dlq alarm ARN
@@ -212,6 +204,10 @@ Parameters:
   CdcKinesisSourceStreamArn:
     Type: String
     Description: 'Where to send CDC'
+
+  CdcKinesisSourceStreamName:
+    Type: String
+    Description: 'Kinesis source CDC stream name'
 
   CdcKinesisSourceStreamKeyArn:
     Description: "Kinesis source CDC stream crypto key ARN"
@@ -308,10 +304,6 @@ Parameters:
   StreamEventManagerLambdaName:
     Type: String
     Description: 'Name of the lambda function that manages the stream events'
-
-  StreamEventManagerDLQARN:
-    Type: String
-    Description: 'ARN of the DLQ queue for stream event manager lambda'
 
   PnTimelinesTableName:
     Type: String
@@ -435,6 +427,20 @@ Parameters:
     Type: String
     Default: '-'
     Description: Cron for which you send the metric to CloudWatch
+
+  ESMKinesisFailureNotificationsBucketName:
+    Type: String
+    Description: "S3 bucket name for ESM Kinesis failure notifications"
+
+  StreamEventManagerMaximumRecordAge:
+    Type: Number
+    Description: "Maximum record age in seconds for StreamEventManagerLambdaKinesisSource"
+    Default: 604800 # 7 days
+
+  NotificationStreamManagerMaximumRecordAge:
+    Type: Number
+    Description: "Maximum record age in seconds for NotificationStreamManagerLambdaKinesisSource"
+    Default: 604800 # 7 days
 
 Resources:
 
@@ -662,12 +668,21 @@ Resources:
               - sqs:SendMessage
             Resource:
               - !Ref EventQueueARN
-              - !Ref StreamEventManagerDLQARN
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}/*
 
 
   # CDC to Stream Event Manager
   StreamEventManagerLambdaKinesisSource:
     Type: AWS::Lambda::EventSourceMapping
+    DependsOn: StreamEventManagerLambdaPolicy
     Properties:
       BatchSize: !Sub ${StreamEventManagerLambdaBatchSize}
       BisectBatchOnFunctionError: true
@@ -677,13 +692,38 @@ Resources:
         - ReportBatchItemFailures
       MaximumBatchingWindowInSeconds: !Sub ${StreamEventManagerLambdaMaximumBatchingWindowInSeconds}
       MaximumRetryAttempts: !Ref MaximumRetryAttemptsValueStream
+      MaximumRecordAgeInSeconds: !Ref StreamEventManagerMaximumRecordAge
       StartingPosition: TRIM_HORIZON
       DestinationConfig:
         OnFailure:
-          Destination: !Ref StreamEventManagerDLQARN
+          Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
       FilterCriteria:
         Filters:
           - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"]}}'
+
+  StreamEventManagerLambdaKinesisFailuresAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-StreamEventManagerLambda-ESM-Alarm"
+      AlarmDescription: "CloudWatch alarm for when StreamEventManagerLambda has Kinesis stream read failures, which can indicate problems with the function processing or with the stream itself."
+      TreatMissingData: notBreaching        
+      AlarmActions:
+        - !Ref AlarmSNSTopicArn
+      OKActions:
+        - !Ref AlarmSNSTopicArn
+      Dimensions:
+        - Value: !Ref StreamEventManagerLambda
+          Name: FunctionName
+        - Value: !Ref CdcKinesisSourceStreamName
+          Name: StreamName
+      DatapointsToAlarm: 1           
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 6
+      Period: 600
+      Namespace: ESM/Kinesis   
+      MetricName: ProcessingFailures
+      Statistic: Maximum      
+      Threshold: 1
 
   StreamEventManagerLambdaAlarms:
     Type: AWS::CloudFormation::Stack
@@ -766,16 +806,18 @@ Resources:
             Resource: !Ref CdcKinesisSourceStreamKeyArn
           - Effect: Allow
             Action:
-              - sqs:ChangeMessageVisibility
-              - sqs:GetQueueAttributes
-              - sqs:GetQueueUrl
-              - sqs:SendMessage
-            Resource:
-              !Ref NotificationStreamManagerDLQARN
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}/*
 
   # CDC to Stream Event Manager
   NotificationStreamManagerLambdaKinesisSource:
     Type: AWS::Lambda::EventSourceMapping
+    DependsOn: NotificationStreamManagerLambdaPolicy
     Properties:
       BatchSize: !Sub ${NotificationStreamManagerLambdaBatchSize}
       BisectBatchOnFunctionError: true
@@ -785,13 +827,38 @@ Resources:
         - ReportBatchItemFailures
       MaximumBatchingWindowInSeconds: !Sub ${NotificationStreamManagerLambdaMaximumBatchingWindowInSeconds}
       MaximumRetryAttempts: !Ref MaximumRetryAttemptsValueNotification
+      MaximumRecordAgeInSeconds: !Ref NotificationStreamManagerMaximumRecordAge
       StartingPosition: TRIM_HORIZON
       DestinationConfig:
         OnFailure:
-          Destination: !Ref NotificationStreamManagerDLQARN
+          Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
       FilterCriteria:
         Filters:
           - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnNotificationTableName}"]}}'
+
+  NotificationStreamManagerLambdaKinesisFailuresAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-NotificationStreamManagerLambda-ESM-Alarm"
+      AlarmDescription: "CloudWatch alarm for when NotificationStreamManagerLambda has Kinesis stream read failures, which can indicate problems with the function processing or with the stream itself."
+      TreatMissingData: notBreaching        
+      AlarmActions:
+        - !Ref AlarmSNSTopicArn
+      OKActions:
+        - !Ref AlarmSNSTopicArn
+      Dimensions:
+        - Value: !Ref NotificationStreamManagerLambda
+          Name: FunctionName
+        - Value: !Ref CdcKinesisSourceStreamName
+          Name: StreamName
+      DatapointsToAlarm: 1           
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 6
+      Period: 600
+      Namespace: ESM/Kinesis   
+      MetricName: ProcessingFailures
+      Statistic: Maximum      
+      Threshold: 1
 
   NotificationStreamManagerLambdaAlarms:
     Type: AWS::CloudFormation::Stack
