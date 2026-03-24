@@ -111,9 +111,6 @@ components:
         - PUBLIC_REGISTRY_VALIDATION_CALL
         - PUBLIC_REGISTRY_VALIDATION_RESPONSE
         - NOTIFICATION_TIMELINE_REWORKED
-        - NOTIFICATION_COST_VALIDATION_REQUEST
-        - NOTIFICATION_COST_VALIDATION_RESPONSE
-
     TimelineElementV28:
       type: object
       additionalProperties: false
@@ -201,9 +198,6 @@ components:
         - "$ref": "#/components/schemas/PublicRegistryValidationCallDetails"
         - "$ref": "#/components/schemas/PublicRegistryValidationResponseDetails"
         - "$ref": "#/components/schemas/NotificationTimelineReworkedDetails"
-        - "$ref": "#/components/schemas/NotificationCostValidationRequestDetails"
-        - "$ref": "#/components/schemas/NotificationCostValidationResponseDetails"
-
     NotificationRequestAcceptedDetailsV28:
       type: object
       properties:
@@ -1403,38 +1397,3 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/NotificationStatusHistoryInvalidatedElement"
-
-    NotificationCostValidationResponseDetails:
-      type: object
-      required:
-        - categoryType
-      properties:
-        categoryType:
-          type: string
-
-    NotificationCostValidationRequestDetails:
-      type: object
-      required:
-        - categoryType
-        - iun
-        - notificationCosts
-        - payments
-      properties:
-        categoryType:
-          type: string
-        iun:
-          type: string
-        notificationCosts:
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            $ref: './schemas-pn-notification-delivery-cost.yaml#/components/schemas/NotificationCostData'
-        payments:
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            $ref: './schemas-pn-notification-delivery-cost.yaml#/components/schemas/PaymentData'
-
-
