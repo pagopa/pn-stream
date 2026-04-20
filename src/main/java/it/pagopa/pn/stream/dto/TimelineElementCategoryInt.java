@@ -59,7 +59,9 @@ public enum TimelineElementCategoryInt {
     SEND_ANALOG_TIMEOUT_CREATION_REQUEST(TimelineElementCategoryInt.VERSION_27),
     SEND_ANALOG_TIMEOUT(TimelineElementCategoryInt.VERSION_27),
     ANALOG_FAILURE_WORKFLOW_TIMEOUT(TimelineElementCategoryInt.VERSION_27),
-    NOTIFICATION_TIMELINE_REWORKED(TimelineElementCategoryInt.VERSION_28);
+    NOTIFICATION_TIMELINE_REWORKED(TimelineElementCategoryInt.VERSION_28),
+    NOTIFICATION_COST_VALIDATION_REQUEST(TimelineElementCategoryInt.VERSION_28),
+    NOTIFICATION_COST_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_28);
 
 
     private final int version;
@@ -86,7 +88,9 @@ public enum TimelineElementCategoryInt {
         NOTIFICATION_CANCELLED_DOCUMENT_CREATION_REQUEST,
         SEND_ANALOG_TIMEOUT_CREATION_REQUEST,
         SEND_ANALOG_TIMEOUT,
-        ANALOG_FAILURE_WORKFLOW_TIMEOUT
+        ANALOG_FAILURE_WORKFLOW_TIMEOUT,
+        NOTIFICATION_COST_VALIDATION_REQUEST,
+        NOTIFICATION_COST_VALIDATION_RESPONSE
     }
 
     public enum UnlockTimelineElementCategory {
