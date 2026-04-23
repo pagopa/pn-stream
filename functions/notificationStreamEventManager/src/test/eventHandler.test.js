@@ -180,5 +180,57 @@ describe("Lambda Handler Tests", () => {
         { itemIdentifier: "seq126" }, // Invalid `iun` value
       ],
     });
-  });  
+  });
+
+  it("should skip records with communicationType present", async () => {
+    const event = {
+      mockKinesisData: [
+        {
+          dynamodb: {
+            NewImage: {
+              iun: { S: "testIUN" },
+              group: { S: "testGroup" },
+              communicationType: { S: "anyString" },
+            },
+          },
+          kinesisSeqNumber: "seq123",
+        },
+      ],
+    };
+
+    let dynamoCalled = false;
+    mockDynamoDBClient.send = async () => {
+      dynamoCalled = true;
+    };
+
+    const result = await lambda.handleEvent(event);
+    expect(result).to.deep.equal({ batchItemFailures: [] });
+    expect(dynamoCalled).to.be.false;
+  });
+
+  it("should skip records with communicationType present as number", async () => {
+      const event = {
+        mockKinesisData: [
+          {
+            dynamodb: {
+              NewImage: {
+                iun: { S: "testIUN" },
+                group: { S: "testGroup" },
+                communicationType: { N: 3 },
+              },
+            },
+            kinesisSeqNumber: "seq123",
+          },
+        ],
+      };
+
+      let dynamoCalled = false;
+      mockDynamoDBClient.send = async () => {
+        dynamoCalled = true;
+      };
+
+      const result = await lambda.handleEvent(event);
+      expect(result).to.deep.equal({ batchItemFailures: [] });
+      expect(dynamoCalled).to.be.false;
+    });
 });
