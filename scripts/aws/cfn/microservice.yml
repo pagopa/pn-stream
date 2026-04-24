@@ -834,8 +834,7 @@ Resources:
           Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
       FilterCriteria:
         Filters:
-          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnNotificationTableName}"]}}'
-
+          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnNotificationTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": [{ "exists": false }]}} }}}'
   NotificationStreamManagerLambdaKinesisFailuresAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
