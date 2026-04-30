@@ -87,8 +87,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                                                String xPagopaPnApiVersion,
                                                                UUID streamId,
                                                                String lastEventId) {
-        String msg = "consumeEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={} ";
-        String[] args = {xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString()};
+        String msg = "consumeEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={} lastEventId={}";
+        String lastEventIDToPrint = StringUtils.hasText(lastEventId)?lastEventId:"";
+        String[] args = {xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString(), lastEventIDToPrint};
         generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).log();
         // grazie al contatore atomico usato in scrittura per generare l'eventId, non serve più gestire la finestra.
         return getStreamEntityToWrite(apiVersion(xPagopaPnApiVersion), xPagopaPnCxId, xPagopaPnCxGroups, streamId, true)
@@ -105,7 +106,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 //timeline ancora anonimizzato - EventEntity + TimelineElementInternal
                                 .collectList()
                                 .map(items -> {
-                                    generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("timelineElementIds {}", createAuditLogOfElementsId(items)).log();
+                                    generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("timelineElementIds {}, lastEventId={}", createAuditLogOfElementsId(items), lastEventIDToPrint).log();
                                     return items;
                                 })
                                 // chiamo timelineService per aggiungere le confidentialInfo
@@ -139,8 +140,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                             .progressResponseElementList(tuple2.getT1())
                                             .build();
                                 })
-                                .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={}", progressResponseElementDto.getProgressResponseElementList().size()).log())
-                                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream").log())
+                                .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={} lastEventId={}", progressResponseElementDto.getProgressResponseElementList().size(), lastEventIDToPrint).log())
+                                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={})", lastEventIDToPrint).log())
                 );
     }
 
