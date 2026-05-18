@@ -364,7 +364,7 @@ paths:
     ############################################################################################
   '/delivery-progresses/v2.9/streams':
     post:
-      summary: Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi v2.9
       description: >-
         Creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline.
@@ -414,7 +414,7 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
-      summary: Elenca stream di eventi
+      summary: Elenca stream di eventi v2.9
       description: >-
         Elenca gli stream di eventi
       tags:
@@ -447,7 +447,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
-      summary: Leggi metadata dello stream
+      summary: Leggi metadata dello stream v2.9
       description: >-
         Lettura delle configurazioni di uno stream di eventi.
       tags:
@@ -485,7 +485,7 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
-      summary: Update Stream metadata
+      summary: Update Stream metadata v2.9
       description: >-
         Modifica delle configurazioni dei filtri associati a uno stream di eventi, non è possibile cambiare il valore del flag waitForAccepted.
       tags:
@@ -529,7 +529,7 @@ paths:
               schema:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
-      summary: Remove Event Stream
+      summary: Remove Event Stream v2.9
       description: >-
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
@@ -570,7 +570,7 @@ paths:
 
   '/delivery-progresses/v2.9/streams/{streamId}/action/disable':
     post:
-      summary: Disabilita uno stream
+      summary: Disabilita uno stream v2.9
       description: >-
         Disabilita uno stream.
 
@@ -627,7 +627,7 @@ paths:
 
   '/delivery-progresses/v2.9/streams/{streamId}/events':
     get:
-      summary: Leggi progressi notifiche
+      summary: Leggi progressi notifiche v2.9
       description: >-
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
         il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
