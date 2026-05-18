@@ -52,7 +52,7 @@ paths:
   '/delivery-progresses/streams':
     post:
       deprecated: true
-      summary: Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi v1
       description: >-
         Viene richiesta la creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline. <br/>
@@ -91,7 +91,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
       deprecated: true
-      summary: Elenca stream di eventi
+      summary: Elenca stream di eventi v1
       description: >-
         Elenca gli stream di eventi
       tags:
@@ -124,7 +124,7 @@ paths:
       - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
-      summary: Leggi metadati dello stream
+      summary: Leggi metadati dello stream v1
       description: >-
         Permette di leggere le configurazioni di uno stream di eventi.
       tags:
@@ -153,7 +153,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
       deprecated: true
-      summary: Update Stream metadata
+      summary: Update Stream metadata v1
       description: >-
         Permette di cambiare le configurazioni dei filtri associati a uno stream di eventi
       tags:
@@ -188,7 +188,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
       deprecated: true
-      summary: Remove Event Stream
+      summary: Remove Event Stream v1
       description: >-
         Elimina uno steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
@@ -221,7 +221,7 @@ paths:
   '/delivery-progresses/streams/{streamId}/events':
     get:
       deprecated: true
-      summary: Leggi progressi notifiche
+      summary: Leggi progressi notifiche v1
       description: >-
         Permette di leggere gli eventi presenti nello stream di aggiornamenti e indica che
         la P.A. ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
@@ -290,7 +290,7 @@ paths:
   '/delivery-progresses/v2.3/streams':
     post:
       deprecated: true
-      summary: Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi v2.3
       description: >-
         Creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline.
@@ -343,7 +343,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
       deprecated: true
-      summary: Elenca stream di eventi
+      summary: Elenca stream di eventi v2.3
       description: >-
         Elenca gli stream di eventi
       tags:
@@ -379,7 +379,7 @@ paths:
       - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
-      summary: Leggi metadata dello stream
+      summary: Leggi metadata dello stream v2.3
       description: >-
         Lettura delle configurazioni di uno stream di eventi.
       tags:
@@ -420,7 +420,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
       deprecated: true
-      summary: Update Stream metadata
+      summary: Update Stream metadata v2.3
       description: >-
         Modifica delle configurazioni dei filtri associati a uno stream di eventi
       tags:
@@ -467,7 +467,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
       deprecated: true
-      summary: Remove Event Stream
+      summary: Remove Event Stream v2.3
       description: >-
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
@@ -511,7 +511,7 @@ paths:
   '/delivery-progresses/v2.3/streams/{streamId}/action/disable':
     post:
       deprecated: true
-      summary: Disabilita uno stream
+      summary: Disabilita uno stream v2.3
       description: >-
         Disabilita uno stream.
 
@@ -571,7 +571,7 @@ paths:
   '/delivery-progresses/v2.3/streams/{streamId}/events':
     get:
       deprecated: true
-      summary: Leggi progressi notifiche
+      summary: Leggi progressi notifiche v2.3
       description: >-
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
         il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
@@ -644,7 +644,7 @@ paths:
   '/delivery-progresses/v2.4/streams':
     post:
       deprecated: true
-      summary: Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi v2.4
       description: >-
         Creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline.
@@ -697,7 +697,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
       deprecated: true
-      summary: Elenca stream di eventi
+      summary: Elenca stream di eventi v2.4
       description: >-
         Elenca gli stream di eventi
       tags:
@@ -733,7 +733,7 @@ paths:
       - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
-      summary: Leggi metadata dello stream
+      summary: Leggi metadata dello stream v2.4
       description: >-
         Lettura delle configurazioni di uno stream di eventi.
       tags:
@@ -774,7 +774,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
       deprecated: true
-      summary: Update Stream metadata
+      summary: Update Stream metadata v2.4
       description: >-
         Modifica delle configurazioni dei filtri associati a uno stream di eventi
       tags:
@@ -821,7 +821,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
       deprecated: true
-      summary: Remove Event Stream
+      summary: Remove Event Stream v2.4
       description: >-
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
@@ -865,7 +865,7 @@ paths:
   '/delivery-progresses/v2.4/streams/{streamId}/action/disable':
     post:
       deprecated: true
-      summary: Disabilita uno stream
+      summary: Disabilita uno stream v2.4
       description: >-
         Disabilita uno stream.
 
@@ -924,7 +924,7 @@ paths:
   '/delivery-progresses/v2.4/streams/{streamId}/events':
     get:
       deprecated: true
-      summary: Leggi progressi notifiche
+      summary: Leggi progressi notifiche v2.4
       description: >-
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
         il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
@@ -1001,7 +1001,7 @@ paths:
   '/delivery-progresses/v2.5/streams':
     post:
       deprecated: true
-      summary: Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi v2.5
       description: >-
         Creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline.
@@ -1054,7 +1054,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
       deprecated: true
-      summary: Elenca stream di eventi
+      summary: Elenca stream di eventi v2.5
       description: >-
         Elenca gli stream di eventi
       tags:
@@ -1090,7 +1090,7 @@ paths:
       - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
-      summary: Leggi metadata dello stream
+      summary: Leggi metadata dello stream v2.5
       description: >-
         Lettura delle configurazioni di uno stream di eventi.
       tags:
@@ -1131,7 +1131,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
       deprecated: true
-      summary: Update Stream metadata
+      summary: Update Stream metadata v2.5
       description: >-
         Modifica delle configurazioni dei filtri associati a uno stream di eventi
       tags:
@@ -1178,7 +1178,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
       deprecated: true
-      summary: Remove Event Stream
+      summary: Remove Event Stream v2.5
       description: >-
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
@@ -1222,7 +1222,7 @@ paths:
   '/delivery-progresses/v2.5/streams/{streamId}/action/disable':
     post:
       deprecated: true
-      summary: Disabilita uno stream
+      summary: Disabilita uno stream v2.5
       description: >-
         Disabilita uno stream.
 
@@ -1282,7 +1282,7 @@ paths:
   '/delivery-progresses/v2.5/streams/{streamId}/events':
     get:
       deprecated: true
-      summary: Leggi progressi notifiche
+      summary: Leggi progressi notifiche v2.5
       description: >-
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
         il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
@@ -1355,7 +1355,7 @@ paths:
   '/delivery-progresses/v2.6/streams':
     post:
       deprecated: true
-      summary: Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi v2.6
       description: >-
         Creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline.
@@ -1408,7 +1408,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
       deprecated: true
-      summary: Elenca stream di eventi
+      summary: Elenca stream di eventi v2.6
       description: >-
         Elenca gli stream di eventi
       tags:
@@ -1444,7 +1444,7 @@ paths:
       - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
-      summary: Leggi metadata dello stream
+      summary: Leggi metadata dello stream v2.6
       description: >-
         Lettura delle configurazioni di uno stream di eventi.
       tags:
@@ -1485,7 +1485,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
       deprecated: true
-      summary: Update Stream metadata
+      summary: Update Stream metadata v2.6
       description: >-
         Modifica delle configurazioni dei filtri associati a uno stream di eventi
       tags:
@@ -1532,7 +1532,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
       deprecated: true
-      summary: Remove Event Stream
+      summary: Remove Event Stream v2.6
       description: >-
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
@@ -1576,7 +1576,7 @@ paths:
   '/delivery-progresses/v2.6/streams/{streamId}/action/disable':
     post:
       deprecated: true
-      summary: Disabilita uno stream
+      summary: Disabilita uno stream v2.6
       description: >-
         Disabilita uno stream.
 
@@ -1636,7 +1636,7 @@ paths:
   '/delivery-progresses/v2.6/streams/{streamId}/events':
     get:
       deprecated: true
-      summary: Leggi progressi notifiche
+      summary: Leggi progressi notifiche v2.6
       description: >-
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
         il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
@@ -1718,7 +1718,7 @@ paths:
   '/delivery-progresses/v2.7/streams':
     post:
       deprecated: true
-      summary: Crea nuovo stream di eventi
+      summary: Crea nuovo stream di eventi v2.7
       description: >-
         Creazione di un flusso di eventi specificando se gli eventi saranno
         relativi ai cambi di stato o agli eventi di timeline.
@@ -1771,7 +1771,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
       deprecated: true
-      summary: Elenca stream di eventi
+      summary: Elenca stream di eventi v2.7
       description: >-
         Elenca gli stream di eventi
       tags:
@@ -1808,7 +1808,7 @@ paths:
       - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
-      summary: Leggi metadata dello stream
+      summary: Leggi metadata dello stream v2.7
       description: >-
         Lettura delle configurazioni di uno stream di eventi.
       tags:
@@ -1849,7 +1849,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
       deprecated: true
-      summary: Update Stream metadata
+      summary: Update Stream metadata v2.7
       description: >-
         Modifica delle configurazioni dei filtri associati a uno stream di eventi, non è possibile cambiare il valore del flag waitForAccepted.
       tags:
@@ -1896,7 +1896,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
       deprecated: true
-      summary: Remove Event Stream
+      summary: Remove Event Stream v2.7
       description: >-
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
         associati allo stream e non ancora consumati.
@@ -1940,7 +1940,7 @@ paths:
   '/delivery-progresses/v2.7/streams/{streamId}/action/disable':
     post:
       deprecated: true
-      summary: Disabilita uno stream
+      summary: Disabilita uno stream v2.7
       description: >-
         Disabilita uno stream.
 
@@ -2000,7 +2000,7 @@ paths:
   '/delivery-progresses/v2.7/streams/{streamId}/events':
     get:
       deprecated: true
-      summary: Leggi progressi notifiche
+      summary: Leggi progressi notifiche v2.7
       description: >-
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
         il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
@@ -2076,7 +2076,7 @@ paths:
   '/delivery-progresses/v2.8/streams':
     post:
       deprecated: true
-      summary: EXPERIMENTAL - Crea nuovo stream di eventi
+      summary: EXPERIMENTAL - Crea nuovo stream di eventi v2.8
       description: >-
         (EXPERIMENTAL)
         Creazione di un flusso di eventi specificando se gli eventi saranno
@@ -2130,7 +2130,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     get:
       deprecated: true
-      summary: EXPERIMENTAL - Elenca stream di eventi
+      summary: EXPERIMENTAL - Elenca stream di eventi v2.8
       description: >-
         (EXPERIMENTAL)
         Elenca gli stream di eventi
@@ -2167,7 +2167,7 @@ paths:
       - $ref: '#/components/parameters/pathStreamId'
     get:
       deprecated: true
-      summary: EXPERIMENTAL - Leggi metadata dello stream
+      summary: EXPERIMENTAL - Leggi metadata dello stream v2.8
       description: >-
         (EXPERIMENTAL)
         Lettura delle configurazioni di uno stream di eventi.
@@ -2209,7 +2209,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     put:
       deprecated: true
-      summary: EXPERIMENTAL - Update Stream metadata
+      summary: EXPERIMENTAL - Update Stream metadata v2.8
       description: >-
         (EXPERIMENTAL)
         Modifica delle configurazioni dei filtri associati a uno stream di eventi, non è possibile cambiare il valore del flag waitForAccepted.
@@ -2257,7 +2257,7 @@ paths:
                 $ref: 'remote-refs.yaml#/components/schemas/Problem'
     delete:
       deprecated: true
-      summary: EXPERIMENTAL - Remove Event Stream
+      summary: EXPERIMENTAL - Remove Event Stream v2.8
       description: >-
         (EXPERIMENTAL)
         Cancellazione dello steam di eventi: elimina sia le configurazioni sia tutti gli eventi
@@ -2302,7 +2302,7 @@ paths:
   '/delivery-progresses/v2.8/streams/{streamId}/action/disable':
     post:
       deprecated: true
-      summary: EXPERIMENTAL - Disabilita uno stream
+      summary: EXPERIMENTAL - Disabilita uno stream v2.8
       description: >-
         (EXPERIMENTAL)
         Disabilita uno stream.
@@ -2363,7 +2363,7 @@ paths:
   '/delivery-progresses/v2.8/streams/{streamId}/events':
     get:
       deprecated: true
-      summary: EXPERIMENTAL - Leggi progressi notifiche
+      summary: EXPERIMENTAL - Leggi progressi notifiche v2.8
       description: >-
         (EXPERIMENTAL)
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
