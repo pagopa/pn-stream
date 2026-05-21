@@ -4497,7 +4497,7 @@ components:
           type: string
           maxLength: 10
           description: |
-            i codici delle motivazioni di  consegna possono essere consultati alla seguente [pagina](https://developer.pagopa.it/send/guides/knowledge-base/v2.5/readme/creazione-e-gestione-degli-stream/stream-di-timeline/decodifiche-send_analog#decodifica-deliveryfailurecause)
+            i codici delle motivazioni di mancata consegna possono essere consultati alla seguente [pagina](https://developer.pagopa.it/send/guides/knowledge-base/v2.5/readme/creazione-e-gestione-degli-stream/stream-di-timeline/decodifiche-send_analog#decodifica-deliveryfailurecause)
         deliveryDetailCode:
           type: string
           maxLength: 20

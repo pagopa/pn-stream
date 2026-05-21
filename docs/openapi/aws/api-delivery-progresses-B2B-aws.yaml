@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: s8k28hf26IMTTLz2qAoPKOxjPcrbIbr7cxglanvXuDI=
+  version: 8g/VOmshNzqm2PsYHgGzyxeoyQJ9to6lAbNba+7oo9c=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -5101,8 +5101,8 @@ components:
           type: string
           maxLength: 10
           description: >
-            i codici delle motivazioni di  consegna possono essere consultati
-            alla seguente
+            i codici delle motivazioni di mancata consegna possono essere
+            consultati alla seguente
             [pagina](https://developer.pagopa.it/send/guides/knowledge-base/v2.5/readme/creazione-e-gestione-degli-stream/stream-di-timeline/decodifiche-send_analog#decodifica-deliveryfailurecause)
         deliveryDetailCode:
           type: string
