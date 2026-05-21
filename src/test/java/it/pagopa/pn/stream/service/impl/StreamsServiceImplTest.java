@@ -197,16 +197,10 @@ class StreamsServiceImplTest {
         Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
         Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
 
-
         //WHEN
-        StreamMetadataResponseV29 res = webhookService.createEventStream(xpagopapnuid,xpagopacxid, null,null, Mono.just(req)).block(d);
-
+        Mono<StreamMetadataResponseV29> res = webhookService.createEventStream(xpagopapnuid,xpagopacxid, null,null, Mono.just(req));
         //THEN
-        assertNotNull(res);
-        Assertions.assertEquals(true, res.getWaitForAccepted());
-
-        Mockito.verify(streamEntityDao).save(Mockito.any());
-
+        assertThrows(PnStreamForbiddenException.class, () -> res.block(d));
     }
 
     @Test
