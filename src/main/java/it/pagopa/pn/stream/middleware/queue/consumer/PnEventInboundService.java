@@ -1,7 +1,6 @@
 package it.pagopa.pn.stream.middleware.queue.consumer;
 
 import it.pagopa.pn.commons.utils.MDCUtils;
-import it.pagopa.pn.stream.config.PnStreamConfigs;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
@@ -25,9 +24,9 @@ public class PnEventInboundService {
     public MessageRoutingCallback customRouter() {
         return new MessageRoutingCallback() {
             @Override
-            public FunctionRoutingResult routingResult(Message<?> message) {
+            public String routingResult(Message<?> message) {
                 setMdc(message);
-                return new FunctionRoutingResult(handleMessage(message));
+                return handleMessage(message);
             }
         };
     }

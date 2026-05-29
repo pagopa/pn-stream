@@ -13,34 +13,30 @@ class ExternalEventTest {
     @BeforeEach
     void setUp() {
         externalEvent = new ExternalEvent();
-        externalEvent.setPayment(PaymentEvent.builder()
-                .iun("001")
-                .build());
+        externalEvent.setPayment(new PaymentEvent()
+                .iun("001"));
     }
 
     @Test
     void payment() {
         ExternalEvent actual = new ExternalEvent();
-        actual.payment(PaymentEvent.builder()
-                .iun("001")
-                .build());
+        actual.payment(new PaymentEvent()
+                .iun("001"));
         Assertions.assertEquals(externalEvent, actual);
     }
 
     @Test
     void getPayment() {
-        PaymentEvent expected = PaymentEvent.builder()
-                .iun("001")
-                .build();
+        PaymentEvent expected = new PaymentEvent()
+                .iun("001");
         Assertions.assertEquals(expected, externalEvent.getPayment());
     }
 
     @Test
     void testEquals() {
         ExternalEvent expected = new ExternalEvent();
-        expected.payment(PaymentEvent.builder()
-                .iun("001")
-                .build());
+        expected.payment(new PaymentEvent()
+                .iun("001"));
         Assertions.assertEquals(Boolean.TRUE, expected.equals(externalEvent));
     }
     

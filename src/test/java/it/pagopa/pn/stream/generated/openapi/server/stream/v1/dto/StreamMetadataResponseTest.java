@@ -27,14 +27,13 @@ class StreamMetadataResponseTest {
     @Test
     void title() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
-                .build();
+                .groups(Collections.emptyList());
         Assertions.assertEquals(expected, response.title("002"));
     }
 
@@ -46,14 +45,13 @@ class StreamMetadataResponseTest {
     @Test
     void eventType() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
-                .build();
+                .groups(Collections.emptyList());
         Assertions.assertEquals(expected, response.eventType(StreamMetadataResponseV29.EventTypeEnum.STATUS));
     }
 
@@ -65,14 +63,13 @@ class StreamMetadataResponseTest {
     @Test
     void filterValues() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
-                .build();
+                .groups(Collections.emptyList());
         Assertions.assertEquals(expected, response.filterValues(Collections.singletonList("001")));
     }
 
@@ -84,14 +81,13 @@ class StreamMetadataResponseTest {
     @Test
     void streamId() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
-                .build();
+                .groups(Collections.emptyList());
         Assertions.assertEquals(expected, response.streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454")));
     }
 
@@ -103,14 +99,13 @@ class StreamMetadataResponseTest {
     @Test
     void activationDate() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
-                .build();
+                .groups(Collections.emptyList());
         Assertions.assertEquals(expected, response.activationDate(instant));
     }
 
@@ -122,14 +117,13 @@ class StreamMetadataResponseTest {
     @Test
     void testEquals() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
                 .title("002")
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
-                .build();
+                .groups(Collections.emptyList());
         Assertions.assertEquals(Boolean.TRUE, expected.equals(response));
     }
 }
