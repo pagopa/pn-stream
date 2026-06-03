@@ -3,10 +3,7 @@ package it.pagopa.pn.stream.service.impl;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.exceptions.PnStreamMaxStreamsCountReachedException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV29;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamListElement;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV29;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV29;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.EventEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
@@ -20,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
@@ -124,8 +123,8 @@ class StreamsServiceImplTest {
 
         StreamCreationRequestV29 req = new StreamCreationRequestV29();
         req.setTitle("titolo");
-        req.setEventType(StreamCreationRequestV29.EventTypeEnum.STATUS);
-        req.setFilterValues(null);
+        req.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE);
+        req.setFilterValues(Arrays.asList("REQUEST_ACCEPTED"));
         req.setWaitForAccepted(true);
 
         String uuid = UUID.randomUUID().toString();
@@ -134,7 +133,7 @@ class StreamsServiceImplTest {
         entity.setTitle(req.getTitle());
         entity.setPaId(xpagopacxid);
         entity.setEventType(req.getEventType().toString());
-        entity.setFilterValues(new HashSet<>());
+        entity.setFilterValues(null);
         entity.setActivationDate(Instant.now());
         entity.setSorting(true);
 
@@ -160,6 +159,48 @@ class StreamsServiceImplTest {
         Assertions.assertEquals(true, res.getWaitForAccepted());
 
         Mockito.verify(streamEntityDao).save(Mockito.any());
+    }
+
+    @Test
+    void createSortEventStreamWithWrongFilter() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String xpagopapnuid = "PA-xpagopapnuid";
+
+
+        StreamCreationRequestV29 req = new StreamCreationRequestV29();
+        req.setTitle("titolo");
+        req.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE);
+        req.setFilterValues(Arrays.asList("TEST"));
+        req.setWaitForAccepted(true);
+
+        String uuid = UUID.randomUUID().toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle(req.getTitle());
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(req.getEventType().toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setSorting(true);
+
+        StreamEntity pentity = new StreamEntity();
+        pentity.setStreamId(uuid);
+        pentity.setTitle(req.getTitle());
+        pentity.setPaId(xpagopacxid);
+        pentity.setEventType(req.getEventType().toString());
+        pentity.setFilterValues(new HashSet<>());
+        pentity.setActivationDate(Instant.now());
+
+
+        Mockito.when(streamEntityDao.findByPa(Mockito.anyString())).thenReturn(Flux.fromIterable(List.of(pentity)));
+        Mockito.when(streamEntityDao.save(Mockito.any())).thenReturn(Mono.just(entity));
+        Mockito.when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
+
+        //WHEN
+        Mono<StreamMetadataResponseV29> res = webhookService.createEventStream(xpagopapnuid,xpagopacxid, null,null, Mono.just(req));
+        //THEN
+        assertThrows(PnStreamForbiddenException.class, () -> res.block(d));
     }
 
     @Test
