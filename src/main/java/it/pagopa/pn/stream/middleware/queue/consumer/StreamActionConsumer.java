@@ -6,26 +6,26 @@ import it.pagopa.pn.stream.middleware.queue.consumer.handler.utils.HandleEventUt
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl.StreamActionsEventHandler;
 import it.pagopa.pn.stream.utils.MdcKey;
-import lombok.AllArgsConstructor;
 import lombok.CustomLog;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
-import org.springframework.stereotype.Component;
 
 import static it.pagopa.pn.stream.utils.MdcUtils.setMdc;
 
-@Component
-@AllArgsConstructor
+@Configuration
 @CustomLog
+@RequiredArgsConstructor
 public class StreamActionConsumer {
 
     private final StreamActionsEventHandler streamActionsEventHandler;
 
-    @SqsListener("${pn.stream.topics.scheduled-actions}")
+    @SqsListener(value = "${pn.stream.topics.scheduled-actions}")
     public void consume(Message<StreamAction> message) {
         final String processName = "STREAM ACTION";
+        setMdc(message);
         try {
-            setMdc(message);
             MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
             HandleEventUtils.addIunToMdc(
                     message.getPayload().getTimelineElementInternal() != null
@@ -33,7 +33,7 @@ public class StreamActionConsumer {
                             : message.getPayload().getIun()
             );
             log.logStartingProcess(processName);
-          //  streamActionsEventHandler.handleEvent(message.getPayload());
+            streamActionsEventHandler.handleEvent(message.getPayload());
             log.logEndingProcess(processName);
         } catch (Exception ex) {
             log.logEndingProcess(processName, false, ex.getMessage(), ex);

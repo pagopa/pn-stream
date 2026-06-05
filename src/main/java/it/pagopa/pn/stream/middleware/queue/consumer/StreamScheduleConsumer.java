@@ -6,28 +6,26 @@ import it.pagopa.pn.stream.middleware.queue.consumer.handler.utils.HandleEventUt
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl.StreamScheduleEventHandler;
 import it.pagopa.pn.stream.utils.MdcKey;
-import lombok.AllArgsConstructor;
 import lombok.CustomLog;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
-import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 import static it.pagopa.pn.stream.utils.MdcUtils.setMdc;
 
-@Component
-@AllArgsConstructor
+@Configuration
 @CustomLog
+@RequiredArgsConstructor
 public class StreamScheduleConsumer {
 
     private final StreamScheduleEventHandler streamScheduleEventHandler;
 
-    @SqsListener("${pn.stream.topics.event-schedule}")
+    @SqsListener(value = "${pn.stream.topics.event-schedule}")
     public void consumeUnlockEvents(Message<SortEventAction> message) {
         final String processName = "UNLOCK EVENTS ACTION";
+        setMdc(message);
         try {
-            setMdc(message);
             MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.UNLOCK_EVENTS_KEY);
             log.logStartingProcess(processName);
             streamScheduleEventHandler.handleUnlockEvents(message.getPayload());

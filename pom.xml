@@ -28,7 +28,6 @@
     <pagopa.codegen.version>v01.06.01</pagopa.codegen.version>
   </properties>
 
-  <!-- ✅ SOLO il BOM qui: gestisce le versioni di tutti i moduli AWS SDK e Spring Cloud AWS -->
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -41,30 +40,17 @@
     </dependencies>
   </dependencyManagement>
 
-  <!-- ✅ TUTTE le dipendenze reali qui -->
   <dependencies>
-
     <dependency>
       <groupId>it.pagopa.pn</groupId>
       <artifactId>pn-model</artifactId>
       <version>2.15.0-SPRINGBOOT3</version>
     </dependency>
 
-    <!--
-        pn-commons porta dentro versioni vecchie dell'AWS SDK (senza AWS_EC2_METADATA_V1_DISABLED).
-        Escludiamo tutto software.amazon.awssdk e re-dichiariamo i moduli
-        necessari esplicitamente sotto, allineati al BOM 2.31.54.
-    -->
     <dependency>
       <groupId>it.pagopa.pn</groupId>
       <artifactId>pn-commons</artifactId>
-      <version>2.21.0-SPRINGBOOT3</version>
-      <exclusions>
-        <exclusion>
-          <groupId>software.amazon.awssdk</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>2.22.0-SPRINGBOOT3</version>
     </dependency>
 
     <dependency>
@@ -73,36 +59,16 @@
       <version>2.2.25</version>
     </dependency>
 
-    <!-- Moduli AWS SDK richiesti da pn-commons e dal microservizio.
-         Nessuna version: gestita dal BOM (2.31.54) -->
     <dependency>
       <groupId>software.amazon.awssdk</groupId>
-      <artifactId>ssm</artifactId>
+      <artifactId>dynamodb</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>eventbridge</artifactId>
+      <groupId>io.awspring.cloud</groupId>
+      <artifactId>spring-cloud-aws-starter-sqs</artifactId>
     </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>sqs</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>s3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>sts</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>cloudwatch</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>regions</artifactId>
-    </dependency>
+
     <dependency>
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>dynamodb-enhanced</artifactId>
@@ -142,21 +108,12 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream</artifactId>
-    </dependency>
-
-    <!-- Versione gestita dal BOM (3.4.0) -->
-    <dependency>
-      <groupId>io.awspring.cloud</groupId>
-      <artifactId>spring-cloud-aws-starter-sqs</artifactId>
-    </dependency>
-
+    <!--LOCALSTACK/TESTCONTAINERS-->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>localstack</artifactId>
       <scope>test</scope>
+
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
@@ -175,7 +132,6 @@
 
   <build>
     <plugins>
-
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -352,11 +308,8 @@
               </configOptions>
             </configuration>
           </execution>
-
         </executions>
       </plugin>
-
     </plugins>
   </build>
-
 </project>
