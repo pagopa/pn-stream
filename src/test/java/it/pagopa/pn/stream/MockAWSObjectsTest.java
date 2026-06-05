@@ -2,7 +2,6 @@ package it.pagopa.pn.stream;
 
 import io.awspring.cloud.autoconfigure.sqs.SqsAutoConfiguration;
 import it.pagopa.pn.api.dto.events.MomProducer;
-import it.pagopa.pn.stream.middleware.queue.consumer.PnEventInboundService;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl.SortEvent;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl.StreamEvent;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -18,9 +17,6 @@ public abstract class MockAWSObjectsTest{
 
     @MockitoBean(name = "streamActionsEventProducer")
     private MomProducer<StreamEvent> webhookActionsEventProducer;
-
-    @MockitoBean
-    private PnEventInboundService pnEventInboundService;
 
     @MockitoBean
     private DynamoDbClient dynamoDbClient;
