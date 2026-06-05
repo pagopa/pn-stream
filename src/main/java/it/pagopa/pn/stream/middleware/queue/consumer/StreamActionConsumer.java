@@ -27,11 +27,12 @@ public class StreamActionConsumer {
         setMdc(message);
         try {
             MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
-            HandleEventUtils.addIunToMdc(
-                    message.getPayload().getTimelineElementInternal() != null
-                            ? message.getPayload().getTimelineElementInternal().getIun()
-                            : message.getPayload().getIun()
-            );
+            String iun = message.getPayload().getTimelineElementInternal() != null
+                    ? message.getPayload().getTimelineElementInternal().getIun()
+                    : message.getPayload().getIun();
+            if (iun != null) {
+                HandleEventUtils.addIunToMdc(iun);
+            }
             log.logStartingProcess(processName);
             streamActionsEventHandler.handleEvent(message.getPayload());
             log.logEndingProcess(processName);
