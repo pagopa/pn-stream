@@ -25,8 +25,8 @@ public class MdcUtils {
             MDC.put(MDCUtils.MDC_TRACE_ID_KEY, String.valueOf(UUID.randomUUID()));
         }
 
-        String iun = (String) message.getHeaders().get("iun");
-        if(iun != null){
+        String iun = messageHeaders.get("iun", String.class);
+        if (iun != null) {
             MDC.put(MDCUtils.MDC_PN_IUN_KEY, iun);
         }
     }
