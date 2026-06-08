@@ -16,28 +16,26 @@ class ExternalEventsRequestTest {
     @BeforeEach 
     void setUp() {
         eventsRequest = new ExternalEventsRequest();
-        eventsRequest.setEvents(Collections.singletonList(ExternalEvent.builder().payment(PaymentEvent.builder().iun("001").build()).build()));
+        eventsRequest.setEvents(Collections.singletonList(new ExternalEvent().payment(new PaymentEvent().iun("001"))));
     }
 
     @Test
     void events() {
-        ExternalEventsRequest expected = ExternalEventsRequest.builder()
-                .events(Collections.singletonList(ExternalEvent.builder().payment(PaymentEvent.builder().iun("001").build()).build()))
-                .build();
+        ExternalEventsRequest expected = new ExternalEventsRequest()
+                .events(Collections.singletonList(new ExternalEvent().payment(new PaymentEvent().iun("001"))));
 
-        Assertions.assertEquals(expected, eventsRequest.events(Collections.singletonList(ExternalEvent.builder().payment(PaymentEvent.builder().iun("001").build()).build())));
+        Assertions.assertEquals(expected, eventsRequest.events(Collections.singletonList(new ExternalEvent().payment(new PaymentEvent().iun("001")))));
     }
 
     @Test
     void getEvents() {
-        Assertions.assertEquals(Collections.singletonList(ExternalEvent.builder().payment(PaymentEvent.builder().iun("001").build()).build()), eventsRequest.getEvents());
+        Assertions.assertEquals(Collections.singletonList(new ExternalEvent().payment(new PaymentEvent().iun("001"))), eventsRequest.getEvents());
     }
 
     @Test
     void testEquals() {
-        ExternalEventsRequest expected = ExternalEventsRequest.builder()
-                .events(Collections.singletonList(ExternalEvent.builder().payment(PaymentEvent.builder().iun("001").build()).build()))
-                .build();
+        ExternalEventsRequest expected = new ExternalEventsRequest()
+                .events(Collections.singletonList(new ExternalEvent().payment(new PaymentEvent().iun("001"))));
 
         Assertions.assertEquals(Boolean.TRUE, expected.equals(eventsRequest));
     }

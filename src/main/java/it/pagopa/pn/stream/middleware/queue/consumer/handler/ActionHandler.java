@@ -44,7 +44,7 @@ public class ActionHandler {
 
                 MDC.remove(MDCUtils.MDC_PN_CTX_TOPIC);
             } catch (Exception ex) {
-                log.logEndingProcess(processName, false, ex.getMessage());
+                log.logEndingProcess(processName, false, ex.getMessage(), ex);
                 MDC.remove(MDCUtils.MDC_PN_CTX_TOPIC);
                 HandleEventUtils.handleException(message.getHeaders(), ex);
                 throw ex;
@@ -71,7 +71,7 @@ public class ActionHandler {
 
                 MDC.remove(MDCUtils.MDC_PN_CTX_TOPIC);
             } catch (Exception ex) {
-                log.logEndingProcess(processName, false, ex.getMessage());
+                log.logEndingProcess(processName, false, ex.getMessage(), ex);
                 MDC.remove(MDCUtils.MDC_PN_CTX_TOPIC);
                 HandleEventUtils.handleException(message.getHeaders(), ex);
                 throw ex;
@@ -98,7 +98,7 @@ public class ActionHandler {
 
                 MDC.remove(MDCUtils.MDC_PN_CTX_TOPIC);
             } catch (Exception ex) {
-                log.logEndingProcess(processName, false, ex.getMessage());
+                log.logEndingProcess(processName, false, ex.getMessage(), ex);
                 MDC.remove(MDCUtils.MDC_PN_CTX_TOPIC);
                 HandleEventUtils.handleException(message.getHeaders(), ex);
                 throw ex;

@@ -18,11 +18,11 @@ import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.Enti
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.WebhookTimelineElementJsonConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.*;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -75,7 +75,7 @@ public class StreamUtils {
         eventEntity.setNewStatus(newStatus);
 
         // il requestId ci va sempre, ed è il base64 dello iun
-        eventEntity.setNotificationRequestId(Base64Utils.encodeToString(timelineElementInternal.getIun().getBytes(StandardCharsets.UTF_8)));
+        eventEntity.setNotificationRequestId(Base64.getEncoder().encodeToString(timelineElementInternal.getIun().getBytes(StandardCharsets.UTF_8)));
 
         WebhookTimelineElementEntity timelineElementEntity;
         try {

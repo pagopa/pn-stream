@@ -32,7 +32,7 @@ class ProgressResponseElementTest {
     @Test
     void eventId() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV29 expected = new ProgressResponseElementV29()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -41,8 +41,7 @@ class ProgressResponseElementTest {
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
-                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
-                .build();
+                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"));
         Assertions.assertEquals(expected, responseElement.eventId("001"));
     }
 
@@ -54,7 +53,7 @@ class ProgressResponseElementTest {
     @Test
     void timestamp() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV29 expected = new ProgressResponseElementV29()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -63,8 +62,7 @@ class ProgressResponseElementTest {
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
-                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
-                .build();
+                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"));
         Assertions.assertEquals(expected, responseElement.timestamp(instant));
     }
 
@@ -76,7 +74,7 @@ class ProgressResponseElementTest {
     @Test
     void notificationRequestId() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV29 expected = new ProgressResponseElementV29()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -85,8 +83,7 @@ class ProgressResponseElementTest {
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
-                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
-                .build();
+                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"));
         Assertions.assertEquals(expected, responseElement.notificationRequestId("003"));
     }
 
@@ -98,7 +95,7 @@ class ProgressResponseElementTest {
     @Test
     void iun() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV29 expected = new ProgressResponseElementV29()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -107,8 +104,7 @@ class ProgressResponseElementTest {
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
-                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
-                .build();
+                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"));
         Assertions.assertEquals(expected, responseElement.iun("002"));
     }
 
@@ -120,7 +116,7 @@ class ProgressResponseElementTest {
     @Test
     void newStatus() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV29 expected = new ProgressResponseElementV29()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -129,8 +125,7 @@ class ProgressResponseElementTest {
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
-                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
-                .build();
+                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"));
         Assertions.assertEquals(expected, responseElement.newStatus(NotificationStatusV26.ACCEPTED));
     }
 
@@ -142,7 +137,7 @@ class ProgressResponseElementTest {
     @Test
     void timelineEventCategory() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV29 expected = new ProgressResponseElementV29()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -151,8 +146,7 @@ class ProgressResponseElementTest {
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
-                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
-                .build();
+                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"));
         Assertions.assertEquals(expected, responseElement.timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED));
     }
 
@@ -164,7 +158,7 @@ class ProgressResponseElementTest {
     @Test
     void testEquals() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV29 expected = new ProgressResponseElementV29()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -173,8 +167,7 @@ class ProgressResponseElementTest {
                 .timestamp(instant)
                 .recipientIndex(1)
                 .channel("channel")
-                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"))
-                .build();
+                .legalfactIds(List.of("PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q"));
         Assertions.assertEquals(Boolean.TRUE, expected.equals(responseElement));
     }
 }

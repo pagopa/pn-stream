@@ -24,17 +24,16 @@ public class TimelineElementMapper {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TimelineElementV28.TimelineElementV28Builder builder;
         try {
             TimelineElementDetailsV28 timelineElement = objectMapper.readValue(internalDto.getDetails(), TimelineElementDetailsV28.class);
             //TODO: remove this when the digital feedback and progress will be managed correctly by the new service
             if (!CollectionUtils.isEmpty(timelineElement.getSendingReceipts())) {
-                timelineElement.sendingReceipts(timelineElement.getSendingReceipts().stream().map(elem -> SendingReceipt.builder().build()).toList());
+                timelineElement.sendingReceipts(timelineElement.getSendingReceipts().stream().map(elem -> new SendingReceipt()).toList());
             }
             if (Objects.isNull(timelineElement.getNextDigitalAddressSource())){
                 timelineElement.setNextSourceAttemptsMade(null);
             }
-            builder = TimelineElementV28.builder()
+            return new TimelineElementV28()
                     .category(internalDto.getCategory() != null ? TimelineElementCategoryV28.fromValue(internalDto.getCategory()) : null)
                     .elementId(internalDto.getTimelineElementId())
                     .timestamp(internalDto.getTimestamp())
@@ -47,9 +46,6 @@ public class TimelineElementMapper {
         } catch (JsonProcessingException e) {
             throw new PnStreamException(e.getMessage(), 500, ERROR_CODE_GENERIC);
         }
-
-
-        return builder.build();
     }
 
 

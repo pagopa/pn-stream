@@ -2,19 +2,19 @@ package it.pagopa.pn.stream.rest;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.exceptions.PnNotFoundException;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.service.StreamsService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -29,19 +29,18 @@ class PnStreamsControllerTest {
     @Autowired
     WebTestClient webTestClient;
 
-    @MockBean
+    @MockitoBean
     private StreamsService service;
 
-    @MockBean
+    @MockitoBean
     private PnStreamConfigs pnStreamConfigs;
 
     @Test
     void createEventStreamOk() {
         Mockito.when(service.createEventStream(Mockito.anyString(),Mockito.anyString(), Mockito.any(),Mockito.any(), Mockito.any()))
                 .thenReturn(Mono.just(new StreamMetadataResponseV29()));
-        StreamCreationRequestV29 request = StreamCreationRequestV29.builder()
-                .eventType(StreamCreationRequestV29.EventTypeEnum.STATUS)
-                .build();
+        StreamCreationRequestV29 request = new StreamCreationRequestV29()
+                .eventType(StreamCreationRequestV29.EventTypeEnum.STATUS);
 
         webTestClient.post()
                 .uri("/delivery-progresses/" + API_VERSION + "/streams")

@@ -20,19 +20,18 @@ class ProblemTest {
         problem.setTitle("003");
         problem.setType("004");
         problem.setTraceId("005");
-        problem.setErrors(Collections.singletonList(ProblemError.builder().detail("001").build()));
+        problem.setErrors(Collections.singletonList(new ProblemError().detail("001")));
     }
 
     @Test
     void type() {
-        Problem expected = Problem.builder()
+        Problem expected = new Problem()
                 .detail("001")
                 .status(2)
                 .title("003")
                 .type("004")
                 .traceId("005")
-                .errors(Collections.singletonList(ProblemError.builder().detail("001").build()))
-                .build();
+                .errors(Collections.singletonList(new ProblemError().detail("001")));
         Assertions.assertEquals(expected, problem.type("004"));
     }
 
@@ -43,14 +42,13 @@ class ProblemTest {
 
     @Test
     void status() {
-        Problem expected = Problem.builder()
+        Problem expected = new Problem()
                 .detail("001")
                 .status(2)
                 .title("003")
                 .type("004")
                 .traceId("005")
-                .errors(Collections.singletonList(ProblemError.builder().detail("001").build()))
-                .build();
+                .errors(Collections.singletonList(new ProblemError().detail("001")));
         Assertions.assertEquals(expected, problem.status(2));
     }
 
@@ -61,14 +59,13 @@ class ProblemTest {
 
     @Test
     void title() {
-        Problem expected = Problem.builder()
+        Problem expected = new Problem()
                 .detail("001")
                 .status(2)
                 .title("003")
                 .type("004")
                 .traceId("005")
-                .errors(Collections.singletonList(ProblemError.builder().detail("001").build()))
-                .build();
+                .errors(Collections.singletonList(new ProblemError().detail("001")));
         Assertions.assertEquals(expected, problem.title("003"));
     }
 
@@ -79,14 +76,13 @@ class ProblemTest {
 
     @Test
     void detail() {
-        Problem expected = Problem.builder()
+        Problem expected = new Problem()
                 .detail("001")
                 .status(2)
                 .title("003")
                 .type("004")
                 .traceId("005")
-                .errors(Collections.singletonList(ProblemError.builder().detail("001").build()))
-                .build();
+                .errors(Collections.singletonList(new ProblemError().detail("001")));
         Assertions.assertEquals(expected, problem.detail("001"));
     }
 
@@ -97,14 +93,13 @@ class ProblemTest {
 
     @Test
     void traceId() {
-        Problem expected = Problem.builder()
+        Problem expected = new Problem()
                 .detail("001")
                 .status(2)
                 .title("003")
                 .type("004")
                 .traceId("005")
-                .errors(Collections.singletonList(ProblemError.builder().detail("001").build()))
-                .build();
+                .errors(Collections.singletonList(new ProblemError().detail("001")));
         Assertions.assertEquals(expected, problem.traceId("005"));
     }
 
@@ -115,32 +110,30 @@ class ProblemTest {
 
     @Test
     void errors() {
-        Problem expected = Problem.builder()
+        Problem expected = new Problem()
                 .detail("001")
                 .status(2)
                 .title("003")
                 .type("004")
                 .traceId("005")
-                .errors(Collections.singletonList(ProblemError.builder().detail("001").build()))
-                .build();
-        Assertions.assertEquals(expected, problem.errors(Collections.singletonList(ProblemError.builder().detail("001").build())));
+                .errors(Collections.singletonList(new ProblemError().detail("001")));
+        Assertions.assertEquals(expected, problem.errors(Collections.singletonList(new ProblemError().detail("001"))));
     }
 
     @Test
     void getErrors() {
-        Assertions.assertEquals(Collections.singletonList(ProblemError.builder().detail("001").build()), problem.getErrors());
+        Assertions.assertEquals(Collections.singletonList(new ProblemError().detail("001")), problem.getErrors());
     }
 
     @Test
     void testEquals() {
-        Problem expected = Problem.builder()
+        Problem expected = new Problem()
                 .detail("001")
                 .status(2)
                 .title("003")
                 .type("004")
                 .traceId("005")
-                .errors(Collections.singletonList(ProblemError.builder().detail("001").build()))
-                .build();
+                .errors(Collections.singletonList(new ProblemError().detail("001")));
         Assertions.assertEquals(Boolean.TRUE, expected.equals(problem));
     }
 }
