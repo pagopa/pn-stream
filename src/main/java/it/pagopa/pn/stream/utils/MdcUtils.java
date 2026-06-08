@@ -7,7 +7,10 @@ import org.springframework.messaging.MessageHeaders;
 
 import java.util.UUID;
 
-public class MdcUtils {
+public final class MdcUtils {
+
+    private MdcUtils() {
+    }
 
     public static void setMdc(Message<?> message) {
         MessageHeaders messageHeaders = message.getHeaders();
