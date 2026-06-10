@@ -111,7 +111,8 @@ components:
         - PUBLIC_REGISTRY_VALIDATION_CALL
         - PUBLIC_REGISTRY_VALIDATION_RESPONSE
         - NOTIFICATION_TIMELINE_REWORKED
-    TimelineElementV28:
+
+    TimelineElementBase:
       type: object
       additionalProperties: false
       properties:
@@ -138,17 +139,24 @@ components:
           type: string
           description: Momento di ricezione della richiesta di notifica da parte di SEND
           format: date-time
-        legalFactsIds:
-          type: array
-          items:
-            $ref: "./schemas-pn-legal-facts.yaml#/components/schemas/LegalFactsIdV20"
-          description: >-
-            Chiavi dei documenti che provano l'effettivo accadimento dell'evento descritto in timeline.
-            Questo elemento
-        category:
-          $ref: '#/components/schemas/TimelineElementCategoryV28'
-        details:
-          $ref: '#/components/schemas/TimelineElementDetailsV28'
+
+    TimelineElementV28:
+      allOf:
+        - $ref: "#/components/schemas/TimelineElementBase"
+        - type: object
+          additionalProperties: false
+          properties:
+            legalFactsIds:
+              type: array
+              items:
+                $ref: "./schemas-pn-legal-facts.yaml#/components/schemas/LegalFactsIdV20"
+              description: >-
+                Chiavi dei documenti che provano l'effettivo accadimento dell'evento descritto in timeline.
+                Questo elemento
+            category:
+              $ref: '#/components/schemas/TimelineElementCategoryV28'
+            details:
+              $ref: '#/components/schemas/TimelineElementDetailsV28'
 
     TimelineElementDetailsV28:
       description: The raw event payload that will be different based on the event.
