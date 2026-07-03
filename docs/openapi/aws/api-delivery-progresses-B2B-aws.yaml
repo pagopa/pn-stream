@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: 8g/VOmshNzqm2PsYHgGzyxeoyQJ9to6lAbNba+7oo9c=
+  version: kf6gOxcf1JmxDy4VQQnzslVcVWZyzAtYcl3rrCFwK5k=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -4324,36 +4324,44 @@ components:
         - municipality
       properties:
         at:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: Campo "presso" dell'indirizzo
         address:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: Indirizzo del domicilio fisico
         addressDetails:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: Seconda riga dell'indirizzo fisico
         zip:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: >-
             Codice di avviamento postale. In caso di invio estero diventa
             facoltativo
         municipality:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: Comune in cui l'indirizzo si trova
         municipalityDetails:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: Frazione o località
         province:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: Provincia in cui si trova l'indirizzo
         foreignState:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: Denominazione paese estero
@@ -4463,10 +4471,12 @@ components:
       type: object
       properties:
         type:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: tipo di indirizzo PEC, REM, SERCQ, SMS, EMAIL, APPIO ...
         address:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           description: account@domain
@@ -4561,6 +4571,7 @@ components:
           type: string
           maxLength: 128
         taxId:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           maxLength: 128
@@ -4571,6 +4582,7 @@ components:
           type: string
           maxLength: 128
         denomination:
+          format: password
           x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           maxLength: 128
