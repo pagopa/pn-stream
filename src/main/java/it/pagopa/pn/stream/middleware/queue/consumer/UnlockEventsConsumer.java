@@ -2,7 +2,7 @@ package it.pagopa.pn.stream.middleware.queue.consumer;
 
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import it.pagopa.pn.commons.utils.MDCUtils;
-import it.pagopa.pn.stream.middleware.queue.consumer.handler.utils.HandleEventUtils;
+import it.pagopa.pn.stream.middleware.queue.consumer.utils.HandleEventUtils;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl.StreamScheduleEventHandler;
 import it.pagopa.pn.stream.utils.MdcKey;
@@ -17,7 +17,7 @@ import static it.pagopa.pn.stream.utils.MdcUtils.setMdc;
 @Configuration
 @CustomLog
 @RequiredArgsConstructor
-public class StreamScheduleConsumer {
+public class UnlockEventsConsumer {
 
     private final StreamScheduleEventHandler streamScheduleEventHandler;
 

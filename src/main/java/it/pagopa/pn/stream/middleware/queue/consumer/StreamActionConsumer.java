@@ -2,7 +2,7 @@ package it.pagopa.pn.stream.middleware.queue.consumer;
 
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import it.pagopa.pn.commons.utils.MDCUtils;
-import it.pagopa.pn.stream.middleware.queue.consumer.handler.utils.HandleEventUtils;
+import it.pagopa.pn.stream.middleware.queue.consumer.utils.HandleEventUtils;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamAction;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.impl.StreamActionsEventHandler;
 import it.pagopa.pn.stream.utils.MdcKey;
@@ -25,6 +25,7 @@ public class StreamActionConsumer {
     public void consume(Message<StreamAction> message) {
         final String processName = "STREAM ACTION";
         setMdc(message);
+        log.debug("Handle action, with content {}", message);
         try {
             MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
             String iun = message.getPayload().getTimelineElementInternal() != null

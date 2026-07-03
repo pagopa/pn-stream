@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class StreamScheduleConsumerTest {
+class UnlockEventsConsumerTest {
 
     @Mock
     private StreamScheduleEventHandler streamScheduleEventHandler;
 
     @InjectMocks
-    private StreamScheduleConsumer consumer;
+    private UnlockEventsConsumer consumer;
 
     @Test
     void consumeUnlockEvents_ok() {

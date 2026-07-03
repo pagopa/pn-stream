@@ -1,4 +1,4 @@
-package it.pagopa.pn.stream.middleware.queue.consumer.handler.utils;
+package it.pagopa.pn.stream.middleware.queue.consumer.utils;
 
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
@@ -25,13 +25,11 @@ class HandleEventUtilsTest {
     @Test
     void mapStandardEventHeaderException() {
 
-        PnInternalException pnInternalException = Assertions.assertThrows(PnInternalException.class, () -> {
-            HandleEventUtils.mapStandardEventHeader(null);
-        });
+        PnInternalException pnInternalException = Assertions.assertThrows(PnInternalException.class, () -> HandleEventUtils.mapStandardEventHeader(null));
 
         String expectErrorMsg = "PN_STREAM_HANDLEEVENTFAILED";
 
-        Assertions.assertEquals(expectErrorMsg, pnInternalException.getProblem().getErrors().get(0).getCode());
+        Assertions.assertEquals(expectErrorMsg, pnInternalException.getProblem().getErrors().getFirst().getCode());
     }
 
     @Test

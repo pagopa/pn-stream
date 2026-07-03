@@ -1228,6 +1228,7 @@ components:
           type: string
           maxLength: 128
         taxId:
+          format: password # NO EXTERNAL
           x-field-extra-annotation: "@lombok.ToString.Exclude" # NO EXTERNAL
           type: string
           maxLength: 128
@@ -1238,6 +1239,7 @@ components:
           type: string
           maxLength: 128
         denomination:
+          format: password # NO EXTERNAL
           x-field-extra-annotation: "@lombok.ToString.Exclude" # NO EXTERNAL
           type: string
           maxLength: 128

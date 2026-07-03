@@ -48,6 +48,7 @@ components:
         - legalFactsId
       properties:
         taxId:
+          format: password # NO EXTERNAL
           x-field-extra-annotation: "@lombok.ToString.Exclude" # NO EXTERNAL
           description: Valorizzato se l'atto si riferisce a uno specifico destinatario
           type: string
