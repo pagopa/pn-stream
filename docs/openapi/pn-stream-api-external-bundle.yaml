@@ -3953,8 +3953,6 @@ components:
           type: string
           maxLength: 128
         taxId:
-          format: password
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           maxLength: 128
         operatorUuid:
@@ -3964,8 +3962,6 @@ components:
           type: string
           maxLength: 128
         denomination:
-          format: password
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
           type: string
           maxLength: 128
         delegateType:
@@ -5170,6 +5166,30 @@ components:
           type: string
           maxLength: 128
           description: Identificativo dell'atto opponibile a terzi del quale è stata richiesta la creazione
+    schemas-DelegateInfo:
+      type: object
+      properties:
+        internalId:
+          type: string
+          maxLength: 128
+        taxId:
+          format: password
+          x-field-extra-annotation: '@lombok.ToString.Exclude'
+          type: string
+          maxLength: 128
+        operatorUuid:
+          type: string
+          maxLength: 128
+        mandateId:
+          type: string
+          maxLength: 128
+        denomination:
+          format: password
+          x-field-extra-annotation: '@lombok.ToString.Exclude'
+          type: string
+          maxLength: 128
+        delegateType:
+          $ref: '#/components/schemas/RecipientType'
     NotificationViewedCreationRequestDetailsV23:
       type: object
       required:
@@ -5192,7 +5212,31 @@ components:
         raddTransactionId:
           $ref: '#/components/schemas/RaddTransactionId'
         delegateInfo:
-          $ref: '#/components/schemas/DelegateInfo'
+          $ref: '#/components/schemas/schemas-DelegateInfo'
+    schemas-NotificationViewedDetailsV23:
+      type: object
+      required:
+        - recIndex
+      properties:
+        recIndex:
+          type: integer
+          description: Index destinatario notifica digitale
+          format: int32
+        notificationCost:
+          description: costo notifica in euro cents, può essere nullo se la notifica si è perfezionata prima per decorrenza termini
+          example: 1220
+          type: integer
+          format: int64
+        raddType:
+          $ref: '#/components/schemas/RaddTypeV23'
+        raddTransactionId:
+          $ref: '#/components/schemas/RaddTransactionId'
+        delegateInfo:
+          $ref: '#/components/schemas/schemas-DelegateInfo'
+        eventTimestamp:
+          type: string
+          description: Data evento visualizzazione
+          format: date-time
     NotificationRefusedErrorV23:
       type: object
       properties:
@@ -5330,7 +5374,7 @@ components:
         - $ref: '#/components/schemas/DigitalSuccessWorkflowDetails'
         - $ref: '#/components/schemas/GetAddressInfoDetails'
         - $ref: '#/components/schemas/NotificationViewedCreationRequestDetailsV23'
-        - $ref: '#/components/schemas/NotificationViewedDetailsV23'
+        - $ref: '#/components/schemas/schemas-NotificationViewedDetailsV23'
         - $ref: '#/components/schemas/NotificationRADDRetrievedDetails'
         - $ref: '#/components/schemas/PublicRegistryCallDetails'
         - $ref: '#/components/schemas/PublicRegistryResponseDetails'
@@ -5460,7 +5504,7 @@ components:
         - $ref: '#/components/schemas/DigitalSuccessWorkflowDetails'
         - $ref: '#/components/schemas/GetAddressInfoDetails'
         - $ref: '#/components/schemas/NotificationViewedCreationRequestDetailsV23'
-        - $ref: '#/components/schemas/NotificationViewedDetailsV23'
+        - $ref: '#/components/schemas/schemas-NotificationViewedDetailsV23'
         - $ref: '#/components/schemas/NotificationRADDRetrievedDetails'
         - $ref: '#/components/schemas/PublicRegistryCallDetails'
         - $ref: '#/components/schemas/PublicRegistryResponseDetails'
@@ -5629,7 +5673,7 @@ components:
         - $ref: '#/components/schemas/DigitalSuccessWorkflowDetails'
         - $ref: '#/components/schemas/GetAddressInfoDetails'
         - $ref: '#/components/schemas/NotificationViewedCreationRequestDetailsV23'
-        - $ref: '#/components/schemas/NotificationViewedDetailsV23'
+        - $ref: '#/components/schemas/schemas-NotificationViewedDetailsV23'
         - $ref: '#/components/schemas/NotificationRADDRetrievedDetails'
         - $ref: '#/components/schemas/PublicRegistryCallDetails'
         - $ref: '#/components/schemas/PublicRegistryResponseDetails'
@@ -5823,7 +5867,7 @@ components:
         - $ref: '#/components/schemas/DigitalSuccessWorkflowDetails'
         - $ref: '#/components/schemas/GetAddressInfoDetails'
         - $ref: '#/components/schemas/NotificationViewedCreationRequestDetailsV23'
-        - $ref: '#/components/schemas/NotificationViewedDetailsV23'
+        - $ref: '#/components/schemas/schemas-NotificationViewedDetailsV23'
         - $ref: '#/components/schemas/NotificationRADDRetrievedDetails'
         - $ref: '#/components/schemas/PublicRegistryCallDetails'
         - $ref: '#/components/schemas/PublicRegistryResponseDetails'
