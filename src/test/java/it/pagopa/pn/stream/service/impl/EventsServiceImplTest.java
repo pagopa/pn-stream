@@ -1082,6 +1082,46 @@ class EventsServiceImplTest {
         Mockito.verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
+    @Test
+    void saveEventDiagnosticElementIsSkipped() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-ABC-FGHI-A-1";
+
+        List<StreamEntity> list = new ArrayList<>();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(UUID.randomUUID().toString());
+        entity.setTitle("1");
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setEventAtomicCounter(1L);
+        entity.setVersion("V10");
+        list.add(entity);
+
+        TimelineElementInternal newtimeline = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.COURTESY_CHANNEL_FAILED.name())
+                .iun(iun)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.COURTESY_CHANNEL_FAILED)
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        StreamNotificationEntity notificationInt = new StreamNotificationEntity();
+
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(list));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(notificationInt));
+
+        webhookEventsService.saveEvent(newtimeline).block(d);
+
+        //THEN
+        Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
+        Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
+        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+    }
+
 
     @Test
     void saveEventFiltered() {
