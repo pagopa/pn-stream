@@ -496,7 +496,7 @@ Resources:
         ContainerEnvEntry27: !Sub 'PN_STREAM_PACONFIGURATIONSPREFIX=${PaConfigurationsPrefix}'
         ContainerEnvEntry28: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
         ContainerEnvEntry29: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
-        JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
+        JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/efs/dumps.hprof -Xmx32m'
         MappedPaths: '/delivery-progresses/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref VpcEgressSubnetsIds ]

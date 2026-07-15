@@ -29,6 +29,6 @@
     "DeliveryProgressesApiPathNew": "delivery-progresses",
     "PnCronAnalyzer": "-",
     "WireTapLogActivation": "false",
-    "MountEfs": "false"
+    "MountEfs": "true"
   }
 }
