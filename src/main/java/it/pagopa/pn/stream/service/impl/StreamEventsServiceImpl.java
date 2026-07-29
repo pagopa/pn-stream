@@ -40,7 +40,6 @@ import reactor.util.function.Tuples;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
 import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
@@ -88,12 +87,11 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                                                UUID streamId,
                                                                String lastEventId) {
         String msg = "consumeEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={} lastEventId={}";
-        String lastEventIDToPrint = StringUtils.hasText(lastEventId)?lastEventId:"";
+        String lastEventIDToPrint = StringUtils.hasText(lastEventId) ? lastEventId : "";
         String[] args = {xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString(), lastEventIDToPrint};
         generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).log();
         // grazie al contatore atomico usato in scrittura per generare l'eventId, non serve più gestire la finestra.
         return getStreamEntityToWrite(apiVersion(xPagopaPnApiVersion), xPagopaPnCxId, xPagopaPnCxGroups, streamId, true)
-                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in reading stream").log())
                 .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Cannot consume stream")))
                 .flatMap(streamEntity -> {
                     log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamEntity.getStreamId(), StreamStatsEnum.NUMBER_OF_REQUESTS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_REQUESTS.name());
@@ -142,7 +140,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 })
                                 .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={} lastEventId={}", progressResponseElementDto.getProgressResponseElementList().size(), lastEventIDToPrint).log())
                                 .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={})", lastEventIDToPrint).log())
-                );
+                )
+                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in reading stream").log());
     }
 
     private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV29> eventList, Long retryAfter) {
@@ -233,9 +232,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
-                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
+                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual(), res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
                         .collectList())
-                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res, StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.size())))
+                .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res, StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()), String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.size())))
                 .then();
     }
 
@@ -243,7 +242,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.debug("sortStream streamId={} timelineElementId={} category={}", streamEntity.getStreamId(), timelineElement.getTimelineElementId(), timelineElement.getCategory());
 
         if (Objects.isNull(streamEntity.getSorting()) || !streamEntity.getSorting()) {
-           return Mono.just(streamEntity);
+            return Mono.just(streamEntity);
         }
 
         if (Arrays.stream(TimelineElementCategoryInt.SkipSortCategory.values()).anyMatch(category -> category.name().equals(timelineElement.getCategory()))) {
@@ -282,7 +281,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                     .map(notificationUnlockedEntity -> stream);
         }
     }
-
 
 
     public Mono<StreamNotificationEntity> getNotification(String iun) {
@@ -355,7 +353,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
     private Mono<StreamEntity> saveEventWithAtomicIncrement(StreamEntity streamEntity, String newStatus,
-                                                    TimelineElementInternal timelineElementInternal) {
+                                                            TimelineElementInternal timelineElementInternal) {
         return streamEntityDao.updateAndGetAtomicCounter(streamEntity)
                 .flatMap(atomicCounterUpdated -> {
                     if (atomicCounterUpdated < 0) {
@@ -468,26 +466,26 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .filter(element -> element.getElement().getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED))
                 .toList();
 
-        if(CollectionUtils.isEmpty(reworkElements)){
+        if (CollectionUtils.isEmpty(reworkElements)) {
             return Mono.just(progressResponseElementsV29);
         }
 
         List<ConfidentialTimelineElementId> elementIds = getConfidentialElementIds(reworkElements, reworkElements.stream().findAny().get().getIun());
 
         return confidentialInformationService.getTimelineConfidentialInformationFromConfidentialElementIds(elementIds)
-            .map(confidentialInfo -> reworkElements.stream()
-                .map(rework -> rework.getElement().getDetails().getInvalidatedTimelineAndStatusHistory())
-                .flatMap(Collection::stream)
-                .map(NotificationStatusHistoryInvalidatedElement::getRelatedTimelineElements)
-                .flatMap(Collection::stream)
-                .filter(i -> i.getElementId().equals(confidentialInfo.getTimelineElementId()))
-                .findFirst()
-                .map(timelineElementInternal -> {
-                    timelineService.enrichTimelineElementWithConfidentialInformation(timelineElementInternal.getCategory().getValue(), timelineElementInternal.getDetails(), confidentialInfo);
-                    return timelineElementInternal;
-                })
-                .orElse(null)
-            ).then(Mono.just(progressResponseElementsV29));
+                .map(confidentialInfo -> reworkElements.stream()
+                        .map(rework -> rework.getElement().getDetails().getInvalidatedTimelineAndStatusHistory())
+                        .flatMap(Collection::stream)
+                        .map(NotificationStatusHistoryInvalidatedElement::getRelatedTimelineElements)
+                        .flatMap(Collection::stream)
+                        .filter(i -> i.getElementId().equals(confidentialInfo.getTimelineElementId()))
+                        .findFirst()
+                        .map(timelineElementInternal -> {
+                            timelineService.enrichTimelineElementWithConfidentialInformation(timelineElementInternal.getCategory().getValue(), timelineElementInternal.getDetails(), confidentialInfo);
+                            return timelineElementInternal;
+                        })
+                        .orElse(null)
+                ).then(Mono.just(progressResponseElementsV29));
     }
 
     private List<ConfidentialTimelineElementId> getConfidentialElementIds(List<ProgressResponseElementV29> reworkElements, String iun) {
