@@ -39,6 +39,7 @@ import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
@@ -103,10 +104,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .onErrorResume(ex -> Mono.error(new PnInternalException("Timeline element entity not converted into JSON", ERROR_CODE_PN_GENERIC_ERROR)))
                                 //timeline ancora anonimizzato - EventEntity + TimelineElementInternal
                                 .collectList()
-                                .map(items -> {
-                                    generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("timelineElementIds {}, lastEventId={}", createAuditLogOfElementsId(items), lastEventIDToPrint).log();
-                                    return items;
-                                })
                                 // chiamo timelineService per aggiungere le confidentialInfo
                                 .flatMapMany(items -> {
                                     if (streamUtils.getVersion(xPagopaPnApiVersion) == 10)
@@ -120,8 +117,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .flatMapIterable(progressResponseElementV29s -> progressResponseElementV29s)
                                 .sort(Comparator.comparing(ProgressResponseElementV29::getEventId))
                                 .collectList()
-                                .zipWith(Mono.just(streamUtils.retrieveRetryAfter(xPagopaPnCxId)))
-                                .flatMap(tuple2 -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, tuple2.getT1(), tuple2.getT2()).thenReturn(tuple2))
+                                    .zipWith(Mono.just(streamUtils.retrieveRetryAfter(xPagopaPnCxId)))
+                                .flatMap(tuple2 -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, tuple2   .getT1(), tuple2.getT2()).thenReturn(tuple2))
                                 .map(tuple2 -> {
                                     var retryAfter = tuple2.getT2().intValue();
                                     var eventList = tuple2.getT1();
@@ -138,10 +135,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                             .progressResponseElementList(tuple2.getT1())
                                             .build();
                                 })
-                                .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={} lastEventId={}", progressResponseElementDto.getProgressResponseElementList().size(), lastEventIDToPrint).log())
-                                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={})", lastEventIDToPrint).log())
+                                .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={} lastEventId={} streamId={} timelineElementIds {} ", progressResponseElementDto.getProgressResponseElementList().size(), lastEventIDToPrint, streamId, createAuditLogOfElementsId(progressResponseElementDto.getProgressResponseElementList())).log())
                 )
-                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in reading stream").log());
+                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={})", lastEventIDToPrint,error).log());
     }
 
     private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV29> eventList, Long retryAfter) {
@@ -153,20 +149,23 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return Mono.empty();
     }
 
-    private String createAuditLogOfElementsId(List<EventTimelineInternalDto> items) {
+    private String createAuditLogOfElementsId(List<ProgressResponseElementV29> items) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode rootNode = mapper.createObjectNode();
-        HashMap<String, List<String>> iunWithTimelineElementId = new HashMap<>();
+        Map<String, List<String>> iunWithTimelineElementId = new LinkedHashMap<>();
 
-        items.forEach(timelineElement -> {
-            List<String> elements = iunWithTimelineElementId.get(timelineElement.getTimelineElementInternal().getIun());
-            String description = timelineElement.getEventEntity().getEventDescription().replace(".IUN_" + timelineElement.getTimelineElementInternal().getIun(), "");
+        items.forEach(item -> {
+            String iun = item.getIun();
+            List<String> elements = iunWithTimelineElementId.get(iun);
+            String description = item.getElement().getTimestamp() + "_" + item.getElement().getElementId();
+            description = description.replace(".IUN_" + iun, "");
+
             if (elements == null) {
                 elements = new ArrayList<>(Collections.singletonList(description));
             } else {
                 elements.add(description);
             }
-            iunWithTimelineElementId.put(timelineElement.getTimelineElementInternal().getIun(), elements);
+            iunWithTimelineElementId.put(iun, elements);
         });
 
         iunWithTimelineElementId.keySet().forEach(iun -> rootNode.put(iun, iunWithTimelineElementId.get(iun).toString()));
