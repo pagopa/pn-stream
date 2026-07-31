@@ -700,6 +700,7 @@ Resources:
       FilterCriteria:
         Filters:
           - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": [{ "exists": false }]}} }}}'
+          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": ["INFORMAL", "informal"]}} }}}'
 
   StreamEventManagerLambdaKinesisFailuresAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -835,6 +836,7 @@ Resources:
       FilterCriteria:
         Filters:
           - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnNotificationTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": [{ "exists": false }]}} }}}'
+          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnNotificationTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": ["INFORMAL", "informal"]}} }}}'
   NotificationStreamManagerLambdaKinesisFailuresAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:

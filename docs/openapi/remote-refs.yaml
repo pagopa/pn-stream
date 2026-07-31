@@ -30,6 +30,10 @@ components:
       $ref: "https://raw.githubusercontent.com/pagopa/pn-delivery/1750230e82ea6e03516e9f4bfae09c1737c1d5e7/docs/openapi/schemas-pn-notification.yaml#/components/schemas/paTaxId"
     NoticeCode:
       $ref: "https://raw.githubusercontent.com/pagopa/pn-delivery/1750230e82ea6e03516e9f4bfae09c1737c1d5e7/docs/openapi/schemas-pn-notification.yaml#/components/schemas/noticeCode"
+    InformalNotificationStatusV1:
+      $ref: "https://raw.githubusercontent.com/pagopa/pn-delivery-push/4a821e4de2356a402fc32a7d6b3a8e242d7a8198/docs/openapi/schemas-pn-status.yaml#/components/schemas/InformalNotificationStatusV1"
+    InformalTimelineElementV1:
+      $ref: "https://raw.githubusercontent.com/pagopa/pn-delivery-push/4a821e4de2356a402fc32a7d6b3a8e242d7a8198/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/InformalTimelineElementV1"
     ############################################################################################
     ###                          STRUTTURE DATI DI PN-ERROR                                  ###
     ############################################################################################

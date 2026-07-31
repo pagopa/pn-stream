@@ -26,4 +26,5 @@ public class TimelineElementInternal{
     private Instant businessTimestamp;
     private Instant ingestionTimestamp; //Questo campo viene valorizzato solo ed esclusivamente in uscita per api e webhook dal mapper
     private Instant eventTimestamp; //Questo campo viene valorizzato solo ed esclusivamente in uscita per api e webhook dal mapper
+    private String communicationType;
 }

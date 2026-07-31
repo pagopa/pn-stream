@@ -52,6 +52,7 @@ import static it.pagopa.pn.stream.service.utils.StreamUtils.checkGroups;
 public class StreamEventsServiceImpl extends PnStreamServiceImpl implements StreamEventsService {
 
     private static final String DEFAULT_CATEGORIES = "DEFAULT";
+    private static final String COMMUNICATION_TYPE_INFORMAL = "INFORMAL";
     private final EventEntityDao eventEntityDao;
     private final StreamNotificationDao streamNotificationDao;
     private final EventsQuarantineEntityDao eventsQuarantineEntityDao;
@@ -233,7 +234,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .flatMapMany(res -> Flux.fromIterable(res.getT1())
                         .flatMap(stream -> processEvent(stream, res.getT2(), res.getT3().getGroup()))
                         .flatMap(stream -> checkEventToSort(stream, res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
-                        .flatMap(stream -> saveEventWithAtomicIncrement(stream, res.getT2().getStatusInfo().getActual() ,res.getT2()), pnStreamConfigs.getSaveEventMaxConcurrency())
+                        .flatMap(stream -> {
+                            String newStatus = res.getT2().getStatusInfo() != null ? res.getT2().getStatusInfo().getActual() : null;
+                            return saveEventWithAtomicIncrement(stream, newStatus, res.getT2());
+                        }, pnStreamConfigs.getSaveEventMaxConcurrency())
                         .collectList())
                 .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res, StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()) ,String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.size())))
                 .then();
@@ -314,13 +318,27 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         }
 
         StreamCreationRequestV29.EventTypeEnum eventType = StreamCreationRequestV29.EventTypeEnum.fromValue(stream.getEventType());
+
+        // Routing guard: informal events go only to TIMELINE_INFORMAL streams; standard events only to STATUS/TIMELINE streams
+        boolean isInformalEvent = COMMUNICATION_TYPE_INFORMAL.equalsIgnoreCase(timelineElementInternal.getCommunicationType());
+        boolean isInformalStream = eventType == StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL;
+        if (isInformalStream != isInformalEvent) {
+            log.info("skipping saving webhook event for stream={} communicationType mismatch: streamType={} isInformalEvent={} iun={}",
+                    stream.getStreamId(), stream.getEventType(), isInformalEvent, timelineElementInternal.getIun());
+            return Mono.empty();
+        }
+
+        if (isInformalStream) {
+            return processInformalEvent(stream, timelineElementInternal);
+        }
+
         if (eventType == StreamCreationRequestV29.EventTypeEnum.STATUS && !timelineElementInternal.getStatusInfo().isStatusChanged()) {
             log.info("skipping saving webhook event for stream={} because there was no change in status iun={}", stream.getStreamId(), timelineElementInternal.getIun());
             return Mono.empty();
         }
 
         String timelineEventCategory = timelineElementInternal.getCategory();
-        if (isDiagnosticElement(timelineElementInternal.getCategory())) {
+        if (isDiagnosticElement(timelineEventCategory)) {
             log.info("skipping saving webhook event for stream={} because category={} is only diagnostic", stream.getStreamId(), timelineEventCategory);
             return Mono.empty();
         }
@@ -333,6 +351,18 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         } else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
         }
+        return Mono.empty();
+    }
+
+    private Mono<StreamEntity> processInformalEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal) {
+        // Diagnostic element check is intentionally omitted: informal categories are a disjoint
+        // domain from DiagnosticTimelineElementCategory and are not subject to the same filtering.
+        String category = timelineElementInternal.getCategory();
+        if (CollectionUtils.isEmpty(stream.getFilterValues()) || stream.getFilterValues().contains(category)) {
+            return Mono.just(stream);
+        }
+        log.info("skipping saving webhook event for stream={} because informal category={} not in filterValues iun={}",
+                stream.getStreamId(), category, timelineElementInternal.getIun());
         return Mono.empty();
     }
 

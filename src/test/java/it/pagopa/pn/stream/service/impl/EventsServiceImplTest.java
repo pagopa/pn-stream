@@ -1902,4 +1902,517 @@ class EventsServiceImplTest {
         Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
 
     }
+
+    @Test
+    void saveEvent_informalEventGoesToInformalStream() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-0001";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+
+        StreamEntity standardStream = new StreamEntity();
+        standardStream.setStreamId(UUID.randomUUID().toString());
+        standardStream.setPaId(xpagopacxid);
+        standardStream.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        standardStream.setFilterValues(new HashSet<>());
+        standardStream.setActivationDate(Instant.now());
+        standardStream.setEventAtomicCounter(2L);
+        standardStream.setVersion("V26");
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category("INFORMAL_CATEGORY")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_CATEGORY")
+                .communicationType("INFORMAL")
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + informalEvent.getTimelineElementId());
+
+        Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
+        Mockito.when(webhookUtils.getVersion(Mockito.any())).thenReturn(CURRENT_VERSION);
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream, standardStream)));
+        Mockito.when(streamEntityDao.updateAndGetAtomicCounter(informalStream)).thenReturn(Mono.just(2L));
+        Mockito.when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(eventEntity));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
+
+        webhookEventsService.saveEvent(informalEvent).block(d);
+
+        //THEN: saved exactly once — only on the informal stream
+        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(standardStream);
+    }
+
+    @Test
+    void saveEvent_standardEventDoesNotGoToInformalStream() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-STD-0001";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+
+        StreamEntity standardStream = new StreamEntity();
+        standardStream.setStreamId(UUID.randomUUID().toString());
+        standardStream.setPaId(xpagopacxid);
+        standardStream.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        standardStream.setFilterValues(new HashSet<>());
+        standardStream.setActivationDate(Instant.now());
+        standardStream.setEventAtomicCounter(2L);
+        standardStream.setVersion("V26");
+
+        // Standard event: no communicationType
+        TimelineElementInternal standardEvent = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.REQUEST_ACCEPTED.name())
+                .iun(iun)
+                .timelineElementId(iun + "_REQUEST_ACCEPTED")
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + standardEvent.getTimelineElementId());
+
+        Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
+        Mockito.when(webhookUtils.getVersion(Mockito.any())).thenReturn(CURRENT_VERSION);
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream, standardStream)));
+        Mockito.when(streamEntityDao.updateAndGetAtomicCounter(standardStream)).thenReturn(Mono.just(3L));
+        Mockito.when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(eventEntity));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
+
+        webhookEventsService.saveEvent(standardEvent).block(d);
+
+        //THEN: saved exactly once — only on the standard stream
+        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(informalStream);
+        Mockito.verify(streamEntityDao, Mockito.times(1)).updateAndGetAtomicCounter(standardStream);
+    }
+
+    @Test
+    void saveEvent_informalStreamWithFilterValuesRejectsUnmatchedCategory() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-0002";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>(Set.of("INFORMAL_ACCEPTED")));
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category("INFORMAL_SENDING")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_SENDING")
+                .communicationType("INFORMAL")
+                .statusInfo(StatusInfoInternal.builder().actual("SENDING").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream)));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
+
+        webhookEventsService.saveEvent(informalEvent).block(d);
+
+        //THEN: category not in filterValues — event is skipped
+        Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
+        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+    }
+
+    @Test
+    void saveEvent_informalEventWithNullStatusInfoDoesNotThrowNPE() {        //GIVEN: informal event without statusInfo (not applicable for informal notifications)
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-0003";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+
+        TimelineElementInternal informalEventNoStatus = TimelineElementInternal.builder()
+                .category("INFORMAL_CATEGORY")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_CATEGORY")
+                .communicationType("INFORMAL")
+                .statusInfo(null)  // informal events may have no statusInfo
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + informalEventNoStatus.getTimelineElementId());
+
+        Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.isNull(), Mockito.any())).thenReturn(eventEntity);
+        Mockito.when(webhookUtils.getVersion(Mockito.any())).thenReturn(CURRENT_VERSION);
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream)));
+        Mockito.when(streamEntityDao.updateAndGetAtomicCounter(informalStream)).thenReturn(Mono.just(2L));
+        Mockito.when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(eventEntity));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
+
+        webhookEventsService.saveEvent(informalEventNoStatus).block(d);
+
+        //THEN: no NPE, event saved once
+        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+    }
+
+    @Test
+    void saveEvent_informalEventDoesNotGoToStatusStream() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-0004";
+
+        StreamEntity statusStream = new StreamEntity();
+        statusStream.setStreamId(UUID.randomUUID().toString());
+        statusStream.setPaId(xpagopacxid);
+        statusStream.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        statusStream.setFilterValues(new HashSet<>());
+        statusStream.setActivationDate(Instant.now());
+        statusStream.setEventAtomicCounter(1L);
+        statusStream.setVersion("V26");
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category("INFORMAL_CATEGORY")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_CATEGORY")
+                .communicationType("INFORMAL")
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(statusStream)));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
+
+        webhookEventsService.saveEvent(informalEvent).block(d);
+
+        //THEN: informal event must not reach a STATUS stream
+        Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
+        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+    }
+
+    // ── Groups authorization tests for TIMELINE_INFORMAL ────────────────────
+
+    @Test
+    void saveEvent_informalStreamWithMatchingGroupAcceptsEvent() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-GRP-001";
+        String matchingGroup = "GROUP-A";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+        informalStream.setGroups(List.of(matchingGroup));
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category("INFORMAL_CATEGORY")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_CATEGORY")
+                .communicationType("INFORMAL")
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        StreamNotificationEntity notificationEntity = new StreamNotificationEntity();
+        notificationEntity.setGroup(matchingGroup);
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + informalEvent.getTimelineElementId());
+
+        Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(eventEntity);
+        Mockito.when(webhookUtils.getVersion(Mockito.any())).thenReturn(CURRENT_VERSION);
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream)));
+        Mockito.when(streamEntityDao.updateAndGetAtomicCounter(informalStream)).thenReturn(Mono.just(2L));
+        Mockito.when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(eventEntity));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(notificationEntity));
+
+        webhookEventsService.saveEvent(informalEvent).block(d);
+
+        //THEN: group matches — event saved
+        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+    }
+
+    @Test
+    void saveEvent_informalStreamWithNonMatchingGroupRejectsEvent() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-GRP-002";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+        informalStream.setGroups(List.of("GROUP-RESTRICTED"));
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category("INFORMAL_CATEGORY")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_CATEGORY")
+                .communicationType("INFORMAL")
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        StreamNotificationEntity notificationEntity = new StreamNotificationEntity();
+        notificationEntity.setGroup("GROUP-OTHER");  // different group
+
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream)));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(notificationEntity));
+
+        webhookEventsService.saveEvent(informalEvent).block(d);
+
+        //THEN: group mismatch — event skipped
+        Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
+        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+    }
+
+    // ── Sorting interaction with TIMELINE_INFORMAL ───────────────────────────
+
+    @Test
+    void saveEvent_informalStreamSortingNullBypassesSortFlow() {
+        // Informal streams do not set sorting; checkEventToSort must short-circuit
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-SORT-001";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+        // sorting is null — not set
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category("INFORMAL_CATEGORY")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_CATEGORY")
+                .communicationType("INFORMAL")
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .paId(xpagopacxid)
+                .build();
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + informalEvent.getTimelineElementId());
+
+        Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(eventEntity);
+        Mockito.when(webhookUtils.getVersion(Mockito.any())).thenReturn(CURRENT_VERSION);
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream)));
+        Mockito.when(streamEntityDao.updateAndGetAtomicCounter(informalStream)).thenReturn(Mono.just(2L));
+        Mockito.when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(eventEntity));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
+
+        webhookEventsService.saveEvent(informalEvent).block(d);
+
+        //THEN: event saved — no quarantine, no unlock-event interaction
+        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        Mockito.verify(notificationUnlockedEntityDao, never()).findByPk(Mockito.any());
+        Mockito.verify(eventsQuarantineEntityDao, never()).putItem(Mockito.any());
+    }
+
+    @Test
+    void saveEvent_informalStreamSortingTrueEntersSortFlow() {
+        // Sorting=true is not guarded for TIMELINE_INFORMAL: the sort flow is entered.
+        // This test documents current behavior so regressions are visible if the guard is later added.
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-INF-SORT-002";
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.parse("2025-01-01T00:00:00Z"));
+        informalStream.setEventAtomicCounter(1L);
+        informalStream.setVersion("V26");
+        informalStream.setSorting(true);
+
+        Instant notificationSentAt = Instant.parse("2025-01-02T00:00:00Z"); // after activationDate
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category("INFORMAL_CATEGORY")
+                .iun(iun)
+                .timelineElementId(iun + "_INFORMAL_CATEGORY")
+                .communicationType("INFORMAL")
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .notificationSentAt(notificationSentAt)
+                .paId(xpagopacxid)
+                .build();
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + informalEvent.getTimelineElementId());
+
+        Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(eventEntity);
+        Mockito.when(webhookUtils.getVersion(Mockito.any())).thenReturn(CURRENT_VERSION);
+        Mockito.when(webhookUtils.checkIfTtlIsExpired(Mockito.any())).thenReturn(false);
+        Mockito.when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(List.of(informalStream)));
+        Mockito.when(streamEntityDao.updateAndGetAtomicCounter(informalStream)).thenReturn(Mono.just(2L));
+        Mockito.when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(eventEntity));
+        Mockito.when(streamNotificationDao.findByIun(Mockito.anyString())).thenReturn(Mono.just(new StreamNotificationEntity()));
+        // No notificationUnlockedEntity found → event goes to quarantine
+        Mockito.when(notificationUnlockedEntityDao.findByPk(Mockito.anyString())).thenReturn(Mono.empty());
+        Mockito.when(eventsQuarantineEntityDao.putItem(Mockito.any())).thenReturn(Mono.empty());
+
+        webhookEventsService.saveEvent(informalEvent).block(d);
+
+        // sorting=true with no unlock entity → event is quarantined (current behavior, not guarded for informal)
+        Mockito.verify(notificationUnlockedEntityDao, Mockito.times(1)).findByPk(Mockito.any());
+        Mockito.verify(eventsQuarantineEntityDao, Mockito.times(1)).putItem(Mockito.any());
+        // Not saved directly: went to quarantine path
+        Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
+    }
+
+    // ── consumeEventStream for TIMELINE_INFORMAL ─────────────────────────────
+
+    @Test
+    void consumeEventStream_informalStreamReturnsEvents() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        List<String> xPagopaPnCxGroups = new ArrayList<>();
+        String xPagopaPnApiVersion = "v26";
+
+        UUID streamUuid = UUID.randomUUID();
+        String streamId = streamUuid.toString();
+
+        StreamEntity informalStreamEntity = new StreamEntity();
+        informalStreamEntity.setStreamId(streamId);
+        informalStreamEntity.setPaId(xpagopacxid);
+        informalStreamEntity.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStreamEntity.setFilterValues(new HashSet<>());
+        informalStreamEntity.setActivationDate(Instant.now());
+        informalStreamEntity.setVersion("v26");
+
+        EventEntity ev1 = new EventEntity();
+        ev1.setEventId("00000000000000000000000000000000000001");
+        ev1.setTimestamp(Instant.now());
+        ev1.setIun("IUN-INF-READ-001");
+        ev1.setNotificationRequestId("cmVxSWQ=");
+        ev1.setStreamId(streamId);
+        ev1.setEventDescription("2025-01-17T15:51:42Z_AAR_GENERATION.IUN_INF-READ-001");
+        // element must be non-empty so getTimelineInternalFromEventEntity delegates to the mock
+        ev1.setElement("{\"timelineElementId\":\"AAR_GENERATION.IUN_INF-READ-001\",\"category\":\"AAR_GENERATION\",\"details\":{},\"legalFactIds\":[]}");
+
+        EventEntityBatch batch = new EventEntityBatch();
+        batch.setEvents(List.of(ev1));
+        batch.setStreamId(streamId);
+        batch.setLastEventIdRead(null);
+
+        TimelineElementInternal timelineInternal = new TimelineElementInternal();
+        timelineInternal.setTimelineElementId("AAR_GENERATION.IUN_INF-READ-001");
+        timelineInternal.setTimestamp(Instant.now());
+        timelineInternal.setIun("IUN-INF-READ-001");
+        timelineInternal.setDetails("{\"nextSourceAttemptsMade\":0}");
+        timelineInternal.setCategory(AAR_GENERATION.name());
+        timelineInternal.setPaId(xpagopacxid);
+        timelineInternal.setCommunicationType("INFORMAL");
+        timelineInternal.setLegalFactId(new ArrayList<>());
+
+        when(webhookUtils.getVersion("v26")).thenReturn(CURRENT_VERSION);
+        when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineInternal);
+        // Return non-zero to prove events-present path overrides retryAfter to 0 regardless
+        when(webhookUtils.retrieveRetryAfter(xpagopacxid)).thenReturn(5000L);
+        when(confidentialInformationService.getTimelineConfidentialInformation(Mockito.any())).thenReturn(Flux.empty());
+        when(eventEntityDao.findByStreamId(streamId, null)).thenReturn(Mono.just(batch));
+        when(streamEntityDao.getWithRetryAfter(xpagopacxid, streamId)).thenReturn(Mono.just(Tuples.of(informalStreamEntity, Optional.empty())));
+
+        //WHEN
+        ProgressResponseElementDto res = webhookEventsService
+                .consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, streamUuid, null)
+                .block(d);
+
+        //THEN: events returned normally, retryAfter=0 regardless of retrieveRetryAfter value
+        assertNotNull(res);
+        Assertions.assertEquals(1, res.getProgressResponseElementList().size());
+        Assertions.assertEquals(0, res.getRetryAfter()); // events present → always 0
+        // lastEventId=null → no purge scheduled
+        Mockito.verify(schedulerService, never()).scheduleStreamEvent(anyString(), any(), any(), any());
+    }
+
+    @Test
+    void consumeEventStream_informalStreamEmptyReturnsRetryAfter() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        List<String> xPagopaPnCxGroups = new ArrayList<>();
+        String xPagopaPnApiVersion = "v26";
+        long expectedRetryAfter = 1000L;
+
+        UUID streamUuid = UUID.randomUUID();
+        String streamId = streamUuid.toString();
+
+        StreamEntity informalStreamEntity = new StreamEntity();
+        informalStreamEntity.setStreamId(streamId);
+        informalStreamEntity.setPaId(xpagopacxid);
+        informalStreamEntity.setEventType(StreamCreationRequestV29.EventTypeEnum.TIMELINE_INFORMAL.toString());
+        informalStreamEntity.setFilterValues(new HashSet<>());
+        informalStreamEntity.setActivationDate(Instant.now());
+        informalStreamEntity.setVersion("v26");
+
+        EventEntityBatch emptyBatch = new EventEntityBatch();
+        emptyBatch.setEvents(Collections.emptyList());
+        emptyBatch.setStreamId(streamId);
+
+        when(webhookUtils.getVersion("v26")).thenReturn(CURRENT_VERSION);
+        when(webhookUtils.retrieveRetryAfter(xpagopacxid)).thenReturn(expectedRetryAfter);
+        when(confidentialInformationService.getTimelineConfidentialInformation(Mockito.any())).thenReturn(Flux.empty());
+        when(eventEntityDao.findByStreamId(streamId, null)).thenReturn(Mono.just(emptyBatch));
+        when(streamEntityDao.getWithRetryAfter(xpagopacxid, streamId)).thenReturn(Mono.just(Tuples.of(informalStreamEntity, Optional.empty())));
+        when(streamEntityDao.updateStreamRetryAfter(Mockito.any())).thenReturn(Mono.empty());
+
+        //WHEN
+        ProgressResponseElementDto res = webhookEventsService
+                .consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, streamUuid, null)
+                .block(d);
+
+        //THEN: no events — retryAfter is populated
+        assertNotNull(res);
+        Assertions.assertEquals(0, res.getProgressResponseElementList().size());
+        Assertions.assertEquals((int) expectedRetryAfter, res.getRetryAfter());
+    }
 }

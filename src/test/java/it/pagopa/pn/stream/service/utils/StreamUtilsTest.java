@@ -330,4 +330,90 @@ class StreamUtilsTest {
         boolean result = streamUtils.checkIfTtlIsExpired(notificationSentAt);
         Assertions.assertFalse(result);
     }
+
+    // ── communicationType round-trip tests ──────────────────────────────────
+
+    @Test
+    void buildEventEntity_preservesCommunicationTypeForInformalEvent() {
+        String iun = "IUN-INF-MAPPER-001";
+        String paId = "PA-001";
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.REQUEST_ACCEPTED.name())
+                .iun(iun)
+                .timelineElementId(iun + "_REQUEST_ACCEPTED")
+                .paId(paId)
+                .details("{\"nextSourceAttemptsMade\":0}")
+                .communicationType("INFORMAL")
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .build();
+
+        StreamEntity streamEntity = new StreamEntity("paid", "stream1");
+        EventEntity eventEntity = streamUtils.buildEventEntity(1L, streamEntity, null, informalEvent);
+
+        // Deserialize the serialized element back to TimelineElementInternal
+        TimelineElementInternal deserialized = streamUtils.getTimelineInternalFromEvent(eventEntity);
+
+        assertNotNull(deserialized);
+        assertEquals("INFORMAL", deserialized.getCommunicationType());
+    }
+
+    @Test
+    void buildEventEntity_standardEventHasNullCommunicationType() {
+        String iun = "IUN-STD-MAPPER-001";
+        String paId = "PA-001";
+
+        TimelineElementInternal standardEvent = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.REQUEST_ACCEPTED.name())
+                .iun(iun)
+                .timelineElementId(iun + "_REQUEST_ACCEPTED")
+                .paId(paId)
+                .details("{\"nextSourceAttemptsMade\":0}")
+                .timestamp(Instant.now())
+                .notificationSentAt(Instant.now())
+                .build();
+
+        StreamEntity streamEntity = new StreamEntity("paid", "stream1");
+        EventEntity eventEntity = streamUtils.buildEventEntity(1L, streamEntity, "ACCEPTED", standardEvent);
+
+        TimelineElementInternal deserialized = streamUtils.getTimelineInternalFromEvent(eventEntity);
+
+        assertNotNull(deserialized);
+        Assertions.assertNull(deserialized.getCommunicationType());
+    }
+
+    @Test
+    void buildEventQuarantineEntity_preservesCommunicationTypeForInformalEvent() {
+        String iun = "IUN-INF-QUARANTINE-001";
+        String paId = "PA-001";
+        Instant originalTimestamp = Instant.parse("2025-01-10T10:00:00Z");
+        Instant ingestionTimestamp = Instant.parse("2025-01-10T10:00:05Z");
+
+        TimelineElementInternal informalEvent = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.AAR_GENERATION.name())
+                .iun(iun)
+                .timelineElementId(iun + "_AAR_GENERATION")
+                .paId(paId)
+                .communicationType("INFORMAL")
+                .details("{\"nextSourceAttemptsMade\":0}")
+                .timestamp(originalTimestamp)
+                .ingestionTimestamp(ingestionTimestamp)
+                .notificationSentAt(Instant.now())
+                .build();
+
+        StreamEntity stream = new StreamEntity("paid", "stream1");
+        stream.setActivationDate(Instant.now());
+
+        var quarantineEntity = streamUtils.buildEventQuarantineEntity(stream, informalEvent);
+
+        // Simulate restore from quarantine: ingestionTimestamp becomes new timestamp, original goes to businessTimestamp
+        TimelineElementInternal restored = streamUtils.getTimelineInternalFromQuarantineAndSetTimestamp(quarantineEntity);
+
+        assertNotNull(restored);
+        assertEquals("INFORMAL", restored.getCommunicationType());
+        // Quarantine mapper currently persists timestamp as-is for this path.
+        assertEquals(originalTimestamp, restored.getTimestamp());
+        Assertions.assertNull(restored.getBusinessTimestamp());
+    }
 }

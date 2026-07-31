@@ -26,5 +26,16 @@ exports.extractKinesisData = function (kinesisEvent) {
       kinesisSeqNumber: rec.kinesis.sequenceNumber,
       ...decodedPayload,
     };
+  }).filter((item) => {
+    const communicationType = item.dynamodb?.NewImage?.communicationType;
+    if (!communicationType) {
+      return true;
+    }
+
+    if (typeof communicationType.S === "string") {
+      return communicationType.S.trim().toUpperCase() === "INFORMAL";
+    }
+
+    return false;
   });
 };

@@ -27,6 +27,7 @@ public class EntityToDtoWebhookTimelineMapper {
                 .timestamp(entity.getTimestamp())
                 .ingestionTimestamp(entity.getIngestionTimestamp())
                 .eventTimestamp(entity.getEventTimestamp())
+                .communicationType(entity.getCommunicationType())
                 .build();
     }
 

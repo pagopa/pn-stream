@@ -30,6 +30,7 @@ public class WebhookTimelineElementEntity<T> {
     private Instant notificationSentAt;
     private Instant ingestionTimestamp;
     private Instant eventTimestamp;
+    private String communicationType;
     
     @DynamoDbPartitionKey
     @DynamoDbAttribute(value = FIELD_IUN )
@@ -118,6 +119,15 @@ public class WebhookTimelineElementEntity<T> {
 
     public void setEventTimestamp(Instant eventTimestamp) {
         this.eventTimestamp = eventTimestamp;
+    }
+
+    @DynamoDbAttribute(value = "communicationType") @DynamoDbIgnoreNulls
+    public String getCommunicationType() {
+        return communicationType;
+    }
+
+    public void setCommunicationType(String communicationType) {
+        this.communicationType = communicationType;
     }
 }
 

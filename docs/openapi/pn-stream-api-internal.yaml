@@ -300,6 +300,21 @@ info:
 
     ```
 
+    ### Flusso dedicato agli eventi timeline delle comunicazioni `informal`:
+
+    Il payload da passare alla API di creazione del flusso _createEventStream_ è
+
+    ```json
+
+    {
+      "title": "TimelineInformal",
+      "eventType": "TIMELINE_INFORMAL",
+      "groups": [],
+      "filterValues": []
+    }
+
+    ```
+
 
     ### Flusso contenente tutti gli eventi per le notifiche create con il gruppo "contravvenzioni":
 
@@ -670,6 +685,8 @@ paths:
         Lettura degli eventi presenti nello stream di aggiornamenti con indicazione che
         il mittente ha ricevuto e memorizzato l'evento identificato dal parametro _lastEventId_
         e tutti gli eventi precedenti. Tali eventi potranno essere cancellati dallo stream.
+        Per stream di tipo _TIMELINE_INFORMAL_ il payload eventi è allineato agli schemi
+        _InformalTimelineElementV1_ e _InformalNotificationStatusV1_.
       tags:
         - Events
       operationId: consumeEventStreamV29
@@ -699,7 +716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProgressResponseV29"
+                $ref: "#/components/schemas/ProgressResponseAnyV29"
         '429':
           description: Too Many Requests
           headers:
@@ -877,10 +894,12 @@ components:
             Tipo di eventi presenti nel flusso:
               - _STATUS_: cambiamenti di stato delle notifiche
               - _TIMELINE_: eventi a granularità fine
+              - _TIMELINE_INFORMAL_: eventi di timeline relativi alle comunicazioni di tipo informal
           type: string
           enum:
             - STATUS
             - TIMELINE
+            - TIMELINE_INFORMAL
         groups:
           description: >-
             rappresenta l'elenco degli id gruppi abilitati a richiedere i dettagli. Una apiKey può consumare o modificare uno stream solo se non ha gruppi o se tutti i gruppi dello stream sono presenti nella apiKey.
@@ -980,6 +999,47 @@ components:
       items:
         $ref: '#/components/schemas/ProgressResponseElementV29'
 
+    ProgressResponseInformalV1:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProgressResponseInformalElementV1'
+
+    ProgressResponseAnyV29:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProgressResponseAnyElementV29'
+
+    ProgressResponseAnyElementV29:
+      type: object
+      required:
+        - eventId
+        - element
+      properties:
+        eventId:
+          description: >-
+            Elemento che garantisce univocità all'interno dello stream
+          type: string
+        notificationRequestId:
+          description: Identificativo della richiesta di notifica
+          type: string
+        iun:
+          description: >-
+            Identificativo della notifica, presente solo se la richiesta di notifica è
+            stata accettata.
+          type: string
+          maxLength: 25
+          pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
+        newStatus:
+          description: >-
+            Stato della notifica. Può assumere il formato NotificationStatusV26 (standard)
+            o InformalNotificationStatusV1 (informal).
+          type: object
+        element:
+          description: >-
+            Elemento timeline. Può assumere il formato TimelineElementV28 (standard)
+            o InformalTimelineElementV1 (informal).
+          type: object
+
     ProgressResponseElementV29:
       type: object
       required:
@@ -1032,6 +1092,29 @@ components:
           items:                                                                                           # NO EXTERNAL
             $ref: '#/components/schemas/RefusedReason'                                                     # NO EXTERNAL
 
+    ProgressResponseInformalElementV1:
+      type: object
+      required:
+        - eventId
+        - element
+      properties:
+        eventId:
+          description: >-
+            Elemento che garantisce univocità all'interno dello stream
+          type: string
+        notificationRequestId:
+          description: Identificativo della richiesta di notifica
+          type: string
+        iun:
+          description: >-
+            Identificativo della notifica, presente solo se la richiesta di notifica è
+            stata accettata.
+          type: string
+        newStatus:
+          $ref: '#/components/schemas/InformalNotificationStatusV1'
+        element:
+          $ref: '#/components/schemas/InformalTimelineElementV1'
+
     RefusedReason:                                                                                         # NO EXTERNAL
       type: object                                                                                         # NO EXTERNAL
       properties:                                                                                          # NO EXTERNAL
@@ -1039,6 +1122,11 @@ components:
           type: string                                                                                     # NO EXTERNAL
         detail:                                                                                            # NO EXTERNAL
           type: string                                                                                     # NO EXTERNAL
+
+    InformalTimelineElementV1:
+      $ref: './remote-refs.yaml#/components/schemas/InformalTimelineElementV1'
+    InformalNotificationStatusV1:
+      $ref: './remote-refs.yaml#/components/schemas/InformalNotificationStatusV1'
 
     ###  - EVENTI GENERATI DALLA P.A.
     ###################################
@@ -1114,4 +1202,3 @@ components:
 
 #security:                 # ONLY EXTERNAL
 #  - ApiKeyAuth: [] # use the same name as under securitySchemes    # ONLY EXTERNAL
-

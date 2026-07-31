@@ -3,6 +3,7 @@ package it.pagopa.pn.stream.rest;
 import it.pagopa.pn.commons.utils.MDCUtils;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.CxTypeAuthFleet;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ExternalEventsRequest;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseAnyElementV29;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV29;
 import it.pagopa.pn.stream.service.StreamEventsService;
 import it.pagopa.pn.stream.utils.MdcKey;
@@ -29,7 +30,7 @@ public class PnEventsController implements EventsApi {
     private final StreamEventsService streamEventsService;
 
     @Override
-    public Mono<ResponseEntity<Flux<ProgressResponseElementV29>>> consumeEventStreamV29(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, String lastEventId, final ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Flux<ProgressResponseAnyElementV29>>> consumeEventStreamV29(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, UUID streamId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, String lastEventId, final ServerWebExchange exchange) {
         log.info("[enter] getEventStream xPagopaPnCxId={} streamId={} lastEventID={}", xPagopaPnCxId, streamId.toString(), lastEventId);
         MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
 
@@ -43,7 +44,8 @@ public class PnEventsController implements EventsApi {
                             return ResponseEntity
                                     .ok()
                                     .headers(responseHeaders)
-                                    .body(Flux.fromIterable(r.getProgressResponseElementList()));
+                                    .body(Flux.fromIterable(r.getProgressResponseElementList())
+                                            .map(this::toProgressResponseAnyElement));
                         })
         );
 
@@ -53,5 +55,15 @@ public class PnEventsController implements EventsApi {
     public Mono<ResponseEntity<Void>> informOnExternalEvent(String xPagopaPnUid, CxTypeAuthFleet xPagopaPnCxType, String xPagopaPnCxId, Mono<ExternalEventsRequest> externalEventsRequest, List<String> xPagopaPnCxGroups, final ServerWebExchange exchange) {
         log.error("[enter] informOnExternalEvent not implemented yet");
         return Mono.just(ResponseEntity.internalServerError().build());
+    }
+
+    private ProgressResponseAnyElementV29 toProgressResponseAnyElement(ProgressResponseElementV29 item) {
+        return ProgressResponseAnyElementV29.builder()
+                .eventId(item.getEventId())
+                .notificationRequestId(item.getNotificationRequestId())
+                .iun(item.getIun())
+                .newStatus(item.getNewStatus())
+                .element(item.getElement())
+                .build();
     }
 }

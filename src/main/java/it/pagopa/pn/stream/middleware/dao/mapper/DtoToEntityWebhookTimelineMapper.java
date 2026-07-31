@@ -28,6 +28,7 @@ public class DtoToEntityWebhookTimelineMapper {
                 .timestamp(dto.getBusinessTimestamp())
                 .ingestionTimestamp(dto.getTimestamp())
                 .eventTimestamp(dto.getBusinessTimestamp())
+                .communicationType(dto.getCommunicationType())
                 .build();
     }
 

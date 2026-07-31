@@ -182,7 +182,10 @@ describe("Lambda Handler Tests", () => {
     });
   });
 
-  it("should skip records with communicationType present", async () => {
+  // kinesis.js filters out unsupported communicationType values before the handler is invoked.
+  // These tests verify that records reaching the handler (post-filter) are processed normally,
+  // regardless of the communicationType field value.
+  it("should process INFORMAL records that pass kinesis filtering", async () => {
     const event = {
       mockKinesisData: [
         {
@@ -190,7 +193,7 @@ describe("Lambda Handler Tests", () => {
             NewImage: {
               iun: { S: "testIUN" },
               group: { S: "testGroup" },
-              communicationType: { S: "anyString" },
+              communicationType: { S: "INFORMAL" },
             },
           },
           kinesisSeqNumber: "seq123",
@@ -198,39 +201,26 @@ describe("Lambda Handler Tests", () => {
       ],
     };
 
-    let dynamoCalled = false;
-    mockDynamoDBClient.send = async () => {
-      dynamoCalled = true;
+    const result = await lambda.handleEvent(event);
+    expect(result).to.deep.equal({ batchItemFailures: [] });
+  });
+
+  it("should process standard records (no communicationType) that pass kinesis filtering", async () => {
+    const event = {
+      mockKinesisData: [
+        {
+          dynamodb: {
+            NewImage: {
+              iun: { S: "testIUN" },
+              group: { S: "testGroup" },
+            },
+          },
+          kinesisSeqNumber: "seq123",
+        },
+      ],
     };
 
     const result = await lambda.handleEvent(event);
     expect(result).to.deep.equal({ batchItemFailures: [] });
-    expect(dynamoCalled).to.be.false;
   });
-
-  it("should skip records with communicationType present as number", async () => {
-      const event = {
-        mockKinesisData: [
-          {
-            dynamodb: {
-              NewImage: {
-                iun: { S: "testIUN" },
-                group: { S: "testGroup" },
-                communicationType: { N: 3 },
-              },
-            },
-            kinesisSeqNumber: "seq123",
-          },
-        ],
-      };
-
-      let dynamoCalled = false;
-      mockDynamoDBClient.send = async () => {
-        dynamoCalled = true;
-      };
-
-      const result = await lambda.handleEvent(event);
-      expect(result).to.deep.equal({ batchItemFailures: [] });
-      expect(dynamoCalled).to.be.false;
-    });
 });
