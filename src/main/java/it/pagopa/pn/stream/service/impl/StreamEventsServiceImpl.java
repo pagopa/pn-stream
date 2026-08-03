@@ -118,7 +118,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 .sort(Comparator.comparing(ProgressResponseElementV29::getEventId))
                                 .collectList()
                                     .zipWith(Mono.just(streamUtils.retrieveRetryAfter(xPagopaPnCxId)))
-                                .flatMap(tuple2 -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, tuple2   .getT1(), tuple2.getT2()).thenReturn(tuple2))
+                                .flatMap(tuple2 -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, tuple2.getT1(), tuple2.getT2()).thenReturn(tuple2))
                                 .map(tuple2 -> {
                                     var retryAfter = tuple2.getT2().intValue();
                                     var eventList = tuple2.getT1();
