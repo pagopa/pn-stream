@@ -61,7 +61,8 @@ public enum TimelineElementCategoryInt {
     ANALOG_FAILURE_WORKFLOW_TIMEOUT(TimelineElementCategoryInt.VERSION_27),
     NOTIFICATION_TIMELINE_REWORKED(TimelineElementCategoryInt.VERSION_28),
     NOTIFICATION_COST_VALIDATION_REQUEST(TimelineElementCategoryInt.VERSION_28),
-    NOTIFICATION_COST_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_28);
+    NOTIFICATION_COST_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_28),
+    COURTESY_CHANNEL_FAILED(TimelineElementCategoryInt.VERSION_28);
 
 
     private final int version;
@@ -90,7 +91,8 @@ public enum TimelineElementCategoryInt {
         SEND_ANALOG_TIMEOUT,
         ANALOG_FAILURE_WORKFLOW_TIMEOUT,
         NOTIFICATION_COST_VALIDATION_REQUEST,
-        NOTIFICATION_COST_VALIDATION_RESPONSE
+        NOTIFICATION_COST_VALIDATION_RESPONSE,
+        COURTESY_CHANNEL_FAILED
     }
 
     public enum UnlockTimelineElementCategory {
