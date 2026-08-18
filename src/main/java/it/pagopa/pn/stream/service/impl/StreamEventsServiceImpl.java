@@ -31,6 +31,7 @@ import it.pagopa.pn.stream.service.utils.StreamUtils;
 import it.pagopa.pn.stream.utils.MetricUtils;
 import lombok.CustomLog;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -39,7 +40,6 @@ import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
@@ -155,10 +155,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         Map<String, List<String>> iunWithTimelineElementId = new LinkedHashMap<>();
 
         items.forEach(item -> {
-            String iun = item.getIun();
+            String iun = Arrays.toString(Base64Utils.decodeFromString(item.getNotificationRequestId()));
             List<String> elements = iunWithTimelineElementId.get(iun);
             String description = item.getElement().getTimestamp() + "_" + item.getElement().getElementId();
-            description = description.replace(".IUN_" + iun, "");
+            description = description.replace(".IUN_" + item.getIun(), "");
 
             if (elements == null) {
                 elements = new ArrayList<>(Collections.singletonList(description));
