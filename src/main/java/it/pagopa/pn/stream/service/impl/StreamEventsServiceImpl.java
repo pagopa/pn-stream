@@ -155,7 +155,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         Map<String, List<String>> iunWithTimelineElementId = new LinkedHashMap<>();
 
         items.forEach(item -> {
-            String iun = Arrays.toString(Base64Utils.decodeFromString(item.getNotificationRequestId()));
+            String iun = new String(Base64Utils.decodeFromString(item.getNotificationRequestId()));
             List<String> elements = iunWithTimelineElementId.get(iun);
             String description = item.getElement().getTimestamp() + "_" + item.getElement().getElementId();
             description = description.replace(".IUN_" + item.getIun(), "");
