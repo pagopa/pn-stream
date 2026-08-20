@@ -21,6 +21,7 @@ public class DtoToEntityStreamMapper {
     public static StreamEntity dtoToEntity(String paId, String streamId, String version, StreamCreationRequestV29 dto) {
         StreamEntity streamEntity = new StreamEntity(paId, streamId);
         streamEntity.setEventType(dto.getEventType().getValue());
+        streamEntity.setCommunicationType(dto.getCommunicationType() != null ? dto.getCommunicationType().getValue() : null);
         streamEntity.setTitle(dto.getTitle());
         streamEntity.setVersion(version != null ? version : currentVersion);
         streamEntity.setGroups(dto.getGroups());
@@ -36,6 +37,9 @@ public class DtoToEntityStreamMapper {
         StreamCreationRequestV29 creationRequestv23 = new StreamCreationRequestV29();
         BeanUtils.copyProperties(dto, creationRequestv23);
         creationRequestv23.setEventType(StreamCreationRequestV29.EventTypeEnum.fromValue(dto.getEventType().getValue()));
+        if (dto.getCommunicationType() != null) {
+            creationRequestv23.setCommunicationType(StreamCreationRequestV29.CommunicationTypeEnum.fromValue(dto.getCommunicationType().getValue()));
+        }
         return dtoToEntity(paId, streamId, version, creationRequestv23);
     }
 }

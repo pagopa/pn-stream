@@ -23,6 +23,7 @@ public class StreamEntity {
     public static final String COL_SK = "sortKey";
     private static final String COL_TITLE = "title";
     private static final String COL_EVENT_TYPE = "eventType";
+    private static final String COL_COMMUNICATION_TYPE = "communicationType";
     private static final String COL_ACTIVATION_DATE = "activationDate";
     private static final String COL_FILTER_VALUES = "filterValues";
     public static final String COL_EVENT_CURRENT_COUNTER = "eventAtomicCounter";
@@ -50,6 +51,7 @@ public class StreamEntity {
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_TITLE)})) private String title;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_EVENT_TYPE)})) private String eventType;
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_COMMUNICATION_TYPE)})) private String communicationType;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_FILTER_VALUES)})) private Set<String> filterValues;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_EVENT_CURRENT_COUNTER) })) private Long eventAtomicCounter;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_DISABLED_DATE), @DynamoDbUpdateBehavior(UpdateBehavior.WRITE_IF_NOT_EXISTS)})) private Instant disabledDate;
