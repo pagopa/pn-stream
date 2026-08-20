@@ -21,6 +21,7 @@ import it.pagopa.pn.stream.service.StreamsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
@@ -162,11 +163,14 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException(String.format("Stream [%s] is disabled, cannot be updated", streamId))))
                         .filter(filterUpdateRequest(xPagopaPnUid, xPagopaPnCxId, xPagopaPnCxGroups, request))
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Not supported operation, groups cannot be removed")))
-                        .map(r -> DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request))
-                        .map(entity -> {
+                        .flatMap(currentEntity -> {
+                            StreamEntity entity = DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request);
+                            if (!isSameCommunicationType(currentEntity.getCommunicationType(), entity.getCommunicationType())) {
+                                return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
+                            }
                             entity.setEventAtomicCounter(null);
                             entity.setSorting(null);
-                            return entity;
+                            return Mono.just(entity);
                         })
                         .flatMap(streamEntityDao::update)
                         .map(EntityToDtoStreamMapper::entityToDto))
@@ -257,11 +261,21 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     private Mono<StreamEntity> replaceStreamEntity(StreamEntity entity, StreamEntity replacedStream) {
         if (replacedStream.getDisabledDate() != null) {
             return Mono.error(new PnStreamForbiddenException("Not supported operation, stream already disabled"));
+        } else if (!isSameCommunicationType(replacedStream.getCommunicationType(), entity.getCommunicationType())) {
+            return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
         } else {
             entity.setEventAtomicCounter(replacedStream.getEventAtomicCounter() + pnStreamConfigs.getDeltaCounter());
             return streamEntityDao.replaceEntity(replacedStream, entity);
         }
 
+    }
+
+    private boolean isSameCommunicationType(String currentCommunicationType, String requestedCommunicationType) {
+        return normalizeCommunicationType(currentCommunicationType).equals(normalizeCommunicationType(requestedCommunicationType));
+    }
+
+    private String normalizeCommunicationType(String communicationType) {
+        return StringUtils.isBlank(communicationType) ? "LEGAL" : communicationType.toUpperCase(Locale.ROOT);
     }
 
     private List<String> getGroups(StreamEntity streamEntity) {
