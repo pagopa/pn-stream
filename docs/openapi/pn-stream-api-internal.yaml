@@ -909,6 +909,12 @@ components:
             Tutti gli eventi dello stato IN_VALIDATION vengono pubblicati senza ritardo.
             Stream di tipo STATUS: se true pubblica gli stati garantendo che il primo stato sia l'ACCEPTED o il REFUSED
           type: boolean
+        communicationType:
+          description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà ad una notifica legale, se invece valorizzato con INFORMAL afferirà ad una notifica bonaria
+          type: string
+          enum:
+            - INFORMAL
+            - LEGAL
 
     StreamGroup:
       type: string
