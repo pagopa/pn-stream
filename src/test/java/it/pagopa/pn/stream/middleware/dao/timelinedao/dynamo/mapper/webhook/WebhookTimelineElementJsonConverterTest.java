@@ -24,13 +24,12 @@ class WebhookTimelineElementJsonConverterTest {
         String iun = "ABC-DEFGHI-LM12-353-FSA";
         WebhookTimelineElementEntity entity = new WebhookTimelineElementEntity();
         entity.setIun(iun);
-
-        String expected = """
-        {"iun":"ABC-DEFGHI-LM12-353-FSA"}""";
+        entity.setCommunicationType("INFORMAL");
 
         String json = converter.entityToJson(entity);
         assertNotNull(json);
-        assertTrue(json.contains(expected));
+        assertTrue(json.contains("\"iun\":\"ABC-DEFGHI-LM12-353-FSA\""));
+        assertTrue(json.contains("\"communicationType\":\"INFORMAL\""));
     }
 
     @Test
@@ -39,6 +38,7 @@ class WebhookTimelineElementJsonConverterTest {
                 {
                 "timelineElementId": "1234",
                 "iun": "1234",
+                "communicationType":"INFORMAL",
                 "statusInfo":null,
                 "notificationSentAt":null,
                 "paId":null,
@@ -173,6 +173,7 @@ class WebhookTimelineElementJsonConverterTest {
 
         assertNotNull(timelineElementEntity);
         assertNotNull(timelineElementEntity.getDetails());
+        assertEquals("INFORMAL", timelineElementEntity.getCommunicationType());
     }
 
     @Test

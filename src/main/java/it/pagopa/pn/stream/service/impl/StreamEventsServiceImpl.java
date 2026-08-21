@@ -39,7 +39,6 @@ import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
@@ -193,6 +192,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             TimelineElementV28 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());
             response.setElement(timelineElement);
         }
+        if (eventTimeline.getTimelineElementInternal() != null) {
+            response.setCommunicationType(ProgressResponseElementV29.CommunicationTypeEnum.valueOf(eventTimeline.getTimelineElementInternal().getCommunicationType()));
+        }
         return response;
     }
 
@@ -219,6 +221,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
+                .filter(entity -> isSameCommunicationType(entity.getCommunicationType(), timelineElementInternal.getCommunicationType()))
                 .collectList()
                 .flatMap(stream -> {
                     if (stream.isEmpty()) {
@@ -235,6 +238,14 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .collectList())
                 .doOnNext(res -> log.logMetric(MetricUtils.generateListOfGeneralMetricsFromStreams(res, StreamStatsEnum.NUMBER_OF_WRITINGS.name(), 1, Instant.now().toEpochMilli()), String.format("Saved event: [%s] on %s streams", timelineElementInternal.getTimelineElementId(), res.size())))
                 .then();
+    }
+
+    private boolean isSameCommunicationType(String currentCommunicationType, String requestedCommunicationType) {
+        return normalizeCommunicationType(currentCommunicationType).equals(normalizeCommunicationType(requestedCommunicationType));
+    }
+
+    private String normalizeCommunicationType(String communicationType) {
+        return !StringUtils.hasText(communicationType) ? "LEGAL" : communicationType.toUpperCase(Locale.ROOT);
     }
 
     private Mono<StreamEntity> checkEventToSort(StreamEntity streamEntity, TimelineElementInternal timelineElement) {

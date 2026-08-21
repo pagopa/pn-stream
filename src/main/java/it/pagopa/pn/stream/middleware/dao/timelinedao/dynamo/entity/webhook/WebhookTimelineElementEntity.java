@@ -23,6 +23,7 @@ public class WebhookTimelineElementEntity<T> {
     private String timelineElementId;
     private Instant timestamp;
     private String paId;
+    private String communicationType;
     private String category;
     private List<LegalFactsIdV20> legalFactIds;
     private T details;
@@ -59,6 +60,15 @@ public class WebhookTimelineElementEntity<T> {
     @DynamoDbAttribute(value = "paId")
     public String getPaId() {return paId;}
     public void setPaId(String paId) {this.paId = paId;}
+
+    @DynamoDbAttribute(value = "communicationType")
+    public String getCommunicationType() {
+        return communicationType;
+    }
+
+    public void setCommunicationType(String communicationType) {
+        this.communicationType = communicationType;
+    }
 
     @DynamoDbAttribute(value = "category")
     public String getCategory() {
@@ -120,4 +130,3 @@ public class WebhookTimelineElementEntity<T> {
         this.eventTimestamp = eventTimestamp;
     }
 }
-
