@@ -1002,8 +1002,12 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
           $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+        informalNewStatus:
+          $ref: './remote-refs.yaml#/components/schemas/InformalNotificationStatusV1'
         element:
           $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+        informalElement:
+          $ref: './remote-refs.yaml#/components/schemas/InformalTimelineElementV1'
         # proprietà necessarie per retro compatibilità nel transitorio, ma che non saranno esposte nella V24 # NO EXTERNAL
         # potranno essere eliminate (assieme al RefusedReason) quando non saranno più presenti eventi della v1 # NO EXTERNAL
         timestamp:                                                                                         # NO EXTERNAL
@@ -1011,6 +1015,8 @@ components:
           format: date-time                                                                                # NO EXTERNAL
         timelineEventCategory:                                                                             # NO EXTERNAL
           $ref: './remote-refs.yaml#/components/schemas/TimelineElementCategoryV28'                # NO EXTERNAL
+        informalTimelineEventCategory:                                                                     # NO EXTERNAL
+          $ref: './remote-refs.yaml#/components/schemas/InformalTimelineElementCategoryV1'                # NO EXTERNAL
         recipientIndex:                                                                                    # NO EXTERNAL
           type: integer                                                                                    # NO EXTERNAL
           format: int32                                                                                    # NO EXTERNAL
@@ -1114,4 +1120,3 @@ components:
 
 #security:                 # ONLY EXTERNAL
 #  - ApiKeyAuth: [] # use the same name as under securitySchemes    # ONLY EXTERNAL
-
