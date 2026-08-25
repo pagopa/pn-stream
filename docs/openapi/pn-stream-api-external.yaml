@@ -920,9 +920,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: './schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
         element:
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: './schemas-pn-timeline.yaml#/components/schemas/TimelineElementV28'
 
 
     ###  - EVENTI GENERATI DALLA P.A.

@@ -2515,10 +2515,10 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
 
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatus'
+          $ref: './schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus'
         timelineEventCategory:
 #          apparentemente non retrocompatibile ma gli stream continueranno a mandare category della versione 1 fino ad esplicita modifica delle config da parte della PA
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementCategoryV23'
+          $ref: './schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV23'
         recipientIndex:
           type: integer
           format: int32
@@ -2698,9 +2698,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatus'
+          $ref: './schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus'
         element:
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV23'
+          $ref: './schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV23'
 
     ############################################################################################
     ###                        COMPONENT API VERSIONE 2.4                                    ###
@@ -2835,9 +2835,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatus'
+          $ref: './schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus'
         element:
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV24'
+          $ref: './schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV24'
             
     ############################################################################################
     ###                        COMPONENT API VERSIONE 2.5                                    ###
@@ -2972,9 +2972,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatus'
+          $ref: './schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus'
         element:
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV25'
+          $ref: './schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV25'
 
     ############################################################################################
     ###                        COMPONENT API VERSIONE 2.6                                    ###
@@ -3134,9 +3134,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: './schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
         element:
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV26'
+          $ref: './schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV26'
 
 
 
@@ -3280,9 +3280,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: './schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
         element:
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV26'
+          $ref: './schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV26'
 
     ############################################################################################
     ###                        COMPONENT API VERSIONE 2.8                                    ###
@@ -3423,9 +3423,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: './schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
         element:
-          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV27'
+          $ref: './schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV27'
 
     StreamMetadataResponse:
       description: Configurazioni di un flusso di eventi
