@@ -3174,9 +3174,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: ./schemas-pn-status.yaml#/components/schemas/NotificationStatusV26
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
-          $ref: ./schemas-pn-timeline.yaml#/components/schemas/TimelineElementV28
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV28
     ProgressResponse:
       type: array
       items:
@@ -3208,10 +3208,10 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
           $ref: >-
-            ./schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus
+            remote-refs.yaml#/components/schemas/NotificationStatus
         timelineEventCategory:
           $ref: >-
-            ./schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV23
+            remote-refs.yaml#/components/schemas/TimelineElementCategoryV23
         recipientIndex:
           type: integer
           format: int32
@@ -3383,10 +3383,10 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
           $ref: >-
-            ./schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus
+            remote-refs.yaml#/components/schemas/NotificationStatus
         element:
           $ref: >-
-            ./schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV23
+            remote-refs.yaml#/components/schemas/TimelineElementV23
     StreamCreationRequestV24:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3521,10 +3521,10 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
           $ref: >-
-            ./schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus
+            remote-refs.yaml#/components/schemas/NotificationStatus
         element:
           $ref: >-
-            ./schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV24
+            remote-refs.yaml#/components/schemas/TimelineElementV24
     StreamCreationRequestV25:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3659,10 +3659,10 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
           $ref: >-
-            ./schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus
+            remote-refs.yaml#/components/schemas/NotificationStatus
         element:
           $ref: >-
-            ./schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV25
+            remote-refs.yaml#/components/schemas/TimelineElementV25
     StreamCreationRequestV26:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3796,10 +3796,10 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: ./schemas-pn-status.yaml#/components/schemas/NotificationStatusV26
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
           $ref: >-
-            ./schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV26
+            remote-refs.yaml#/components/schemas/TimelineElementV26
     StreamCreationRequestV27:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3939,10 +3939,10 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: ./schemas-pn-status.yaml#/components/schemas/NotificationStatusV26
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
           $ref: >-
-            ./schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV26
+            remote-refs.yaml#/components/schemas/TimelineElementV26
     StreamCreationRequestV28:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -4082,10 +4082,10 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: ./schemas-pn-status.yaml#/components/schemas/NotificationStatusV26
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
           $ref: >-
-            ./schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV27
+            remote-refs.yaml#/components/schemas/TimelineElementV27
     StreamMetadataResponse:
       description: Configurazioni di un flusso di eventi
       allOf:
