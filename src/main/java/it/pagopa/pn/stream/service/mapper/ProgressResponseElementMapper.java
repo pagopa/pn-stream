@@ -1,13 +1,12 @@
 package it.pagopa.pn.stream.service.mapper;
 
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV26;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV29;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV30;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.RefusedReason;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.RefusedReasonEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.EntityToDtoRefusedReasonMapper;
-
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -16,8 +15,8 @@ public class ProgressResponseElementMapper {
     private ProgressResponseElementMapper() {
     }
 
-    public static ProgressResponseElementV29 internalToExternal(EventEntity ev) {
-        ProgressResponseElementV29 progressResponseElement = new ProgressResponseElementV29();
+    public static ProgressResponseElementV30 internalToExternal(EventEntity ev) {
+        ProgressResponseElementV30 progressResponseElement = new ProgressResponseElementV30();
         progressResponseElement.setEventId(ev.getEventId());
         progressResponseElement.setTimestamp(ev.getTimestamp());
         progressResponseElement.setIun(ev.getIun());
