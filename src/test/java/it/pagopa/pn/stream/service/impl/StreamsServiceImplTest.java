@@ -167,7 +167,7 @@ class StreamsServiceImplTest {
         String xpagopacxid = "PA-xpagopacxid";
         String xpagopapnuid = "PA-xpagopapnuid";
 
-        StreamCreationRequestV30 req = new StreamCreationRequestV29();
+        StreamCreationRequestV30 req = new StreamCreationRequestV30();
         req.setTitle("titolo");
         req.setEventType(StreamCreationRequestV30.EventTypeEnum.STATUS);
         req.setCommunicationType(StreamCreationRequestV30.CommunicationTypeEnum.INFORMAL);
