@@ -22,9 +22,8 @@ public class EntityToDtoStreamMapper {
         streamMetadataResponse.setStreamId(UUID.fromString(entity.getStreamId()));
         streamMetadataResponse.setActivationDate(entity.getActivationDate());
         streamMetadataResponse.setEventType(StreamMetadataResponseV30.EventTypeEnum.valueOf(entity.getEventType()));
-        streamMetadataResponse.setEventType(StreamMetadataResponseV30.EventTypeEnum.valueOf(entity.getEventType()));
         if (entity.getCommunicationType() != null) {
-            streamMetadataResponse.setCommunicationType(StreamMetadataResponseV30.CommunicationTypeEnum.valueOf(entity.getCommunicationType()));
+            streamMetadataResponse.setCommunicationType(StreamMetadataResponseV30.CommunicationTypeEnum.valueOf(entity.getCommunicationType().name()));
         }
         streamMetadataResponse.setTitle(entity.getTitle());
         streamMetadataResponse.setFilterValues(List.copyOf(Objects.requireNonNullElse(entity.getFilterValues(), new HashSet<>())));

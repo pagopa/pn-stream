@@ -1,6 +1,7 @@
 package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.exceptions.PnStreamMaxStreamsCountReachedException;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV30;
@@ -179,7 +180,7 @@ class StreamsServiceImplTest {
         entity.setTitle(req.getTitle());
         entity.setPaId(xpagopacxid);
         entity.setEventType(req.getEventType().toString());
-        entity.setCommunicationType(req.getCommunicationType().toString());
+        entity.setCommunicationType(CommunicationType.valueOf(req.getCommunicationType().getValue()));
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setSorting(Boolean.FALSE);
@@ -201,7 +202,7 @@ class StreamsServiceImplTest {
 
         assertNotNull(res);
         assertEquals(StreamMetadataResponseV30.CommunicationTypeEnum.INFORMAL, res.getCommunicationType());
-        assertEquals(StreamCreationRequestV30.CommunicationTypeEnum.INFORMAL.toString(), captor.getValue().getCommunicationType());
+        assertEquals(CommunicationType.INFORMAL, captor.getValue().getCommunicationType());
     }
 
     @Test
@@ -1613,7 +1614,7 @@ class StreamsServiceImplTest {
         ).block(d);
 
         assertNotNull(res);
-        assertEquals(StreamRequestV30.CommunicationTypeEnum.INFORMAL.toString(), captor.getValue().getCommunicationType());
+        assertEquals(CommunicationType.INFORMAL, captor.getValue().getCommunicationType());
         assertEquals(StreamMetadataResponseV30.CommunicationTypeEnum.INFORMAL, res.getCommunicationType());
     }
 
