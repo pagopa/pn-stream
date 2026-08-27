@@ -34,11 +34,11 @@ components:
     ###                         STRUTTURE DATI DI PN-DELIVERY_PUSH                           ###
     ############################################################################################
     TimelineElementCategoryV28:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/TimelineElementCategoryV28'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/TimelineElementCategoryV28'
     TimelineElementV28:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/TimelineElementV28'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/TimelineElementV28'
     NotificationStatusV26:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
     InformalTimelineElementV1:
       $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/1f304a056f4a6a7ebc2fd4652150d00937e7f80f/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/InformalTimelineElementV1'
     InformalTimelineElementCategoryV1:
@@ -49,23 +49,23 @@ components:
     ###           STRUTTURE DATI DI PN-DELIVERY_PUSH OBSOLETE MA CHE DEVONO RESTARE          ###
     ############################################################################################
     TimelineElementCategoryV23:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV23'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV23'
     TimelineElementV23:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV23'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV23'
     TimelineElementV24:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV24'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV24'
     TimelineElementV25:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV25'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV25'
     TimelineElementV26:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV26'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV26'
     TimelineElementCategoryV26:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV26'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV26'
     TimelineElementV27:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV27'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementV27'
     TimelineElementCategoryV27:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV27'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-timeline-older-version.yaml#/components/schemas/TimelineElementCategoryV27'
     NotificationStatus:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/9e486010b7103547b0da6bf9136d14f87da43fd6/docs/openapi/schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus'
+      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/be25bd72d4cf720feb4566af68f4c9884bd4fe3c/docs/openapi/schemas-pn-status-older-version.yaml#/components/schemas/NotificationStatus'
     ############################################################################################
     ###                          STRUTTURE DATI DI PN-ERROR                                  ###
     ############################################################################################
