@@ -1,6 +1,7 @@
 package it.pagopa.pn.stream.middleware.dao.dynamo.mapper;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV30;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV30;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
@@ -20,7 +21,7 @@ public class DtoToEntityStreamMapper {
     public static StreamEntity dtoToEntity(String paId, String streamId, String version, StreamCreationRequestV30 dto) {
         StreamEntity streamEntity = new StreamEntity(paId, streamId);
         streamEntity.setEventType(dto.getEventType().getValue());
-        streamEntity.setCommunicationType(dto.getCommunicationType() != null ? dto.getCommunicationType().getValue() : null);
+        streamEntity.setCommunicationType(dto.getCommunicationType() != null ? CommunicationType.valueOf(dto.getCommunicationType().getValue()) : null);
         streamEntity.setTitle(dto.getTitle());
         streamEntity.setVersion(version != null ? version : currentVersion);
         streamEntity.setGroups(dto.getGroups());
@@ -33,13 +34,12 @@ public class DtoToEntityStreamMapper {
     }
 
     public static StreamEntity dtoToEntity(String paId, String streamId, String version, StreamRequestV30 dto) {
-        StreamCreationRequestV30 creationRequestv23 = new StreamCreationRequestV30();
-        BeanUtils.copyProperties(dto, creationRequestv23);
-        creationRequestv23.setEventType(StreamCreationRequestV30.EventTypeEnum.fromValue(dto.getEventType().getValue()));
-        creationRequestv23.setEventType(StreamCreationRequestV30.EventTypeEnum.fromValue(dto.getEventType().getValue()));
+        StreamCreationRequestV30 creationRequestv30 = new StreamCreationRequestV30();
+        BeanUtils.copyProperties(dto, creationRequestv30);
+        creationRequestv30.setEventType(StreamCreationRequestV30.EventTypeEnum.fromValue(dto.getEventType().getValue()));
         if (dto.getCommunicationType() != null) {
-            creationRequestv23.setCommunicationType(StreamCreationRequestV30.CommunicationTypeEnum.fromValue(dto.getCommunicationType().getValue()));
+            creationRequestv30.setCommunicationType(StreamCreationRequestV30.CommunicationTypeEnum.fromValue(dto.getCommunicationType().getValue()));
         }
-        return dtoToEntity(paId, streamId, version, creationRequestv23);
+        return dtoToEntity(paId, streamId, version, creationRequestv30);
     }
 }
