@@ -5,10 +5,10 @@ import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.exceptions.PnStreamMaxStreamsCountReachedException;
 import it.pagopa.pn.stream.exceptions.PnStreamNotFoundException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV29;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV30;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamListElement;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV29;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV29;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV30;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamRequestV30;
 import it.pagopa.pn.stream.middleware.dao.dynamo.StreamEntityDao;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.mapper.DtoToEntityStreamMapper;
@@ -21,6 +21,7 @@ import it.pagopa.pn.stream.service.StreamsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
@@ -51,7 +52,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV29> createEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, Mono<StreamCreationRequestV29> streamCreationRequest) {
+    public Mono<StreamMetadataResponseV30> createEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, Mono<StreamCreationRequestV30> streamCreationRequest) {
         final String apiV10 = pnStreamConfigs.getFirstVersion();
         String msg = "createEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}";
         String[] args = {xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion};
@@ -91,7 +92,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 }).map(EntityToDtoStreamMapper::entityToDto).doOnSuccess(newEntity -> generateAuditLog(PnAuditLogEventType.AUD_WH_CREATE, msg, args).generateSuccess().log()).doOnError(err -> generateAuditLog(PnAuditLogEventType.AUD_WH_CREATE, msg, args).generateFailure(ERROR_CREATING_STREAM, err).log());
     }
 
-    private Mono<StreamEntity> saveOrReplace(StreamCreationRequestV29 dto, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion) {
+    private Mono<StreamEntity> saveOrReplace(StreamCreationRequestV30 dto, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion) {
         return dto.getReplacedStreamId() == null
                 ? streamEntityDao.save(DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, UUID.randomUUID().toString(), xPagopaPnApiVersion, dto))
                 : replaceStream(xPagopaPnCxId, xPagopaPnCxGroups, xPagopaPnApiVersion, dto);
@@ -116,7 +117,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV29> getEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
+    public Mono<StreamMetadataResponseV30> getEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
         String msg = "getEventStream xPagopaPnUid={}, xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={} ";
         List<String> args = Arrays.asList(xPagopaPnUid, xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString());
         generateAuditLog(PnAuditLogEventType.AUD_WH_READ, msg, args.toArray(new String[0])).log();
@@ -148,7 +149,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV29> updateEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId, Mono<StreamRequestV29> streamRequest) {
+    public Mono<StreamMetadataResponseV30> updateEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId, Mono<StreamRequestV30> streamRequest) {
         String msg = "updateEventStream xPagopaPnUid={},xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={}, request={} ";
         List<String> args = Arrays.asList(xPagopaPnUid, xPagopaPnCxId, groupString(xPagopaPnCxGroups), streamId.toString(), xPagopaPnApiVersion);
 
@@ -162,11 +163,14 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException(String.format("Stream [%s] is disabled, cannot be updated", streamId))))
                         .filter(filterUpdateRequest(xPagopaPnUid, xPagopaPnCxId, xPagopaPnCxGroups, request))
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Not supported operation, groups cannot be removed")))
-                        .map(r -> DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request))
-                        .map(entity -> {
+                        .flatMap(currentEntity -> {
+                            StreamEntity entity = DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request);
+                            if (!isSameCommunicationType(currentEntity.getCommunicationType().toString(), entity.getCommunicationType().toString())) {
+                                return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
+                            }
                             entity.setEventAtomicCounter(null);
                             entity.setSorting(null);
-                            return entity;
+                            return Mono.just(entity);
                         })
                         .flatMap(streamEntityDao::update)
                         .map(EntityToDtoStreamMapper::entityToDto))
@@ -175,7 +179,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .generateFailure("error updating stream", err).log());
     }
 
-    private Predicate<StreamEntity> filterUpdateRequest(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, StreamRequestV29 request) {
+    private Predicate<StreamEntity> filterUpdateRequest(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, StreamRequestV30 request) {
         return r -> {
             //Da master se non restringo i gruppi sullo stream OK
             if (CollectionUtils.isEmpty(r.getGroups())
@@ -212,7 +216,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     @Override
-    public Mono<StreamMetadataResponseV29> disableEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
+    public Mono<StreamMetadataResponseV30> disableEventStream(String xPagopaPnUid, String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, UUID streamId) {
         String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, streamId={}";
         String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, streamId.toString()};
         generateAuditLog(PnAuditLogEventType.AUD_WH_DISABLE, msg, args).log();
@@ -243,7 +247,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 });
     }
 
-    private Mono<StreamEntity> replaceStream(String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, StreamCreationRequestV29 dto) {
+    private Mono<StreamEntity> replaceStream(String xPagopaPnCxId, List<String> xPagopaPnCxGroups, String xPagopaPnApiVersion, StreamCreationRequestV30 dto) {
         StreamEntity streamEntity = DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, UUID.randomUUID().toString(), xPagopaPnApiVersion, dto);
         String msg = "disableEventStream xPagopaPnCxId={}, xPagopaPnCxGroups={}, xPagopaPnApiVersion={}, disabledStreamId={}, streamId={}";
         String[] args = new String[]{xPagopaPnCxId, groupString(xPagopaPnCxGroups), xPagopaPnApiVersion, dto.getReplacedStreamId().toString(), dto.getReplacedStreamId().toString()};
@@ -257,11 +261,21 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     private Mono<StreamEntity> replaceStreamEntity(StreamEntity entity, StreamEntity replacedStream) {
         if (replacedStream.getDisabledDate() != null) {
             return Mono.error(new PnStreamForbiddenException("Not supported operation, stream already disabled"));
+        } else if (!isSameCommunicationType(replacedStream.getCommunicationType().toString(), entity.getCommunicationType().toString())) {
+            return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
         } else {
             entity.setEventAtomicCounter(replacedStream.getEventAtomicCounter() + pnStreamConfigs.getDeltaCounter());
             return streamEntityDao.replaceEntity(replacedStream, entity);
         }
 
+    }
+
+    private boolean isSameCommunicationType(String currentCommunicationType, String requestedCommunicationType) {
+        return normalizeCommunicationType(currentCommunicationType).equals(normalizeCommunicationType(requestedCommunicationType));
+    }
+
+    private String normalizeCommunicationType(String communicationType) {
+        return StringUtils.isBlank(communicationType) ? "LEGAL" : communicationType.toUpperCase(Locale.ROOT);
     }
 
     private List<String> getGroups(StreamEntity streamEntity) {
