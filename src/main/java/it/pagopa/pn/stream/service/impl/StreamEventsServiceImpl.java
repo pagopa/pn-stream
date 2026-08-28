@@ -109,12 +109,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                         return Flux.fromStream(items.stream());
                                     return addConfidentialInformationAtEventTimelineList(removeDuplicatedItems(items));
                                 })
-                                // converto l'eventTimelineInternalDTO in ProgressResponseElementV29
+                                // converto l'eventTimelineInternalDTO in ProgressResponseElementV30
                                 .map(this::getProgressResponseFromEventTimeline)
                                 .collectList()
                                 .flatMap(this::checkIfReworkElementAndAddConfidentialInfoToRelated)
-                                .flatMapIterable(progressResponseElementV29s -> progressResponseElementV29s)
-                                .sort(Comparator.comparing(ProgressResponseElementV29::getEventId))
+                                .flatMapIterable(progressResponseElementV30s -> progressResponseElementV30s)
+                                .sort(Comparator.comparing(ProgressResponseElementV30::getEventId))
                                 .collectList()
                                     .zipWith(Mono.just(streamUtils.retrieveRetryAfter(xPagopaPnCxId)))
                                 .flatMap(tuple2 -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, tuple2.getT1(), tuple2.getT2()).thenReturn(tuple2))
@@ -139,7 +139,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={})", lastEventIDToPrint,error).log());
     }
 
-    private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV29> eventList, Long retryAfter) {
+    private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV30> eventList, Long retryAfter) {
         if (eventList.isEmpty()) {
             log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
             return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId, Instant.now().plusMillis(retryAfter)));
@@ -148,7 +148,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return Mono.empty();
     }
 
-    private String createAuditLogOfElementsId(List<ProgressResponseElementV29> items) {
+    private String createAuditLogOfElementsId(List<ProgressResponseElementV30> items) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode rootNode = mapper.createObjectNode();
         Map<String, List<String>> iunWithTimelineElementId = new LinkedHashMap<>();
@@ -186,7 +186,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return retryAfterEntity;
     }
 
-    private ProgressResponseElementV29 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
+    private ProgressResponseElementV30 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
         var response = ProgressResponseElementMapper.internalToExternal(eventTimeline.getEventEntity());
         if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
             TimelineElementV28 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());
@@ -321,8 +321,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             return Mono.empty();
         }
 
-        StreamCreationRequestV29.EventTypeEnum eventType = StreamCreationRequestV29.EventTypeEnum.fromValue(stream.getEventType());
-        if (eventType == StreamCreationRequestV29.EventTypeEnum.STATUS && !timelineElementInternal.getStatusInfo().isStatusChanged()) {
+        StreamCreationRequestV30.EventTypeEnum eventType = StreamCreationRequestV30.EventTypeEnum.fromValue(stream.getEventType());
+        if (eventType == StreamCreationRequestV30.EventTypeEnum.STATUS && !timelineElementInternal.getStatusInfo().isStatusChanged()) {
             log.info("skipping saving webhook event for stream={} because there was no change in status iun={}", stream.getStreamId(), timelineElementInternal.getIun());
             return Mono.empty();
         }
@@ -335,8 +335,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         Set<String> filteredValues = retrieveFilteredValues(stream, eventType);
 
-        if ((eventType == StreamCreationRequestV29.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
-                || (eventType == StreamCreationRequestV29.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
+        if ((eventType == StreamCreationRequestV30.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
+                || (eventType == StreamCreationRequestV30.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
             return Mono.just(stream);
         } else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
@@ -344,10 +344,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return Mono.empty();
     }
 
-    private Set<String> retrieveFilteredValues(StreamEntity stream, StreamCreationRequestV29.EventTypeEnum eventType) {
-        if (eventType == StreamCreationRequestV29.EventTypeEnum.TIMELINE) {
+    private Set<String> retrieveFilteredValues(StreamEntity stream, StreamCreationRequestV30.EventTypeEnum eventType) {
+        if (eventType == StreamCreationRequestV30.EventTypeEnum.TIMELINE) {
             return categoriesByFilter(stream);
-        } else if (eventType == StreamCreationRequestV29.EventTypeEnum.STATUS) {
+        } else if (eventType == StreamCreationRequestV30.EventTypeEnum.STATUS) {
             return statusByFilter(stream);
         }
         return Collections.emptySet();
@@ -471,13 +471,13 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .flatMapMany(item -> Flux.fromStream(eventEntities.stream()));
     }
 
-    protected Mono<List<ProgressResponseElementV29>> checkIfReworkElementAndAddConfidentialInfoToRelated(List<ProgressResponseElementV29> progressResponseElementsV29) {
-        List<ProgressResponseElementV29> reworkElements = progressResponseElementsV29.stream()
+    protected Mono<List<ProgressResponseElementV30>> checkIfReworkElementAndAddConfidentialInfoToRelated(List<ProgressResponseElementV30> progressResponseElementsV30) {
+        List<ProgressResponseElementV30> reworkElements = progressResponseElementsV30.stream()
                 .filter(element -> element.getElement().getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED))
                 .toList();
 
         if (CollectionUtils.isEmpty(reworkElements)) {
-            return Mono.just(progressResponseElementsV29);
+            return Mono.just(progressResponseElementsV30);
         }
 
         List<ConfidentialTimelineElementId> elementIds = getConfidentialElementIds(reworkElements, reworkElements.stream().findAny().get().getIun());
@@ -495,10 +495,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                             return timelineElementInternal;
                         })
                         .orElse(null)
-                ).then(Mono.just(progressResponseElementsV29));
+                ).then(Mono.just(progressResponseElementsV30));
     }
 
-    private List<ConfidentialTimelineElementId> getConfidentialElementIds(List<ProgressResponseElementV29> reworkElements, String iun) {
+    private List<ConfidentialTimelineElementId> getConfidentialElementIds(List<ProgressResponseElementV30> reworkElements, String iun) {
         return reworkElements.stream()
                 .map(rework -> rework.getElement().getDetails().getInvalidatedTimelineAndStatusHistory())
                 .flatMap(Collection::stream)

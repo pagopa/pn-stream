@@ -3,6 +3,8 @@ package it.pagopa.pn.stream.middleware.dao.dynamo.entity;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+
+import it.pagopa.pn.stream.dto.CommunicationType;
 import lombok.Data;
 import lombok.Getter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior;
@@ -51,7 +53,7 @@ public class StreamEntity {
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_TITLE)})) private String title;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_EVENT_TYPE)})) private String eventType;
-    @Getter(onMethod=@__({@DynamoDbAttribute(COL_COMMUNICATION_TYPE)})) private String communicationType;
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_COMMUNICATION_TYPE)})) private CommunicationType communicationType;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_FILTER_VALUES)})) private Set<String> filterValues;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_EVENT_CURRENT_COUNTER) })) private Long eventAtomicCounter;
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_DISABLED_DATE), @DynamoDbUpdateBehavior(UpdateBehavior.WRITE_IF_NOT_EXISTS)})) private Instant disabledDate;

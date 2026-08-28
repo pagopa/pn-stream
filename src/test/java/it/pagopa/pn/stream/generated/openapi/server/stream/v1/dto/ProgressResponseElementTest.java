@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.NotificationStatusV26;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV29;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV30;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,12 +12,12 @@ import org.junit.jupiter.api.Test;
 
 class ProgressResponseElementTest {
 
-    private ProgressResponseElementV29 responseElement;
+    private ProgressResponseElementV30 responseElement;
 
     @BeforeEach
     void setUp() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        responseElement = new ProgressResponseElementV29();
+        responseElement = new ProgressResponseElementV30();
         responseElement.setEventId("001");
         responseElement.setIun("002");
         responseElement.setNotificationRequestId("003");
@@ -32,7 +32,7 @@ class ProgressResponseElementTest {
     @Test
     void eventId() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV30 expected = ProgressResponseElementV30.builder()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -54,7 +54,7 @@ class ProgressResponseElementTest {
     @Test
     void timestamp() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV30 expected = ProgressResponseElementV30.builder()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -76,7 +76,7 @@ class ProgressResponseElementTest {
     @Test
     void notificationRequestId() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV30 expected = ProgressResponseElementV30.builder()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -98,7 +98,7 @@ class ProgressResponseElementTest {
     @Test
     void iun() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV30 expected = ProgressResponseElementV30.builder()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -120,7 +120,7 @@ class ProgressResponseElementTest {
     @Test
     void newStatus() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV30 expected = ProgressResponseElementV30.builder()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -142,7 +142,7 @@ class ProgressResponseElementTest {
     @Test
     void timelineEventCategory() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV30 expected = ProgressResponseElementV30.builder()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
@@ -164,7 +164,7 @@ class ProgressResponseElementTest {
     @Test
     void testEquals() {
         Instant instant = Instant.parse("2021-09-16T15:23:00.00Z");
-        ProgressResponseElementV29 expected = ProgressResponseElementV29.builder()
+        ProgressResponseElementV30 expected = ProgressResponseElementV30.builder()
                 .eventId("001")
                 .iun("002")
                 .notificationRequestId("003")
