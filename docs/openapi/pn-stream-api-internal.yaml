@@ -158,7 +158,7 @@ info:
       </details>
 
        <details>
-        <summary>Eventi di timeline - v3.0 (tutti gli elementi v1 + v2 + v2.3 + v2.6 + v2.8 + gli elementi seguenti)</summary>
+        <summary>Eventi di timeline - v2.9 (tutti gli elementi v1 + v2 + v2.3 + v2.6 + v2.8 + gli elementi seguenti)</summary>
 
       | Categoria | Descrizione |
       |-----------|-------------|
@@ -910,11 +910,14 @@ components:
             Stream di tipo STATUS: se true pubblica gli stati garantendo che il primo stato sia l'ACCEPTED o il REFUSED
           type: boolean
         communicationType:
-          description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà ad una notifica legale, se invece valorizzato con INFORMAL afferirà ad una notifica bonaria
-          type: string
-          enum:
-            - INFORMAL
-            - LEGAL
+          $ref: '#/components/schemas/CommunicationType'
+
+    CommunicationType:
+      description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà alla tipologia di notifica legale, se invece valorizzato con INFORMAL afferirà alla tipologia di una notifica bonaria
+      type: string
+      enum:
+        - INFORMAL
+        - LEGAL
 
     StreamGroup:
       type: string
@@ -1010,6 +1013,8 @@ components:
           $ref: 'remote-refs.yaml#/components/schemas/NotificationStatusV26'
         element:
           $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV28'
+        communicationType:
+          $ref: '#/components/schemas/CommunicationType'
         # proprietà necessarie per retro compatibilità nel transitorio, ma che non saranno esposte nella V24 # NO EXTERNAL
         # potranno essere eliminate (assieme al RefusedReason) quando non saranno più presenti eventi della v1 # NO EXTERNAL
         timestamp:                                                                                         # NO EXTERNAL
