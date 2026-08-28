@@ -2457,7 +2457,6 @@ paths:
       tags:
         - Streams
       operationId: createEventStreamV29
-      deprecated: true
       x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
       x-pagopa-lambda-account: core
       requestBody:
@@ -2504,7 +2503,6 @@ paths:
       tags:
         - Streams
       operationId: listEventStreamsV29
-      deprecated: true
       x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
       x-pagopa-lambda-account: core
       responses:
@@ -2541,7 +2539,6 @@ paths:
           - Streams
         operationId: getEventStreamV29                             # NO EXTERNAL
 #        operationId: retrieveEventStreamV29                       # ONLY EXTERNAL
-        deprecated: true
         x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
         x-pagopa-lambda-account: core
         responses:
@@ -2582,7 +2579,6 @@ paths:
         tags:
           - Streams
         operationId: updateEventStreamV29
-        deprecated: true
         x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
         x-pagopa-lambda-account: core
         requestBody:
@@ -2631,7 +2627,6 @@ paths:
           - Streams
         operationId: deleteEventStreamV29                          # NO EXTERNAL
 #        operationId: removeEventStreamV29                         # ONLY EXTERNAL
-        deprecated: true
         x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
         x-pagopa-lambda-account: core
         responses:
@@ -2684,7 +2679,6 @@ paths:
         tags:
           - Streams
         operationId: disableEventStreamV29
-        deprecated: true
         x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
         x-pagopa-lambda-account: core
         parameters:
@@ -2734,7 +2728,6 @@ paths:
         tags:
           - Events
         operationId: consumeEventStreamV29
-        deprecated: true
         x-pagopa-lambda-name: 'pn-versioningV1V2WebhookLambda:live'
         x-pagopa-lambda-account: core
         parameters:
