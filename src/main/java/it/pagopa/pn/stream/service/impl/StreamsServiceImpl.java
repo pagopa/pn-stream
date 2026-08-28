@@ -165,7 +165,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Not supported operation, groups cannot be removed")))
                         .flatMap(currentEntity -> {
                             StreamEntity entity = DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request);
-                            if (!isSameCommunicationType(currentEntity.getCommunicationType(), entity.getCommunicationType())) {
+                            if (!isSameCommunicationType(currentEntity.getCommunicationType().toString(), entity.getCommunicationType().toString())) {
                                 return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
                             }
                             entity.setEventAtomicCounter(null);
@@ -261,7 +261,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     private Mono<StreamEntity> replaceStreamEntity(StreamEntity entity, StreamEntity replacedStream) {
         if (replacedStream.getDisabledDate() != null) {
             return Mono.error(new PnStreamForbiddenException("Not supported operation, stream already disabled"));
-        } else if (!isSameCommunicationType(replacedStream.getCommunicationType(), entity.getCommunicationType())) {
+        } else if (!isSameCommunicationType(replacedStream.getCommunicationType().toString(), entity.getCommunicationType().toString())) {
             return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
         } else {
             entity.setEventAtomicCounter(replacedStream.getEventAtomicCounter() + pnStreamConfigs.getDeltaCounter());
