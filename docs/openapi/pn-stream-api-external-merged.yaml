@@ -443,25 +443,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: ReplacedId Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       summary: Elenca stream di eventi v2.9
       description: Elenca gli stream di eventi
@@ -480,13 +480,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.9/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -508,25 +508,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       summary: Update Stream metadata v2.9
       description: >-
@@ -553,25 +553,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       summary: Remove Event Stream v2.9
       description: >-
@@ -588,25 +588,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.9/streams/{streamId}/action/disable:
     post:
       summary: Disabilita uno stream v2.9
@@ -642,25 +642,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: ''./remote-refs.yaml#/components/schemas/Problem''
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: ''./remote-refs.yaml#/components/schemas/Problem''
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: ''./remote-refs.yaml#/components/schemas/Problem''
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: ''./remote-refs.yaml#/components/schemas/Problem''
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.9/streams/{streamId}/events:
     get:
       summary: Leggi progressi notifiche v2.9
@@ -701,19 +701,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Not allowed to consume details
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -729,7 +729,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/streams:
     post:
       deprecated: true
@@ -763,13 +763,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       deprecated: true
       summary: Elenca stream di eventi v1
@@ -791,13 +791,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -822,13 +822,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: ''./remote-refs.yaml#/components/schemas/Problem''
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: ''./remote-refs.yaml#/components/schemas/Problem''
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       deprecated: true
       summary: Update Stream metadata v1
@@ -858,13 +858,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       deprecated: true
       summary: Remove Event Stream v1
@@ -884,13 +884,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/streams/{streamId}/events:
     get:
       deprecated: true
@@ -931,7 +931,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -947,7 +947,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.3/streams:
     post:
       deprecated: true
@@ -983,25 +983,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: ReplacedId Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       deprecated: true
       summary: Elenca stream di eventi v2.3
@@ -1023,13 +1023,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.3/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -1054,25 +1054,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       deprecated: true
       summary: Update Stream metadata v2.3
@@ -1102,25 +1102,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       deprecated: true
       summary: Remove Event Stream v2.3
@@ -1140,25 +1140,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.3/streams/{streamId}/action/disable:
     post:
       deprecated: true
@@ -1197,25 +1197,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.3/streams/{streamId}/events:
     get:
       deprecated: true
@@ -1259,19 +1259,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Not allowed to consume details
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -1287,7 +1287,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.4/streams:
     post:
       deprecated: true
@@ -1323,25 +1323,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: ReplacedId Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       deprecated: true
       summary: Elenca stream di eventi v2.4
@@ -1363,13 +1363,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.4/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -1394,25 +1394,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       deprecated: true
       summary: Update Stream metadata v2.4
@@ -1442,25 +1442,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       deprecated: true
       summary: Remove Event Stream v2.4
@@ -1480,25 +1480,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.4/streams/{streamId}/action/disable:
     post:
       deprecated: true
@@ -1537,25 +1537,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.4/streams/{streamId}/events:
     get:
       deprecated: true
@@ -1599,19 +1599,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Not allowed to consume details
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -1627,7 +1627,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.5/streams:
     post:
       deprecated: true
@@ -1663,25 +1663,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: ReplacedId Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       deprecated: true
       summary: Elenca stream di eventi v2.5
@@ -1703,13 +1703,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.5/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -1734,25 +1734,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       deprecated: true
       summary: Update Stream metadata v2.5
@@ -1782,25 +1782,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       deprecated: true
       summary: Remove Event Stream v2.5
@@ -1820,25 +1820,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.5/streams/{streamId}/action/disable:
     post:
       deprecated: true
@@ -1877,25 +1877,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.5/streams/{streamId}/events:
     get:
       deprecated: true
@@ -1939,19 +1939,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Not allowed to consume details
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -1967,7 +1967,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.6/streams:
     post:
       deprecated: true
@@ -2003,25 +2003,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: ReplacedId Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       deprecated: true
       summary: Elenca stream di eventi v2.6
@@ -2043,13 +2043,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.6/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -2074,25 +2074,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       deprecated: true
       summary: Update Stream metadata v2.6
@@ -2122,25 +2122,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       deprecated: true
       summary: Remove Event Stream v2.6
@@ -2160,25 +2160,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.6/streams/{streamId}/action/disable:
     post:
       deprecated: true
@@ -2217,25 +2217,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.6/streams/{streamId}/events:
     get:
       deprecated: true
@@ -2279,19 +2279,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Not allowed to consume details
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -2307,7 +2307,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.7/streams:
     post:
       deprecated: true
@@ -2343,25 +2343,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: ReplacedId Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       deprecated: true
       summary: Elenca stream di eventi v2.7
@@ -2383,13 +2383,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.7/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -2414,25 +2414,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       deprecated: true
       summary: Update Stream metadata v2.7
@@ -2462,25 +2462,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       deprecated: true
       summary: Remove Event Stream v2.7
@@ -2500,25 +2500,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.7/streams/{streamId}/action/disable:
     post:
       deprecated: true
@@ -2557,25 +2557,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.7/streams/{streamId}/events:
     get:
       deprecated: true
@@ -2619,19 +2619,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Not allowed to consume details
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -2647,7 +2647,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.8/streams:
     post:
       deprecated: true
@@ -2683,25 +2683,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: ReplacedId Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     get:
       deprecated: true
       summary: EXPERIMENTAL - Elenca stream di eventi v2.8
@@ -2723,13 +2723,13 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.8/streams/{streamId}:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
@@ -2754,25 +2754,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     put:
       deprecated: true
       summary: EXPERIMENTAL - Update Stream metadata v2.8
@@ -2803,25 +2803,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
     delete:
       deprecated: true
       summary: EXPERIMENTAL - Remove Event Stream v2.8
@@ -2842,25 +2842,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: ./remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.8/streams/{streamId}/action/disable:
     post:
       deprecated: true
@@ -2899,25 +2899,25 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Forbidden
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '500':
           description: Internal Server Error
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
   /delivery-progresses/v2.8/streams/{streamId}/events:
     get:
       deprecated: true
@@ -2961,19 +2961,19 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '403':
           description: Not allowed to consume details
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '404':
           description: Stream not found
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
         '429':
           description: Too Many Requests
           headers:
@@ -2989,7 +2989,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: './remote-refs.yaml#/components/schemas/Problem'
+                $ref: remote-refs.yaml#/components/schemas/Problem
 components:
   parameters:
     queryLastEventId:
@@ -3174,9 +3174,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV28
     ProgressResponse:
       type: array
       items:
@@ -3207,9 +3207,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatus
         timelineEventCategory:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementCategoryV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementCategoryV23
         recipientIndex:
           type: integer
           format: int32
@@ -3380,9 +3380,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatus
         element:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV23
     StreamCreationRequestV24:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3516,9 +3516,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatus
         element:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV24
     StreamCreationRequestV25:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3652,9 +3652,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatus
         element:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV25
     StreamCreationRequestV26:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3788,9 +3788,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV26
     StreamCreationRequestV27:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -3930,9 +3930,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV26
     StreamCreationRequestV28:
       description: >-
         Richiesta di creazione di uno stream di eventi di avanzamento delle
@@ -4072,9 +4072,9 @@ components:
           maxLength: 25
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
-          $ref: './remote-refs.yaml#/components/schemas/NotificationStatusV26'
+          $ref: remote-refs.yaml#/components/schemas/NotificationStatusV26
         element:
-          $ref: './remote-refs.yaml#/components/schemas/TimelineElementV28'
+          $ref: remote-refs.yaml#/components/schemas/TimelineElementV27
     StreamMetadataResponse:
       description: Configurazioni di un flusso di eventi
       allOf:
