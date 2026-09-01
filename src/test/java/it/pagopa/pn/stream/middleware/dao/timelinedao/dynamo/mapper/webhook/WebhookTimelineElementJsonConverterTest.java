@@ -2,6 +2,7 @@ package it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook.WebhookTimelineElementEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class WebhookTimelineElementJsonConverterTest {
         String iun = "ABC-DEFGHI-LM12-353-FSA";
         WebhookTimelineElementEntity entity = new WebhookTimelineElementEntity();
         entity.setIun(iun);
-        entity.setCommunicationType("INFORMAL");
+        entity.setCommunicationType(CommunicationType.INFORMAL);
 
         String json = converter.entityToJson(entity);
         assertNotNull(json);
@@ -173,7 +174,7 @@ class WebhookTimelineElementJsonConverterTest {
 
         assertNotNull(timelineElementEntity);
         assertNotNull(timelineElementEntity.getDetails());
-        assertEquals("INFORMAL", timelineElementEntity.getCommunicationType());
+            assertEquals(CommunicationType.INFORMAL, timelineElementEntity.getCommunicationType());
     }
 
     @Test

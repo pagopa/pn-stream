@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.entity.webhook;
 
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StatusInfoEntity;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
 import lombok.*;
@@ -23,7 +24,7 @@ public class WebhookTimelineElementEntity<T> {
     private String timelineElementId;
     private Instant timestamp;
     private String paId;
-    private String communicationType;
+    private CommunicationType communicationType;
     private String category;
     private List<LegalFactsIdV20> legalFactIds;
     private T details;
@@ -62,11 +63,11 @@ public class WebhookTimelineElementEntity<T> {
     public void setPaId(String paId) {this.paId = paId;}
 
     @DynamoDbAttribute(value = "communicationType")
-    public String getCommunicationType() {
+    public CommunicationType getCommunicationType() {
         return communicationType;
     }
 
-    public void setCommunicationType(String communicationType) {
+    public void setCommunicationType(CommunicationType communicationType) {
         this.communicationType = communicationType;
     }
 

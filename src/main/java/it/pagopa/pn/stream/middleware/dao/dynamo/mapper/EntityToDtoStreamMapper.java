@@ -1,6 +1,7 @@
 package it.pagopa.pn.stream.middleware.dao.dynamo.mapper;
 
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamMetadataResponseV30;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamEntity;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class EntityToDtoStreamMapper {
         streamMetadataResponse.setActivationDate(entity.getActivationDate());
         streamMetadataResponse.setEventType(StreamMetadataResponseV30.EventTypeEnum.valueOf(entity.getEventType()));
         if (entity.getCommunicationType() != null) {
-            streamMetadataResponse.setCommunicationType(StreamMetadataResponseV30.CommunicationTypeEnum.valueOf(entity.getCommunicationType().name()));
+            streamMetadataResponse.setCommunicationType(CommunicationType.valueOf(entity.getCommunicationType().name()));
         }
         streamMetadataResponse.setTitle(entity.getTitle());
         streamMetadataResponse.setFilterValues(List.copyOf(Objects.requireNonNullElse(entity.getFilterValues(), new HashSet<>())));

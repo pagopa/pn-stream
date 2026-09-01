@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.CustomPaConfiguration;
 import it.pagopa.pn.stream.dto.PaConfiguration;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
@@ -111,7 +112,7 @@ class StreamUtilsTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE)
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
-                .communicationType("INFORMAL")
+                .communicationType(CommunicationType.INFORMAL)
                 .details("{\"recIndex\":\"0\"}")
                 .build();
 
@@ -121,7 +122,7 @@ class StreamUtilsTest {
         TimelineElementInternal restored = streamUtils.getTimelineInternalFromEvent(eventEntity);
 
         assertNotNull(restored);
-        assertEquals("INFORMAL", restored.getCommunicationType());
+            assertEquals(CommunicationType.INFORMAL, restored.getCommunicationType());
     }
 
 
