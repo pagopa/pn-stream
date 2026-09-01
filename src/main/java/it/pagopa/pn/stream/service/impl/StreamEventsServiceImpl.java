@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
@@ -192,6 +192,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             TimelineElementV28 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());
             response.setElement(timelineElement);
         }
+        if (eventTimeline.getTimelineElementInternal() != null) {
+            response.setCommunicationType(CommunicationType.valueOf(eventTimeline.getTimelineElementInternal().getCommunicationType().name()));
+        }
         return response;
     }
 
@@ -218,6 +221,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
+                .filter(entity -> entity.getCommunicationType().equals(timelineElementInternal.getCommunicationType()))
                 .collectList()
                 .flatMap(stream -> {
                     if (stream.isEmpty()) {
@@ -288,14 +292,14 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(this::constructAndSaveNotificationEntity));
     }
 
-    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV25 SentNotificationV25) {
+    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV26 SentNotificationV26) {
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
-        streamNotificationEntity.setHashKey(SentNotificationV25.getIun());
-        streamNotificationEntity.setGroup(SentNotificationV25.getGroup());
+        streamNotificationEntity.setHashKey(SentNotificationV26.getIun());
+        streamNotificationEntity.setGroup(SentNotificationV26.getGroup());
         streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
-        streamNotificationEntity.setCreationDate(SentNotificationV25.getSentAt());
+        streamNotificationEntity.setCreationDate(SentNotificationV26.getSentAt());
         return streamNotificationDao.putItem(streamNotificationEntity)
-                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV25.getIun()));
+                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV26.getIun()));
     }
 
     private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
