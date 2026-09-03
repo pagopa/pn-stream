@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.service.mapper;
 
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.InformalTimelineElementCategoryV1;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.ProgressResponseElementV30;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.RefusedReasonEntity;
@@ -34,4 +35,22 @@ class ProgressResponseElementMapperTest {
         Assertions.assertEquals( ERROR_CODE, progressResponseElement.getValidationErrors().get( 0 ).getErrorCode() );
         Assertions.assertEquals( DETAIL, progressResponseElement.getValidationErrors().get( 0 ).getDetail() );
     }
+
+    @Test
+    void internalToInformalExternal() {
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setTimelineEventCategory("REQUEST_REFUSED");
+
+        ProgressResponseElementV30 progressResponseElement =
+                ProgressResponseElementMapper.internalToInformalExternal(eventEntity);
+
+        Assertions.assertEquals(
+                InformalTimelineElementCategoryV1.REQUEST_REFUSED,
+                progressResponseElement.getInformalTimelineEventCategory()
+        );
+    }
+
 }

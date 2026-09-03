@@ -44,22 +44,7 @@ components:
     PaTaxId:
       $ref: "https://raw.githubusercontent.com/pagopa/pn-delivery/1750230e82ea6e03516e9f4bfae09c1737c1d5e7/docs/openapi/schemas-pn-notification.yaml#/components/schemas/paTaxId"
     NoticeCode:
-      $ref: "https://raw.githubusercontent.com/pagopa/pn-delivery/1750230e82ea6e03516e9f4bfae09c1737c1d5e7/docs/openapi/schemas-pn-notification.yaml#/components/schemas/noticeCode"
-    ############################################################################################
-    ###                         STRUTTURE DATI DI PN-DELIVERY_PUSH                           ###
-    ############################################################################################
-    TimelineElementCategoryV28:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/497b7e80796b0eb51a5e65bfd20d9c849f222f39/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/TimelineElementCategoryV28'
-    TimelineElementV28:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/497b7e80796b0eb51a5e65bfd20d9c849f222f39/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/TimelineElementV28'
-    NotificationStatusV26:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/497b7e80796b0eb51a5e65bfd20d9c849f222f39/docs/openapi/schemas-pn-status.yaml#/components/schemas/NotificationStatusV26'
-    InformalTimelineElementV1:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/497b7e80796b0eb51a5e65bfd20d9c849f222f39/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/InformalTimelineElementV1'
-    InformalTimelineElementCategoryV1:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/497b7e80796b0eb51a5e65bfd20d9c849f222f39/docs/openapi/schemas-pn-timeline-external.yaml#/components/schemas/InformalTimelineElementCategoryV1'
-    InformalNotificationStatusV1:
-      $ref: 'https://raw.githubusercontent.com/pagopa/pn-delivery-push/497b7e80796b0eb51a5e65bfd20d9c849f222f39/docs/openapi/schemas-pn-status.yaml#/components/schemas/InformalNotificationStatusV1'
+      $ref: "https://raw.githubusercontent.com/pagopa/pn-delivery/1750230e82ea6e03516e9f4bfae09c1737c1d5e7/docs/openapi/schemas-pn-notification.yaml#/components/schemas/noticeCode"0
     ############################################################################################
     ###           STRUTTURE DATI DI PN-DELIVERY_PUSH OBSOLETE MA CHE DEVONO RESTARE          ###
     ############################################################################################

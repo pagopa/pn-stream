@@ -2,6 +2,7 @@ package it.pagopa.pn.stream.service.mapper;
 
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.InformalTimelineElementV1;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV28;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,27 @@ class TimelineElementMapperTest {
         TimelineElementInternal internalDto = buildInvalidTimelineElementInternal();
         Assertions.assertThrows(PnStreamException.class, () -> {
             TimelineElementMapper.internalToExternal(internalDto);
+        });
+    }
+
+    @Test
+    void internalToInformalExternal_validInput() {
+        TimelineElementInternal internalDto = buildTimelineElementInternal();
+        internalDto.setCategory("REQUEST_REFUSED");
+        InformalTimelineElementV1 result =
+                TimelineElementMapper.internalToInformalExternal(internalDto);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(internalDto.getTimelineElementId(), result.getElementId());
+        Assertions.assertEquals(internalDto.getTimestamp(), result.getTimestamp());
+    }
+
+    @Test
+    void internalToInformalExternal_invalidJson() {
+        TimelineElementInternal internalDto = buildInvalidTimelineElementInternal();
+
+        Assertions.assertThrows(PnStreamException.class, () -> {
+            TimelineElementMapper.internalToInformalExternal(internalDto);
         });
     }
 

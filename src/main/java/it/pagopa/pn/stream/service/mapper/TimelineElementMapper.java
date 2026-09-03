@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.SendingReceipt;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementCategoryV28;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementDetailsV28;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElementV28;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Objects;
@@ -52,5 +49,27 @@ public class TimelineElementMapper {
         return builder.build();
     }
 
+    public static InformalTimelineElementV1 internalToInformalExternal(TimelineElementInternal internalDto) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        InformalTimelineElementV1.InformalTimelineElementV1Builder builder;
+        try {
+            InformalTimelineElementV1 InformalTimelineElement = objectMapper.readValue(internalDto.getDetails(), InformalTimelineElementV1.class);
 
+            builder = InformalTimelineElementV1.builder()
+                    .category(internalDto.getCategory() != null ? InformalTimelineElementCategoryV1.fromValue(internalDto.getCategory()) : null)
+                    .elementId(internalDto.getTimelineElementId())
+                    .timestamp(internalDto.getTimestamp())
+                    .notificationSentAt(internalDto.getNotificationSentAt())
+                    .ingestionTimestamp(internalDto.getIngestionTimestamp())
+                    .eventTimestamp(internalDto.getEventTimestamp())
+                    .details(InformalTimelineElement.getDetails());
+
+        } catch (JsonProcessingException e) {
+            throw new PnStreamException(e.getMessage(), 500, ERROR_CODE_GENERIC);
+        }
+
+        return builder.build();
+    }
 }
