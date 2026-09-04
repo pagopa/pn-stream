@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
-import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
-import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
+import it.pagopa.pn.stream.dto.*;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
@@ -59,6 +58,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private final SchedulerService schedulerService;
     private final TimelineService timelineService;
     private final ConfidentialInformationService confidentialInformationService;
+    private final StreamVersionsTable streamVersionsTable;
 
     private static final String LOG_MSG_JSON_COMPRESSION = "Error while compressing timeline elements into JSON for the audit";
 
@@ -68,7 +68,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    PnStreamConfigs pnStreamConfigs, TimelineService timeLineService,
                                    ConfidentialInformationService confidentialInformationService,
                                    StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive,
-                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao) {
+                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao, StreamVersionsTable streamVersionsTable) {
         super(streamEntityDao, pnStreamConfigs, streamUtils);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
@@ -78,6 +78,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         this.pnDeliveryClientReactive = pnDeliveryClientReactive;
         this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
         this.notificationUnlockedEntityDao = notificationUnlockedEntityDao;
+        this.streamVersionsTable = streamVersionsTable;
     }
 
     @Override
@@ -288,14 +289,14 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(this::constructAndSaveNotificationEntity));
     }
 
-    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV25 SentNotificationV25) {
+    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV26 SentNotificationV26) {
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
-        streamNotificationEntity.setHashKey(SentNotificationV25.getIun());
-        streamNotificationEntity.setGroup(SentNotificationV25.getGroup());
+        streamNotificationEntity.setHashKey(SentNotificationV26.getIun());
+        streamNotificationEntity.setGroup(SentNotificationV26.getGroup());
         streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
-        streamNotificationEntity.setCreationDate(SentNotificationV25.getSentAt());
+        streamNotificationEntity.setCreationDate(SentNotificationV26.getSentAt());
         return streamNotificationDao.putItem(streamNotificationEntity)
-                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV25.getIun()));
+                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV26.getIun()));
     }
 
     private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
@@ -385,22 +386,28 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .then();
     }
 
-    private Set<String> categoriesByVersion(int version) {
-        return Arrays.stream(TimelineElementCategoryInt.values())
-                .filter(e -> e.getVersion() <= TimelineElementCategoryInt.StreamVersions.fromIntValue(version).getTimelineVersion())
+    private Set<String> categoriesByVersion(int version, CommunicationType communicationType) {
+        TimelineElementCategoryInt.StreamVersions streamVersion = TimelineElementCategoryInt.StreamVersions.fromIntValue(version);
+        int timelineVersion = streamVersionsTable.getTimelineVersion(streamVersion, communicationType);
+
+        return Arrays.stream(TimelineElementCategoryInt.getSupportedCategoriesBy(communicationType))
+                .filter(e -> e.getVersionNonNull(communicationType) <= timelineVersion)
                 .map(Enum::name)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> statusByVersion(int version) {
-        return Arrays.stream(NotificationStatusInt.values())
-                .filter(e -> e.getVersion() <= TimelineElementCategoryInt.StreamVersions.fromIntValue(version).getStatusVersion())
+    private Set<String> statusByVersion(int version, CommunicationType communicationType) {
+        TimelineElementCategoryInt.StreamVersions streamVersion = TimelineElementCategoryInt.StreamVersions.fromIntValue(version);
+        int statusVersion = streamVersionsTable.getStatusVersion(streamVersion, communicationType);
+
+        return Arrays.stream(NotificationStatusInt.getSupportedCategoriesBy(communicationType))
+                .filter(e -> e.getVersionNonNull(communicationType) <= statusVersion)
                 .map(NotificationStatusInt::getValue)
                 .collect(Collectors.toSet());
     }
 
     private Set<String> categoriesByFilter(StreamEntity stream) {
-        Set<String> versionedCategoriesSet = categoriesByVersion(streamUtils.getVersion(stream.getVersion()));
+        Set<String> versionedCategoriesSet = categoriesByVersion(streamUtils.getVersion(stream.getVersion()), stream.getCommunicationType());
 
         if (CollectionUtils.isEmpty(stream.getFilterValues())) {
             return versionedCategoriesSet;
@@ -412,7 +419,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         if (stream.getFilterValues().contains(DEFAULT_CATEGORIES)) {
             log.debug("pnDeliveryPushConfigs.getListCategoriesPa[0]={}", pnStreamConfigs.getListCategoriesPa().get(0));
-            categoriesSet.addAll(pnStreamConfigs.getListCategoriesPa());
+            categoriesSet.addAll(stream.getCommunicationType() != null && CommunicationType.INFORMAL.equals(stream.getCommunicationType()) ? pnStreamConfigs.getListInformalCategoriesPa() : pnStreamConfigs.getListCategoriesPa());
         }
 
         return categoriesSet.stream()
@@ -421,7 +428,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
     private Set<String> statusByFilter(StreamEntity stream) {
-        Set<String> versionedStatusSet = statusByVersion(streamUtils.getVersion(stream.getVersion()));
+        Set<String> versionedStatusSet = statusByVersion(streamUtils.getVersion(stream.getVersion()), stream.getCommunicationType());
         if (CollectionUtils.isEmpty(stream.getFilterValues())) {
             return versionedStatusSet;
         }
