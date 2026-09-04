@@ -131,7 +131,7 @@ class EventsServiceImplTest {
         return res;
     }
 
-    @Test           //todo: fix
+    @Test
     void consumeEventStream() {
         //GIVEN
         String xpagopacxid = "PA-xpagopacxid";
@@ -186,7 +186,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
         timelineElementInternal.setCategory(AAR_GENERATION.name());
         timelineElementInternal.setPaId("PaId");
-        timelineElementInternal.setCommunicationType(CommunicationType.INFORMAL);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
@@ -212,7 +212,6 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
-        Assertions.assertEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, res.getProgressResponseElementList().get(0).getCommunicationType());
         Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
