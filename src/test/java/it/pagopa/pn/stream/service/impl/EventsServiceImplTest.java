@@ -1,12 +1,10 @@
 package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.commons.exceptions.PnInternalException;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
-import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
-import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
-import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
+import it.pagopa.pn.stream.dto.*;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.address.PhysicalAddressInt;
 import it.pagopa.pn.stream.dto.ext.datavault.ConfidentialTimelineElementDtoInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
@@ -29,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -74,6 +73,8 @@ class EventsServiceImplTest {
     private UnlockedNotificationEntityDao notificationUnlockedEntityDao;
     @Mock
     private EventsQuarantineEntityDao eventsQuarantineEntityDao;
+    @Spy
+    private StreamVersionsTable streamVersionsTable;
 
     Duration d = Duration.ofSeconds(3);
 
@@ -106,6 +107,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(t0)
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
@@ -114,6 +116,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("REFUSED").statusChanged(true).build())
                 .timestamp(t0.plusMillis(1000))
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
@@ -122,6 +125,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(t0.plusMillis(1000))
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         return res;
@@ -228,6 +232,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
         List<EventEntity> list = new ArrayList<>();
         EventEntity eventEntity = new EventEntity();
@@ -268,6 +273,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
@@ -314,6 +320,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -356,7 +363,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
-
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
                 .timelineElementId("id")
@@ -437,6 +444,7 @@ class EventsServiceImplTest {
         entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -479,6 +487,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         lasteventid = list.get(0).getEventId();
 
@@ -590,6 +599,7 @@ class EventsServiceImplTest {
         entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -632,6 +642,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         StreamRetryAfter streamRetryAfter = new StreamRetryAfter();
         streamRetryAfter.setPaId(xpagopacxid);
@@ -933,6 +944,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setGroups(groupsList);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -944,6 +956,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setGroups(groupsList);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -962,6 +975,7 @@ class EventsServiceImplTest {
         notificationInt.setGroup(authGroup);
 
         TimelineElementInternal timelineElementInternal = Mockito.mock(TimelineElementInternal.class);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         Mockito.when(timelineElementInternal.getCategory()).thenReturn(TimelineElementCategoryInt.REQUEST_ACCEPTED.name());
 
         Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
@@ -1035,6 +1049,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1046,6 +1061,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1096,6 +1112,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         TimelineElementInternal newtimeline = TimelineElementInternal.builder()
@@ -1105,6 +1122,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         StreamNotificationEntity notificationInt = new StreamNotificationEntity();
@@ -1140,6 +1158,7 @@ class EventsServiceImplTest {
         entity.getFilterValues().add(NotificationStatusInt.ACCEPTED.getValue());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1150,6 +1169,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1205,6 +1225,7 @@ class EventsServiceImplTest {
         entity.setVersion("V23");
         entity.setEventAtomicCounter(1L);
         entity.setSorting(false);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1217,6 +1238,7 @@ class EventsServiceImplTest {
         entity.setEventAtomicCounter(2L);
         entity.setSorting(false);
         entity.setVersion("V23");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1284,6 +1306,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1295,6 +1318,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1314,6 +1338,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLATION_REQUEST )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1322,6 +1347,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLED )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1330,6 +1356,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.PROBABLE_SCHEDULING_ANALOG_DATE )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
@@ -1396,6 +1423,7 @@ class EventsServiceImplTest {
         streamEntity.setActivationDate(Instant.now());
         streamEntity.setEventAtomicCounter(1L);
         streamEntity.setGroups(groupsList);
+        streamEntity.setCommunicationType(CommunicationType.LEGAL);
         streamEntityList.add(streamEntity);
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid))
@@ -1462,6 +1490,7 @@ class EventsServiceImplTest {
         streamEntity.setEventAtomicCounter(1L);
         streamEntity.setVersion("V23");
         streamEntity.setGroups(groupsList);
+        streamEntity.setCommunicationType(CommunicationType.LEGAL);
         streamEntityList.add(streamEntity);
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid))
@@ -1471,7 +1500,7 @@ class EventsServiceImplTest {
         Mockito.when(timelineElementInternal.getCategory())
                 .thenReturn(TimelineElementCategoryInt.REQUEST_ACCEPTED.name());
 
-        SentNotificationV25 sentNotification = new SentNotificationV25();
+        SentNotificationV26 sentNotification = new SentNotificationV26();
         sentNotification.setGroup(authGroup);
         StreamNotificationEntity streamNotification = new StreamNotificationEntity();
         streamNotification.setGroup(authGroup);
@@ -1516,6 +1545,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
@@ -1532,6 +1562,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SENDER_ACK_CREATION_REQUEST )
                 .statusInfo(StatusInfoInternal.builder().actual("IN_VALIDATION").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
@@ -1569,6 +1600,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1588,6 +1620,7 @@ class EventsServiceImplTest {
                 .notificationSentAt(Instant.now())
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         NotificationUnlockedEntity unlockNotification = new NotificationUnlockedEntity();
@@ -1627,6 +1660,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1645,6 +1679,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now().minus(Duration.ofHours(48)));
@@ -1686,6 +1721,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1704,6 +1740,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.REQUEST_ACCEPTED )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1745,6 +1782,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1763,6 +1801,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1807,6 +1846,7 @@ class EventsServiceImplTest {
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
         entity.setActivationDate(Instant.now().plus(Duration.ofDays(1)));
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1826,6 +1866,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
                 .notificationSentAt(Instant.now())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1864,6 +1905,7 @@ class EventsServiceImplTest {
         entity.setEventAtomicCounter(1L);
         entity.setSorting(false);
         entity.setActivationDate(Instant.now().plus(Duration.ofDays(1)));
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1883,6 +1925,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
                 .notificationSentAt(Instant.now())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
