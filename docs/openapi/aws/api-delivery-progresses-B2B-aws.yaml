@@ -4087,6 +4087,12 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
           $ref: '#/components/schemas/NotificationStatusV26'
+        communicationType:
+          description: Tipologia di comunicazione dell'evento di timeline
+          type: string
+          enum:
+            - INFORMAL
+            - LEGAL
         element:
           $ref: '#/components/schemas/TimelineElementV28'
     ProblemError:

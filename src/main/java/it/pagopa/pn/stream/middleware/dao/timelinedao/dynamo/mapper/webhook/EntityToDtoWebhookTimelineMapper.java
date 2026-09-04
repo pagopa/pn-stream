@@ -19,6 +19,7 @@ public class EntityToDtoWebhookTimelineMapper {
                 .iun(entity.getIun())
                 .timelineElementId( entity.getTimelineElementId() )
                 .category( entity.getCategory() )
+                .communicationType(entity.getCommunicationType())
                 .details(objectMapper.writeValueAsString(entity.getDetails()))
                 .legalFactId(  entity.getLegalFactIds() )
                 .statusInfo(entityToStatusInfoInternal(entity.getStatusInfo()))

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.CustomPaConfiguration;
 import it.pagopa.pn.stream.dto.PaConfiguration;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
@@ -98,6 +99,30 @@ class StreamUtilsTest {
         assertEquals(StringUtils.leftPad("1", 38, "0"), eventEntity.getEventId());
         assertNotNull(eventEntity.getElement());
         assertNotNull(eventEntity.getTtl());
+    }
+
+    @Test
+    void buildEventEntity_roundTripCommunicationType() {
+        String iun = "IUN-ABC-123";
+        String xpagopacxid = "PF-123456";
+
+        TimelineElementInternal timelineElementInternal = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name())
+                .iun(iun)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE)
+                .timestamp(Instant.now())
+                .paId(xpagopacxid)
+                .communicationType(CommunicationType.INFORMAL)
+                .details("{\"recIndex\":\"0\"}")
+                .build();
+
+        StreamEntity streamEntity = new StreamEntity("paid", "abc");
+        EventEntity eventEntity = streamUtils.buildEventEntity(1L, streamEntity, "ACCEPTED", timelineElementInternal);
+
+        TimelineElementInternal restored = streamUtils.getTimelineInternalFromEvent(eventEntity);
+
+        assertNotNull(restored);
+            assertEquals(CommunicationType.INFORMAL, restored.getCommunicationType());
     }
 
 

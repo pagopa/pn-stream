@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
@@ -26,7 +26,7 @@ import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamEventsService;
 import it.pagopa.pn.stream.service.TimelineService;
 import it.pagopa.pn.stream.service.mapper.ProgressResponseElementMapper;
-import it.pagopa.pn.stream.service.mapper.TimelineElementStreamMapper;
+import it.pagopa.pn.stream.service.mapper.TimelineElementMapper;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import it.pagopa.pn.stream.utils.MetricUtils;
 import lombok.CustomLog;
@@ -156,7 +156,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         items.forEach(item -> {
             String iun = item.getIun();
             List<String> elements = iunWithTimelineElementId.get(iun);
-            String description = item.getElement().getTimestamp() + "_" + item.getElement().getElementId();
+            String description = item.getElement() != null
+                    ? item.getElement().getTimestamp() + "_" + item.getElement().getElementId()
+                    : item.getInformalElement().getTimestamp() + "_" + item.getInformalElement().getElementId();
             description = description.replace(".IUN_" + iun, "");
 
             if (elements == null) {
@@ -187,11 +189,35 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
     private ProgressResponseElementV30 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
-        var response = ProgressResponseElementMapper.internalToExternal(eventTimeline.getEventEntity());
-        if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
-            TimelineElementV28 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());
-            response.setElement(timelineElement);
+        var timelineElementInternal = eventTimeline.getTimelineElementInternal();
+        ProgressResponseElementV30 response = eventTimeline.getEventEntity() != null
+                ? ProgressResponseElementMapper.internalToExternal(eventTimeline.getEventEntity())
+                : new ProgressResponseElementV30();
+
+        if (timelineElementInternal != null) {
+            response.setCommunicationType(CommunicationType.valueOf(timelineElementInternal.getCommunicationType().name()));
+
+            if (timelineElementInternal.getCommunicationType().equals(it.pagopa.pn.stream.dto.CommunicationType.INFORMAL)) {
+                response = ProgressResponseElementMapper.internalToInformalExternal(eventTimeline.getEventEntity());
+                response.setCommunicationType(CommunicationType.valueOf(timelineElementInternal.getCommunicationType().name()));
+
+                if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
+                    InformalTimelineElementV1 informalTimelineElement = TimelineElementMapper.internalToInformalExternal(timelineElementInternal);
+                    response.setInformalElement(informalTimelineElement);
+                    response.setInformalTimelineEventCategory(InformalTimelineElementCategoryV1.valueOf(timelineElementInternal.getCategory()));
+                }
+
+                return response;
+            }
+
+            if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
+                TimelineElementV28 timelineElement = TimelineElementMapper.internalToExternal(timelineElementInternal);
+                response.setElement(timelineElement);
+                response.setTimelineEventCategory(TimelineElementCategoryV28.valueOf(timelineElementInternal.getCategory()));
+                response.setCommunicationType(CommunicationType.valueOf(timelineElementInternal.getCommunicationType().name()));
+            }
         }
+
         return response;
     }
 
@@ -218,6 +244,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
+                .filter(entity -> entity.getCommunicationType().equals(timelineElementInternal.getCommunicationType()))
                 .collectList()
                 .flatMap(stream -> {
                     if (stream.isEmpty()) {
@@ -288,14 +315,14 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                         .flatMap(this::constructAndSaveNotificationEntity));
     }
 
-    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV25 SentNotificationV25) {
+    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV26 SentNotificationV26) {
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
-        streamNotificationEntity.setHashKey(SentNotificationV25.getIun());
-        streamNotificationEntity.setGroup(SentNotificationV25.getGroup());
+        streamNotificationEntity.setHashKey(SentNotificationV26.getIun());
+        streamNotificationEntity.setGroup(SentNotificationV26.getGroup());
         streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
-        streamNotificationEntity.setCreationDate(SentNotificationV25.getSentAt());
+        streamNotificationEntity.setCreationDate(SentNotificationV26.getSentAt());
         return streamNotificationDao.putItem(streamNotificationEntity)
-                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV25.getIun()));
+                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV26.getIun()));
     }
 
     private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
@@ -461,7 +488,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     protected Mono<List<ProgressResponseElementV30>> checkIfReworkElementAndAddConfidentialInfoToRelated(List<ProgressResponseElementV30> progressResponseElementsV30) {
         List<ProgressResponseElementV30> reworkElements = progressResponseElementsV30.stream()
-                .filter(element -> element.getElement().getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED))
+                .filter(element -> TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED.equals(element.getTimelineEventCategory()))
                 .toList();
 
         if (CollectionUtils.isEmpty(reworkElements)) {

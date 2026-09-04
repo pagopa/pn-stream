@@ -1,8 +1,9 @@
 package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.commons.exceptions.PnInternalException;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
 import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
@@ -106,6 +107,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(t0)
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
@@ -114,6 +116,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("REFUSED").statusChanged(true).build())
                 .timestamp(t0.plusMillis(1000))
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
@@ -122,6 +125,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(t0.plusMillis(1000))
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         return res;
@@ -182,6 +186,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
         timelineElementInternal.setCategory(AAR_GENERATION.name());
         timelineElementInternal.setPaId("PaId");
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
@@ -212,6 +217,144 @@ class EventsServiceImplTest {
     }
 
     @Test
+    void consumeEventStream_whenInformalCommunicationType_shouldPopulateInformalElement() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        List<String> xPagopaPnCxGroups = new ArrayList<>();
+        String xPagopaPnApiVersion = "v10";
+
+        UUID uuidd = UUID.randomUUID();
+        String uuid = uuidd.toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle("");
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setVersion("v10");
+
+        List<EventEntity> list = new ArrayList<>();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setNewStatus(NotificationStatusInt.ACCEPTED.getValue());
+        eventEntity.setTimelineEventCategory(InformalTimelineElementCategoryV1.REQUEST_ACCEPTED.name());
+        eventEntity.setIun("");
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(uuid);
+        eventEntity.setEventDescription("2025-01-17T15:51:42.217434925Z_SEND_DIGITAL_FEEDBACK.IUN_DHZW-LJLR-RKXT-202501-D-1.RECINDEX_0.SOURCE_PLATFORM.REPEAT_false.ATTEMPT_0");
+        eventEntity.setElement("{\"timelineElementId\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST.IUN_EWEU-VWQE-DQTL-202501-R-1\",\"iun\":\"EWEU-VWQE-DQTL-202501-R-1\",\"statusInfo\":{\"actual\":\"IN_VALIDATION\",\"statusChangeTimestamp\":\"2025-01-28T10:51:30.521908236Z\",\"statusChanged\":false},\"notificationSentAt\":\"2025-01-28T10:51:30.521908236Z\",\"ingestionTimestamp\":\"2025-01-28T10:52:00.126937484Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"legalFactIds\":[],\"details\":{\"nextSourceAttemptsMade\":0},\"category\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST\",\"timestamp\":\"2025-01-28T10:52:00.126937484Z\",\"eventTimestamp\":\"2025-01-28T10:52:00.126937484Z\"}");
+        list.add(eventEntity);
+
+        EventEntityBatch eventEntityBatch = new EventEntityBatch();
+        eventEntityBatch.setEvents(list);
+        eventEntityBatch.setStreamId(uuid);
+        eventEntityBatch.setLastEventIdRead(null);
+
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimelineElementId("id");
+        timelineElementInternal.setTimestamp(Instant.now());
+        timelineElementInternal.setIun("Iun");
+        timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
+        timelineElementInternal.setCategory(InformalTimelineElementCategoryV1.REQUEST_ACCEPTED.name());
+        timelineElementInternal.setPaId("PaId");
+        timelineElementInternal.setCommunicationType(CommunicationType.INFORMAL);
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
+        timelineElementInternal.setStatusInfo(null);
+
+        when(webhookUtils.getVersion("v10")).thenReturn(10);
+        when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
+        when(eventEntityDao.findByStreamId(uuid, "00000000000000000000000000000000000001")).thenReturn(Mono.just(eventEntityBatch));
+        when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
+
+        //WHEN
+        ProgressResponseElementDto res = webhookEventsService.consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, uuidd, "00000000000000000000000000000000000001").block(d);
+
+        //THEN
+        assertNotNull(res);
+        ProgressResponseElementV30 element = res.getProgressResponseElementList().get(0);
+
+        Assertions.assertEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, element.getCommunicationType());
+        Assertions.assertNotNull(element.getInformalElement(), "informalElement deve essere valorizzato per CommunicationType.INFORMAL");
+        Assertions.assertNull(element.getElement(), "element deve restare null per CommunicationType.INFORMAL");
+        Assertions.assertEquals(InformalTimelineElementCategoryV1.REQUEST_ACCEPTED, element.getInformalTimelineEventCategory());
+        Assertions.assertNull(element.getTimelineEventCategory(), "timelineEventCategory deve restare null per CommunicationType.INFORMAL");
+
+        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void consumeEventStream_whenLegalCommunicationType_shouldPopulateElement() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        List<String> xPagopaPnCxGroups = new ArrayList<>();
+        String xPagopaPnApiVersion = "v10";
+
+        UUID uuidd = UUID.randomUUID();
+        String uuid = uuidd.toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle("");
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setVersion("v10");
+
+        List<EventEntity> list = new ArrayList<>();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setNewStatus(NotificationStatusInt.ACCEPTED.getValue());
+        eventEntity.setTimelineEventCategory(AAR_GENERATION.name());
+        eventEntity.setIun("");
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(uuid);
+        eventEntity.setEventDescription("2025-01-17T15:51:42.217434925Z_SEND_DIGITAL_FEEDBACK.IUN_DHZW-LJLR-RKXT-202501-D-1.RECINDEX_0.SOURCE_PLATFORM.REPEAT_false.ATTEMPT_0");
+        eventEntity.setElement("{\"timelineElementId\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST.IUN_EWEU-VWQE-DQTL-202501-R-1\",\"iun\":\"EWEU-VWQE-DQTL-202501-R-1\",\"statusInfo\":{\"actual\":\"IN_VALIDATION\",\"statusChangeTimestamp\":\"2025-01-28T10:51:30.521908236Z\",\"statusChanged\":false},\"notificationSentAt\":\"2025-01-28T10:51:30.521908236Z\",\"ingestionTimestamp\":\"2025-01-28T10:52:00.126937484Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"legalFactIds\":[],\"details\":{\"nextSourceAttemptsMade\":0},\"category\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST\",\"timestamp\":\"2025-01-28T10:52:00.126937484Z\",\"eventTimestamp\":\"2025-01-28T10:52:00.126937484Z\"}");
+        list.add(eventEntity);
+
+        EventEntityBatch eventEntityBatch = new EventEntityBatch();
+        eventEntityBatch.setEvents(list);
+        eventEntityBatch.setStreamId(uuid);
+        eventEntityBatch.setLastEventIdRead(null);
+
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimelineElementId("id");
+        timelineElementInternal.setTimestamp(Instant.now());
+        timelineElementInternal.setIun("Iun");
+        timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
+        timelineElementInternal.setCategory(AAR_GENERATION.name());
+        timelineElementInternal.setPaId("PaId");
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
+        timelineElementInternal.setStatusInfo(null);
+
+        when(webhookUtils.getVersion("v10")).thenReturn(10);
+        when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
+        when(eventEntityDao.findByStreamId(uuid, "00000000000000000000000000000000000001")).thenReturn(Mono.just(eventEntityBatch));
+        when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
+
+        //WHEN
+        ProgressResponseElementDto res = webhookEventsService.consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, uuidd, "00000000000000000000000000000000000001").block(d);
+
+        //THEN
+        assertNotNull(res);
+        ProgressResponseElementV30 element = res.getProgressResponseElementList().get(0);
+
+        Assertions.assertNotEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, element.getCommunicationType());
+        Assertions.assertNotNull(element.getElement(), "element deve essere valorizzato per comunicazioni non-INFORMAL");
+        Assertions.assertNull(element.getInformalElement(), "informalElement deve restare null per comunicazioni non-INFORMAL");
+        Assertions.assertEquals(TimelineElementCategoryV28.AAR_GENERATION, element.getTimelineEventCategory());
+        Assertions.assertNull(element.getInformalTimelineEventCategory(), "informalTimelineEventCategory deve restare null per comunicazioni non-INFORMAL");
+
+        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
     void consumeEventStreamWithLastEventId() {
         //GIVEN
         String xpagopacxid = "PA-xpagopacxid";
@@ -228,6 +371,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
         List<EventEntity> list = new ArrayList<>();
         EventEntity eventEntity = new EventEntity();
@@ -268,6 +412,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
@@ -314,6 +459,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -356,7 +502,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
-
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
                 .timelineElementId("id")
@@ -437,6 +583,7 @@ class EventsServiceImplTest {
         entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -479,6 +626,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         lasteventid = list.get(0).getEventId();
 
@@ -590,6 +738,7 @@ class EventsServiceImplTest {
         entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -632,6 +781,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         StreamRetryAfter streamRetryAfter = new StreamRetryAfter();
         streamRetryAfter.setPaId(xpagopacxid);
@@ -933,6 +1083,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setGroups(groupsList);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -944,6 +1095,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setGroups(groupsList);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -962,6 +1114,7 @@ class EventsServiceImplTest {
         notificationInt.setGroup(authGroup);
 
         TimelineElementInternal timelineElementInternal = Mockito.mock(TimelineElementInternal.class);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         Mockito.when(timelineElementInternal.getCategory()).thenReturn(TimelineElementCategoryInt.REQUEST_ACCEPTED.name());
 
         Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
@@ -1035,6 +1188,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1046,6 +1200,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1096,6 +1251,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         TimelineElementInternal newtimeline = TimelineElementInternal.builder()
@@ -1105,6 +1261,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         StreamNotificationEntity notificationInt = new StreamNotificationEntity();
@@ -1118,6 +1275,69 @@ class EventsServiceImplTest {
         Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
         Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
         Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+    }
+
+    @Test
+    void saveEventFiltersByCommunicationType() {
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-ABC-FGHI-A-1";
+
+        List<StreamEntity> list = new ArrayList<>();
+        StreamEntity legalStream = new StreamEntity();
+        legalStream.setStreamId(UUID.randomUUID().toString());
+        legalStream.setTitle("1");
+        legalStream.setPaId(xpagopacxid);
+        legalStream.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
+        legalStream.setFilterValues(new HashSet<>());
+        legalStream.setActivationDate(Instant.now());
+        legalStream.setEventAtomicCounter(1L);
+        legalStream.setCommunicationType(CommunicationType.LEGAL);
+        list.add(legalStream);
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setTitle("2");
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(2L);
+        informalStream.setCommunicationType(CommunicationType.INFORMAL);
+        list.add(informalStream);
+
+        TimelineElementInternal newtimeline = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name())
+                .iun(iun)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE)
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .paId(xpagopacxid)
+                .communicationType(CommunicationType.INFORMAL)
+                .build();
+
+        StreamNotificationEntity notificationInt = new StreamNotificationEntity();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + newtimeline.getTimelineElementId());
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setTimelineEventCategory(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name());
+        eventEntity.setNewStatus(NotificationStatusInt.DELIVERING.getValue());
+        eventEntity.setIun(iun);
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(informalStream.getStreamId());
+
+        when(webhookUtils.getVersion(anyString())).thenReturn(10);
+        when(webhookUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
+        when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(list));
+        when(streamEntityDao.updateAndGetAtomicCounter(argThat(entity -> entity != null && entity.getStreamId().equals(informalStream.getStreamId())))).thenReturn(Mono.just(2L));
+        when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(new EventEntity()));
+        when(streamNotificationDao.findByIun(anyString())).thenReturn(Mono.just(notificationInt));
+
+        webhookEventsService.saveEvent(newtimeline).block(d);
+
+        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
+        Mockito.verify(streamEntityDao, Mockito.times(1)).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(informalStream.getStreamId())));
+        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(legalStream.getStreamId())));
+        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
     }
 
 
@@ -1140,6 +1360,7 @@ class EventsServiceImplTest {
         entity.getFilterValues().add(NotificationStatusInt.ACCEPTED.getValue());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1150,6 +1371,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1205,6 +1427,7 @@ class EventsServiceImplTest {
         entity.setVersion("V23");
         entity.setEventAtomicCounter(1L);
         entity.setSorting(false);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1217,6 +1440,7 @@ class EventsServiceImplTest {
         entity.setEventAtomicCounter(2L);
         entity.setSorting(false);
         entity.setVersion("V23");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1284,6 +1508,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
@@ -1295,6 +1520,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1314,6 +1540,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLATION_REQUEST )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1322,6 +1549,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLED )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1330,6 +1558,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.PROBABLE_SCHEDULING_ANALOG_DATE )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
@@ -1396,6 +1625,7 @@ class EventsServiceImplTest {
         streamEntity.setActivationDate(Instant.now());
         streamEntity.setEventAtomicCounter(1L);
         streamEntity.setGroups(groupsList);
+        streamEntity.setCommunicationType(CommunicationType.LEGAL);
         streamEntityList.add(streamEntity);
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid))
@@ -1462,6 +1692,7 @@ class EventsServiceImplTest {
         streamEntity.setEventAtomicCounter(1L);
         streamEntity.setVersion("V23");
         streamEntity.setGroups(groupsList);
+        streamEntity.setCommunicationType(CommunicationType.LEGAL);
         streamEntityList.add(streamEntity);
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid))
@@ -1471,7 +1702,7 @@ class EventsServiceImplTest {
         Mockito.when(timelineElementInternal.getCategory())
                 .thenReturn(TimelineElementCategoryInt.REQUEST_ACCEPTED.name());
 
-        SentNotificationV25 sentNotification = new SentNotificationV25();
+        SentNotificationV26 sentNotification = new SentNotificationV26();
         sentNotification.setGroup(authGroup);
         StreamNotificationEntity streamNotification = new StreamNotificationEntity();
         streamNotification.setGroup(authGroup);
@@ -1516,6 +1747,7 @@ class EventsServiceImplTest {
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
@@ -1532,6 +1764,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SENDER_ACK_CREATION_REQUEST )
                 .statusInfo(StatusInfoInternal.builder().actual("IN_VALIDATION").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
@@ -1569,6 +1802,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1588,6 +1822,7 @@ class EventsServiceImplTest {
                 .notificationSentAt(Instant.now())
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         NotificationUnlockedEntity unlockNotification = new NotificationUnlockedEntity();
@@ -1627,6 +1862,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1645,6 +1881,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now().minus(Duration.ofHours(48)));
@@ -1686,6 +1923,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1704,6 +1942,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.REQUEST_ACCEPTED )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1745,6 +1984,7 @@ class EventsServiceImplTest {
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1763,6 +2003,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1807,6 +2048,7 @@ class EventsServiceImplTest {
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
         entity.setActivationDate(Instant.now().plus(Duration.ofDays(1)));
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1826,6 +2068,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
                 .notificationSentAt(Instant.now())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1864,6 +2107,7 @@ class EventsServiceImplTest {
         entity.setEventAtomicCounter(1L);
         entity.setSorting(false);
         entity.setActivationDate(Instant.now().plus(Duration.ofDays(1)));
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1883,6 +2127,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
                 .notificationSentAt(Instant.now())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
