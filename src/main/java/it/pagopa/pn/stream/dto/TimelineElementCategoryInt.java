@@ -62,7 +62,24 @@ public enum TimelineElementCategoryInt {
     NOTIFICATION_TIMELINE_REWORKED(TimelineElementCategoryInt.VERSION_28),
     NOTIFICATION_COST_VALIDATION_REQUEST(TimelineElementCategoryInt.VERSION_28),
     NOTIFICATION_COST_VALIDATION_RESPONSE(TimelineElementCategoryInt.VERSION_28),
-    COURTESY_CHANNEL_FAILED(TimelineElementCategoryInt.VERSION_28);
+    COURTESY_CHANNEL_FAILED(TimelineElementCategoryInt.VERSION_28),
+    //Timeline Element for Informal Notification
+    SEND_DIGITAL_MESSAGE(TimelineElementCategoryInt.VERSION_10),
+    SEND_DIGITAL_MESSAGE_SKIP(TimelineElementCategoryInt.VERSION_10),
+    SEND_DIGITAL_MESSAGE_PROGRESS(TimelineElementCategoryInt.VERSION_10),
+    SEND_DIGITAL_MESSAGE_FEEDBACK(TimelineElementCategoryInt.VERSION_10),
+    PREPARE_ANALOG_DELIVERY(TimelineElementCategoryInt.VERSION_10),
+    SEND_ANALOG_MESSAGE(TimelineElementCategoryInt.VERSION_10),
+    SEND_ANALOG_MESSAGE_PROGRESS(TimelineElementCategoryInt.VERSION_10),
+    SEND_ANALOG_MESSAGE_FEEDBACK(TimelineElementCategoryInt.VERSION_10),
+    DELIVERED(TimelineElementCategoryInt.VERSION_10),
+    WORKFLOW_ENDED_REACHED(TimelineElementCategoryInt.VERSION_10),
+    WORKFLOW_ENDED_UNREACHED(TimelineElementCategoryInt.VERSION_10),
+    WORKFLOW_ENDED_UNDELIVERABLE(TimelineElementCategoryInt.VERSION_10),
+    WORKFLOW_DONE_REACHED(TimelineElementCategoryInt.VERSION_10),
+    WORKFLOW_DONE_UNREACHED(TimelineElementCategoryInt.VERSION_10),
+    INFORMAL_NOTIFICATION_VIEWED(TimelineElementCategoryInt.VERSION_10),
+    COVERPAGE_CREATION_REQUEST(TimelineElementCategoryInt.VERSION_10);
 
 
     private final int version;
