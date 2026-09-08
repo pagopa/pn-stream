@@ -160,6 +160,7 @@ public enum TimelineElementCategoryInt {
 
     @Getter
     public enum StreamVersions {
+        // Per ogni nuova versione di stream, ricordarsi di aggiornare le configurazioni in StreamVersionsTable
         STREAM_V30(VERSION_30),
         STREAM_V29(VERSION_29),
         STREAM_V28(VERSION_28),
