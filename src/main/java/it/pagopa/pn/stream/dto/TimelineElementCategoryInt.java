@@ -103,7 +103,7 @@ public enum TimelineElementCategoryInt {
     public static TimelineElementCategoryInt[] getSupportedCategoriesBy(CommunicationType communicationType) {
         CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
         return Arrays.stream(TimelineElementCategoryInt.values())
-                .filter(category -> category.isSupportedBy(communicationType))
+                .filter(category -> category.isSupportedBy(defaultCommunicationType))
                 .toArray(TimelineElementCategoryInt[]::new);
     }
 
