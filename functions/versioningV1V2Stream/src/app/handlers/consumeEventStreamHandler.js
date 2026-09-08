@@ -7,6 +7,7 @@ const {createProgressResponseV24} = require("./mapper/transformProgressResponseF
 const {createProgressResponseV25} = require("./mapper/transformProgressResponseFromV26ToV25");
 const {createProgressResponseV27} = require("./mapper/transformProgressResponseFromV28ToV27");
 const {createProgressResponseV28} = require("./mapper/transformProgressResponseFromV29ToV28");
+const {createProgressResponseV29} = require("./mapper/transformProgressResponseFromV30ToV29");
 
 class ConsumeEventStreamHandler extends EventHandler {
     constructor() {
@@ -56,25 +57,28 @@ class ConsumeEventStreamHandler extends EventHandler {
                 switch(version) {
                     case 10:
                         console.debug('Mapping to v10')
-                        return createProgressResponseV10(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data))))));
+                        return createProgressResponseV10(createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(createProgressResponseV29(data)))))));
                     case 23:
                         console.debug('Mapping to v23')
-                        return createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)))));
+                        return createProgressResponseV23(createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(createProgressResponseV29(data))))));
                     case 24:
                         console.debug('Mapping to v24')
-                        return createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data))));
+                        return createProgressResponseV24(await createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(createProgressResponseV29(data)))));
                     case 25:
                         console.debug('Mapping to v25')
-                        return createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(data)));
+                        return createProgressResponseV25(createProgressResponseV27(createProgressResponseV28(createProgressResponseV29(data))));
                     case 26:
                         console.debug('Mapping to v26')
-                        return createProgressResponseV27(createProgressResponseV28(data));
+                        return createProgressResponseV27(createProgressResponseV28(createProgressResponseV29(data)));
                     case 27:
                         console.debug('Mapping to v27')
-                        return createProgressResponseV27(createProgressResponseV28(data));
+                        return createProgressResponseV27(createProgressResponseV28(createProgressResponseV29(data)));
                     case 28:
                         console.debug('Mapping to v28')
-                        return createProgressResponseV28(data);
+                        return createProgressResponseV28(createProgressResponseV29(data));
+                    case 29:
+                        console.debug('Mapping to v29')
+                        return createProgressResponseV29(data);
                     default:
                         console.error('Invalid version ', version)
                         return Promise.reject("unknown case");
