@@ -193,6 +193,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             TimelineElementV28 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());
             response.setElement(timelineElement);
         }
+        if (eventTimeline.getTimelineElementInternal() != null) {
+            response.setCommunicationType(CommunicationType.valueOf(eventTimeline.getTimelineElementInternal().getCommunicationType().name()));
+        }
         return response;
     }
 
@@ -219,6 +222,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
+                .filter(entity -> entity.getCommunicationType().equals(timelineElementInternal.getCommunicationType()))
                 .collectList()
                 .flatMap(stream -> {
                     if (stream.isEmpty()) {
