@@ -930,12 +930,8 @@ components:
           pattern: ^[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{6}-[A-Z]{1}-[0-9]{1}$
         newStatus:
           $ref: 'remote-refs.yaml#/components/schemas/NotificationStatusV26'
-        informalNewStatus:
-          $ref: 'remote-refs.yaml#/components/schemas/InformalNotificationStatusV1'
         element:
           $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV28'
-        informalElement:
-          $ref: 'remote-refs.yaml#/components/schemas/InformalTimelineElementV1'
         communicationType:
           $ref: '#/components/schemas/CommunicationType'
 
