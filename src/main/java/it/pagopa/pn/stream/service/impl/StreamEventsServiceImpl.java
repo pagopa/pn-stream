@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.*;
 import it.pagopa.pn.stream.dto.CommunicationType;
@@ -22,7 +21,6 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.So
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.*;
 import it.pagopa.pn.stream.service.mapper.ProgressResponseElementMapper;
-import it.pagopa.pn.stream.service.mapper.TimelineElementMapper;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import it.pagopa.pn.stream.utils.CommunicationTypeUtils;
 import it.pagopa.pn.stream.utils.MetricUtils;
@@ -111,7 +109,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                     return addConfidentialInformationAtEventTimelineList(removeDuplicatedItems(items));
                                 })
                                 // converto l'eventTimelineInternalDTO in ProgressResponseElementV30
-                                .map(this::getProgressResponseFromEventTimeline)
+                                .map(ProgressResponseElementMapper::internalToExternal)
                                 .collectList()
                                 .flatMap(this::checkIfReworkElementAndAddConfidentialInfoToRelated)
                                 .flatMapIterable(progressResponseElementV30s -> progressResponseElementV30s)
@@ -187,39 +185,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         retryAfterEntity.setRetryAfter(retryAfter);
         retryAfterEntity.setTtl(retryAfter.getEpochSecond());
         return retryAfterEntity;
-    }
-
-    private ProgressResponseElementV30 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
-        var timelineElementInternal = eventTimeline.getTimelineElementInternal();
-        ProgressResponseElementV30 response = eventTimeline.getEventEntity() != null
-                ? ProgressResponseElementMapper.internalToExternal(eventTimeline.getEventEntity())
-                : new ProgressResponseElementV30();
-
-        if (timelineElementInternal != null) {
-            response.setCommunicationType(CommunicationType.valueOf(timelineElementInternal.getCommunicationType().name()));
-
-            if (timelineElementInternal.getCommunicationType().equals(it.pagopa.pn.stream.dto.CommunicationType.INFORMAL)) {
-                response = ProgressResponseElementMapper.internalToInformalExternal(eventTimeline.getEventEntity());
-                response.setCommunicationType(CommunicationType.valueOf(timelineElementInternal.getCommunicationType().name()));
-
-                if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
-                    InformalTimelineElementV1 informalTimelineElement = TimelineElementMapper.internalToInformalExternal(timelineElementInternal);
-                    response.setInformalElement(informalTimelineElement);
-                    response.setInformalTimelineEventCategory(InformalTimelineElementCategoryV1.valueOf(timelineElementInternal.getCategory()));
-                }
-
-                return response;
-            }
-
-            if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
-                TimelineElementV28 timelineElement = TimelineElementMapper.internalToExternal(timelineElementInternal);
-                response.setElement(timelineElement);
-                response.setTimelineEventCategory(TimelineElementCategoryV28.valueOf(timelineElementInternal.getCategory()));
-                response.setCommunicationType(CommunicationType.valueOf(timelineElementInternal.getCommunicationType().name()));
-            }
-        }
-
-        return response;
     }
 
     private Flux<EventTimelineInternalDto> toEventTimelineInternalFromEventEntity(List<EventEntity> events) throws PnInternalException {

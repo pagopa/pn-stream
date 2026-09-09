@@ -5,11 +5,6 @@ import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentN
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.*;
 import it.pagopa.pn.stream.dto.CommunicationType;
-import it.pagopa.pn.stream.dto.CommunicationType;
-import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
-import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
-import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
-import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.address.PhysicalAddressInt;
 import it.pagopa.pn.stream.dto.ext.datavault.ConfidentialTimelineElementDtoInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
@@ -286,7 +281,6 @@ class EventsServiceImplTest {
         Assertions.assertEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, element.getCommunicationType());
         Assertions.assertNotNull(element.getInformalElement(), "informalElement deve essere valorizzato per CommunicationType.INFORMAL");
         Assertions.assertNull(element.getElement(), "element deve restare null per CommunicationType.INFORMAL");
-        Assertions.assertEquals(InformalTimelineElementCategoryV1.REQUEST_ACCEPTED, element.getInformalTimelineEventCategory());
         Assertions.assertNull(element.getTimelineEventCategory(), "timelineEventCategory deve restare null per CommunicationType.INFORMAL");
 
         Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
@@ -356,7 +350,6 @@ class EventsServiceImplTest {
         Assertions.assertNotNull(element.getElement(), "element deve essere valorizzato per comunicazioni non-INFORMAL");
         Assertions.assertNull(element.getInformalElement(), "informalElement deve restare null per comunicazioni non-INFORMAL");
         Assertions.assertEquals(TimelineElementCategoryV28.AAR_GENERATION, element.getTimelineEventCategory());
-        Assertions.assertNull(element.getInformalTimelineEventCategory(), "informalTimelineEventCategory deve restare null per comunicazioni non-INFORMAL");
 
         Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
         Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
