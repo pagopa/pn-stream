@@ -3,6 +3,8 @@ package it.pagopa.pn.stream.service.impl;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.dto.*;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
@@ -20,6 +22,7 @@ import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.service.ConfidentialInformationService;
+import it.pagopa.pn.stream.service.NotificationService;
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.TimelineService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -75,6 +79,10 @@ class EventsServiceImplTest {
     private UnlockedNotificationEntityDao notificationUnlockedEntityDao;
     @Mock
     private EventsQuarantineEntityDao eventsQuarantineEntityDao;
+    @Spy
+    private StreamVersionsTable streamVersionsTable;
+    @Mock
+    private NotificationService notificationService;
 
     Duration d = Duration.ofSeconds(3);
 
@@ -1166,6 +1174,7 @@ class EventsServiceImplTest {
         informalStream.setActivationDate(Instant.now());
         informalStream.setEventAtomicCounter(2L);
         informalStream.setCommunicationType(CommunicationType.INFORMAL);
+        informalStream.setVersion("30");
         list.add(informalStream);
 
         TimelineElementInternal newtimeline = TimelineElementInternal.builder()
@@ -1188,7 +1197,7 @@ class EventsServiceImplTest {
         eventEntity.setNotificationRequestId("");
         eventEntity.setStreamId(informalStream.getStreamId());
 
-        when(webhookUtils.getVersion(anyString())).thenReturn(10);
+        when(webhookUtils.getVersion(anyString())).thenReturn(30);
         when(webhookUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
         when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(list));
         when(streamEntityDao.updateAndGetAtomicCounter(argThat(entity -> entity != null && entity.getStreamId().equals(informalStream.getStreamId())))).thenReturn(Mono.just(2L));
@@ -1544,6 +1553,7 @@ class EventsServiceImplTest {
         List<StreamEntity> streamEntityList = new ArrayList<>();
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
+        CommunicationType communicationType = CommunicationType.LEGAL;
         StreamEntity streamEntity = new StreamEntity();
         streamEntity.setStreamId(uuid);
         streamEntity.setStreamId(uuid);
@@ -1555,7 +1565,7 @@ class EventsServiceImplTest {
         streamEntity.setEventAtomicCounter(1L);
         streamEntity.setVersion("V23");
         streamEntity.setGroups(groupsList);
-        streamEntity.setCommunicationType(CommunicationType.LEGAL);
+        streamEntity.setCommunicationType(communicationType);
         streamEntityList.add(streamEntity);
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid))
@@ -1570,7 +1580,7 @@ class EventsServiceImplTest {
         StreamNotificationEntity streamNotification = new StreamNotificationEntity();
         streamNotification.setGroup(authGroup);
         when(streamNotificationDao.findByIun(anyString())).thenReturn(Mono.empty());
-        when(pnDeliveryClientReactive.getSentNotification(anyString())).thenReturn(Mono.just(sentNotification));
+        when(notificationService.constructNotificationEntity(iun, communicationType)).thenReturn(Mono.just(streamNotification));
         when(streamNotificationDao.putItem(any())).thenReturn(Mono.just(streamNotification));
         Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 
@@ -1591,8 +1601,8 @@ class EventsServiceImplTest {
                 .updateAndGetAtomicCounter(Mockito.any());
         Mockito.verify(eventEntityDao, Mockito.times(1))
                 .save(Mockito.any());
-        Mockito.verify(pnDeliveryClientReactive, Mockito.times(1))
-                .getSentNotification(anyString());
+        Mockito.verify(notificationService, Mockito.times(1))
+                .constructNotificationEntity(iun, communicationType);
     }
 
     @Test
