@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: n+aCX4nGKkC50rkNsIpeMQ6mp32Sn6NdGnGMvyfCsPE=
+  version: rolMu45r+Pl5bW+a0w+T/76M7wMQl1Nah3Y/I5gN980=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -5020,7 +5020,7 @@ components:
           type: number
           description: Index destinatario notifica digitale
         digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
+          $ref: '#/components/schemas/DigitalAddress'
         endWorkflowStatus:
           $ref: '#/components/schemas/EndWorkflowStatus'
         completionWorkflowDate:
@@ -6066,36 +6066,36 @@ components:
       description: The raw event payload that will be different based on the event.
       oneOf:
         - $ref: '#/components/schemas/SenderAckCreationRequestDetails'
-        - $ref: '#/components/schemas/schemas-NormalizedAddressDetails'
+        - $ref: '#/components/schemas/NormalizedAddressDetails'
         - $ref: '#/components/schemas/NotificationRequestAcceptedDetailsV28'
         - $ref: '#/components/schemas/AnalogFailureWorkflowDetails'
-        - $ref: '#/components/schemas/schemas-AnalogSuccessWorkflowDetails'
+        - $ref: '#/components/schemas/AnalogSuccessWorkflowDetails'
         - $ref: '#/components/schemas/CompletelyUnreachableCreationRequestDetailsV28'
         - $ref: '#/components/schemas/CompletelyUnreachableDetails'
         - $ref: '#/components/schemas/DigitalDeliveryCreationRequestDetailsV28'
         - $ref: '#/components/schemas/DigitalFailureWorkflowDetails'
-        - $ref: '#/components/schemas/schemas-DigitalSuccessWorkflowDetails'
+        - $ref: '#/components/schemas/DigitalSuccessWorkflowDetails'
         - $ref: '#/components/schemas/GetAddressInfoDetails'
         - $ref: '#/components/schemas/NotificationViewedCreationRequestDetailsV28'
         - $ref: '#/components/schemas/NotificationViewedDetailsV23'
         - $ref: '#/components/schemas/NotificationRADDRetrievedDetails'
         - $ref: '#/components/schemas/PublicRegistryCallDetails'
-        - $ref: '#/components/schemas/schemas-PublicRegistryResponseDetails'
+        - $ref: '#/components/schemas/PublicRegistryResponseDetails'
         - $ref: '#/components/schemas/RefinementDetailsV23'
         - $ref: '#/components/schemas/RequestRefusedDetailsV27'
         - $ref: '#/components/schemas/ScheduleAnalogWorkflowDetailsV23'
-        - $ref: '#/components/schemas/schemas-ScheduleDigitalWorkflowDetailsV23'
+        - $ref: '#/components/schemas/ScheduleDigitalWorkflowDetailsV23'
         - $ref: '#/components/schemas/ScheduleRefinementDetails'
-        - $ref: '#/components/schemas/schemas-SendCourtesyMessageDetails'
-        - $ref: '#/components/schemas/schemas-PrepareDigitalDetails'
-        - $ref: '#/components/schemas/schemas-SendDigitalDetails'
-        - $ref: '#/components/schemas/schemas-SendDigitalFeedbackDetails'
-        - $ref: '#/components/schemas/schemas-SendDigitalProgressDetailsV23'
-        - $ref: '#/components/schemas/schemas-BaseAnalogDetails'
-        - $ref: '#/components/schemas/schemas-SendAnalogDetails'
-        - $ref: '#/components/schemas/schemas-SendAnalogFeedbackDetailsV25'
-        - $ref: '#/components/schemas/schemas-BaseRegisteredLetterDetails'
-        - $ref: '#/components/schemas/schemas-SimpleRegisteredLetterDetails'
+        - $ref: '#/components/schemas/SendCourtesyMessageDetails'
+        - $ref: '#/components/schemas/PrepareDigitalDetails'
+        - $ref: '#/components/schemas/SendDigitalDetails'
+        - $ref: '#/components/schemas/SendDigitalFeedbackDetails'
+        - $ref: '#/components/schemas/SendDigitalProgressDetailsV23'
+        - $ref: '#/components/schemas/BaseAnalogDetails'
+        - $ref: '#/components/schemas/SendAnalogDetails'
+        - $ref: '#/components/schemas/SendAnalogFeedbackDetailsV25'
+        - $ref: '#/components/schemas/BaseRegisteredLetterDetails'
+        - $ref: '#/components/schemas/SimpleRegisteredLetterDetails'
         - $ref: '#/components/schemas/AarCreationRequestDetails'
         - $ref: '#/components/schemas/AarGenerationDetails'
         - $ref: '#/components/schemas/NotHandledDetails'
@@ -6105,11 +6105,10 @@ components:
         - $ref: '#/components/schemas/ProbableDateAnalogWorkflowDetails'
         - $ref: '#/components/schemas/NotificationCancellationRequestDetails'
         - $ref: '#/components/schemas/NotificationCancelledDetails'
-        - $ref: '#/components/schemas/schemas-PrepareAnalogDomicileFailureDetails'
-        - $ref: >-
-            #/components/schemas/schemas-AnalogWorkflowRecipientDeceasedDetailsV26
+        - $ref: '#/components/schemas/PrepareAnalogDomicileFailureDetails'
+        - $ref: '#/components/schemas/AnalogWorkflowRecipientDeceasedDetailsV26'
         - $ref: '#/components/schemas/PublicRegistryValidationCallDetails'
-        - $ref: '#/components/schemas/schemas-PublicRegistryValidationResponseDetails'
+        - $ref: '#/components/schemas/PublicRegistryValidationResponseDetails'
         - $ref: '#/components/schemas/NotificationTimelineReworkedDetails'
     InformalTimelineElementCategoryV1:
       type: string
@@ -6163,101 +6162,6 @@ components:
         - INFORMAL_NOTIFICATION_VIEWED
         - COVERPAGE_CREATION_REQUEST
         - PAYMENT
-    schemas-DigitalAddress:
-      description: Indirizzo di invio della notifica
-      required:
-        - address
-        - type
-      type: object
-      properties:
-        type:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: tipo di indirizzo PEC, REM, SERCQ, SMS, EMAIL, APPIO ...
-        address:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: account@domain
-    schemas-PhysicalAddress:
-      type: object
-      required:
-        - address
-        - municipality
-      properties:
-        at:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: Campo "presso" dell'indirizzo
-        address:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: Indirizzo del domicilio fisico
-        addressDetails:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: Seconda riga dell'indirizzo fisico
-        zip:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: >-
-            Codice di avviamento postale. In caso di invio estero diventa
-            facoltativo
-        municipality:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: Comune in cui l'indirizzo si trova
-        municipalityDetails:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: Frazione o località
-        province:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: Provincia in cui si trova l'indirizzo
-        foreignState:
-          x-field-extra-annotation: '@lombok.ToString.Exclude'
-          type: string
-          description: Denominazione paese estero
-      description: Indirizzo fisico scoperto durante fase di consegna
-    schemas-PublicRegistryResponseDetails:
-      type: object
-      required:
-        - recIndex
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-    schemas-PublicRegistryValidationResponseDetails:
-      allOf:
-        - $ref: '#/components/schemas/schemas-PublicRegistryResponseDetails'
-        - type: object
-          properties:
-            registry:
-              type: string
-              description: >
-                Rappresenta il registro consultato per ottenere l'indirizzo. Può
-                assumere i seguenti valori:
-                  - ANPR
-                  - REGISTRO_IMPRESE
-              maxLength: 128
-    schemas-NormalizedAddressDetails:
-      type: object
-      required:
-        - recIndex
-        - oldAddress
-        - normalizedAddress
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        oldAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        normalizedAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
     RecIndex:
       type: number
       description: Index destinatario notifica digitale
@@ -6276,7 +6180,7 @@ components:
         recIndex:
           $ref: '#/components/schemas/RecIndex'
         digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
+          $ref: '#/components/schemas/DigitalAddress'
         digitalAddressSource:
           $ref: '#/components/schemas/DigitalAddressSource'
         channel:
@@ -6340,7 +6244,7 @@ components:
         deliveryDetail:
           $ref: '#/components/schemas/DigitalDeliveryDetail'
         digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
+          $ref: '#/components/schemas/DigitalAddress'
         digitalAddressSource:
           $ref: '#/components/schemas/DigitalAddressSource'
         channel:
@@ -6370,7 +6274,7 @@ components:
         recIndex:
           $ref: '#/components/schemas/RecIndex'
         digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
+          $ref: '#/components/schemas/DigitalAddress'
         digitalAddressSource:
           $ref: '#/components/schemas/DigitalAddressSource'
         responseStatus:
@@ -6407,7 +6311,7 @@ components:
         recIndex:
           $ref: '#/components/schemas/RecIndex'
         physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
+          $ref: '#/components/schemas/PhysicalAddress'
         serviceLevel:
           $ref: '#/components/schemas/ServiceLevel'
         deliveryType:
@@ -6431,7 +6335,7 @@ components:
         recIndex:
           $ref: '#/components/schemas/RecIndex'
         physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
+          $ref: '#/components/schemas/PhysicalAddress'
         serviceLevel:
           $ref: '#/components/schemas/ServiceLevel'
         deliveryType:
@@ -6557,14 +6461,14 @@ components:
         recIndex:
           $ref: '#/components/schemas/RecIndex'
         physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
+          $ref: '#/components/schemas/PhysicalAddress'
         serviceLevel:
           $ref: '#/components/schemas/ServiceLevel'
         sentAttemptMade:
           type: number
           description: numero dei tentativi effettuati
         newAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
+          $ref: '#/components/schemas/PhysicalAddress'
         deliveryDetail:
           $ref: '#/components/schemas/AnalogDeliveryDetail'
         deliveryType:
@@ -6738,8 +6642,8 @@ components:
       description: The raw event payload that will be different based on the event.
       oneOf:
         - $ref: '#/components/schemas/PublicRegistryValidationCallDetails'
-        - $ref: '#/components/schemas/schemas-PublicRegistryValidationResponseDetails'
-        - $ref: '#/components/schemas/schemas-NormalizedAddressDetails'
+        - $ref: '#/components/schemas/PublicRegistryValidationResponseDetails'
+        - $ref: '#/components/schemas/NormalizedAddressDetails'
         - $ref: '#/components/schemas/NotificationRequestAcceptedDetailsV28'
         - $ref: '#/components/schemas/RequestRefusedDetailsV27'
         - $ref: '#/components/schemas/SendDigitalMessageDetails'
@@ -8859,395 +8763,6 @@ components:
           $ref: '#/components/schemas/TimelineElementCategoryV27'
         details:
           $ref: '#/components/schemas/TimelineElementDetailsV27'
-    schemas-AnalogSuccessWorkflowDetails:
-      type: object
-      required:
-        - recIndex
-        - physicalAddress
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-    schemas-DigitalSuccessWorkflowDetails:
-      type: object
-      required:
-        - recIndex
-        - digitalAddress
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-    schemas-ScheduleDigitalWorkflowDetailsV23:
-      type: object
-      required:
-        - recIndex
-        - digitalAddressSource
-        - sentAttemptMade
-        - lastAttemptDate
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-        digitalAddressSource:
-          $ref: '#/components/schemas/DigitalAddressSource'
-        sentAttemptMade:
-          type: number
-        lastAttemptDate:
-          type: string
-          format: date-time
-        schedulingDate:
-          type: string
-          description: >-
-            Data prevista prossimo tentativo d'invio digitale per quella
-            specifica sorgente di indirizzo
-          format: date-time
-    schemas-SendCourtesyMessageDetails:
-      type: object
-      required:
-        - recIndex
-        - digitalAddress
-        - sendDate
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-        sendDate:
-          type: string
-          description: data invio messaggio di cortesia
-          format: date-time
-        ioSendMessageResult:
-          $ref: '#/components/schemas/IoSendMessageResult'
-    schemas-PrepareDigitalDetails:
-      type: object
-      required:
-        - recIndex
-        - digitalAddressSource
-        - retryNumber
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-        digitalAddressSource:
-          $ref: '#/components/schemas/DigitalAddressSource'
-        retryNumber:
-          type: number
-          description: numero dei tentativi effettuati
-        attemptDate:
-          type: string
-          description: data tentativo precedente
-          format: date-time
-        nextDigitalAddressSource:
-          $ref: '#/components/schemas/DigitalAddressSource'
-        nextSourceAttemptsMade:
-          type: number
-          description: numero del prossimo tentativo da effettuare
-        nextLastAttemptMadeForSource:
-          type: string
-          description: data tentativo precedente per prossimo source
-          format: date-time
-    schemas-SendDigitalDetails:
-      type: object
-      required:
-        - recIndex
-        - digitalAddress
-        - digitalAddressSource
-        - retryNumber
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-        digitalAddressSource:
-          $ref: '#/components/schemas/DigitalAddressSource'
-        retryNumber:
-          type: number
-          description: numero dei tentativi effettuati
-    schemas-SendDigitalFeedbackDetails:
-      type: object
-      required:
-        - recIndex
-        - digitalAddress
-        - responseStatus
-        - notificationDate
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-        responseStatus:
-          $ref: '#/components/schemas/ResponseStatus'
-        notificationDate:
-          type: string
-          description: data notifica
-          format: date-time
-        deliveryFailureCause:
-          description: Codice errore, vuoto in caso di successo
-          type: string
-        deliveryDetailCode:
-          type: string
-          description: |
-            Stato - Codice relativo all'evento - Descrizione:
-              - PROGRESS   C000 = PREACCETTAZIONE
-              - PROGRESS   C001 = ACCETTAZIONE
-              - PROGRESS   C005 = PRESA_IN_CARICO
-              - PROGRESS   C007 = PREAVVISO_ERRORE_CONSEGNA
-              - PROGRESS   DP00 = RE-INVIO PEC CAUSA FALLIMENTO TEMPORANEO
-              - PROGRESS   DP10 = TIMEOUT RICEZIONE RISULTATO
-              - ERROR      C002 = NON_ACCETTAZIONE
-              - ERROR      C004 = ERRORE_CONSEGNA
-              - ERROR      C006 = RILEVAZIONE_VIRUS
-              - ERROR      C008 = ERRORE_COMUNICAZIONE_SERVER_PEC
-              - ERROR      C009 = ERRORE_DOMINIO_PEC_NON_VALIDO
-              - ERROR      C010 = ERROR_INVIO_PEC
-              - OK         C003 = AVVENUTA_CONSEGNA
-        sendingReceipts:
-          type: array
-          items:
-            $ref: '#/components/schemas/SendingReceipt'
-    schemas-SendDigitalProgressDetailsV23:
-      type: object
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        deliveryFailureCause:
-          description: Codice errore, opzionale
-          type: string
-        deliveryDetailCode:
-          type: string
-          description: Vedi deliveryDetailCode in SendDigitalFeedbackDetails
-        shouldRetry:
-          type: boolean
-          description: indica se il progress ha dato luogo ad un ritentativo
-        digitalAddress:
-          $ref: '#/components/schemas/schemas-DigitalAddress'
-        digitalAddressSource:
-          $ref: '#/components/schemas/DigitalAddressSource'
-        notificationDate:
-          type: string
-          description: data notifica
-          format: date-time
-        sendingReceipts:
-          type: array
-          items:
-            $ref: '#/components/schemas/SendingReceipt'
-        retryNumber:
-          type: number
-          description: numero dei tentativi effettuati
-        eventTimestamp:
-          type: string
-          description: Data evento
-          format: date-time
-    schemas-BaseAnalogDetails:
-      type: object
-      required:
-        - recIndex
-        - physicalAddress
-        - serviceLevel
-        - sentAttemptMade
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        serviceLevel:
-          $ref: '#/components/schemas/ServiceLevel'
-        sentAttemptMade:
-          type: number
-          description: numero dei tentativi effettuati
-        relatedRequestId:
-          type: string
-          description: Id relativo alla eventuale precedente richiesta di invio cartaceo
-          maxLength: 512
-    schemas-SendAnalogDetails:
-      type: object
-      required:
-        - recIndex
-        - physicalAddress
-        - serviceLevel
-        - sentAttemptMade
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        serviceLevel:
-          $ref: '#/components/schemas/ServiceLevel'
-        sentAttemptMade:
-          type: number
-          description: numero dei tentativi effettuati
-        relatedRequestId:
-          type: string
-          description: Id relativo alla eventuale precedente richiesta di invio cartaceo
-          maxLength: 512
-        productType:
-          type: string
-          maxLength: 10
-          description: |
-            Tipo di invio cartaceo effettivamente inviato
-              - __AR__: Raccomandata nazionale Andata e Ritorno
-              - __890__: Recapito a norma della legge 890/1982
-              - __RIR__: Raccomandata internazionale Andata e Ritorno
-        analogCost:
-          type: number
-          description: costo in eurocent dell'invio
-        numberOfPages:
-          type: number
-          description: numero delle pagina che compongono la spedizione cartacea
-        envelopeWeight:
-          type: number
-          description: peso in grammi della busta
-        prepareRequestId:
-          type: string
-          description: request id della relativa richiesta di prepare
-          maxLength: 512
-    schemas-SendAnalogFeedbackDetailsV25:
-      type: object
-      required:
-        - recIndex
-        - physicalAddress
-        - serviceLevel
-        - sentAttemptMade
-        - responseStatus
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        serviceLevel:
-          $ref: '#/components/schemas/ServiceLevel'
-        sentAttemptMade:
-          type: number
-          description: numero dei tentativi effettuati
-        newAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        responseStatus:
-          $ref: '#/components/schemas/ResponseStatus'
-        notificationDate:
-          type: string
-          format: date-time
-        deliveryFailureCause:
-          type: string
-          maxLength: 10
-          description: >
-            i codici delle motivazioni di mancata consegna possono essere
-            consultati alla seguente
-            [pagina](https://developer.pagopa.it/send/guides/knowledge-base/v2.5/readme/creazione-e-gestione-degli-stream/stream-di-timeline/decodifiche-send_analog#decodifica-deliveryfailurecause)
-        deliveryDetailCode:
-          type: string
-          maxLength: 20
-          description: >
-            i codici di decodifica degli eventi di invio cartaceo possono essere
-            consultati alla seguente
-            [pagina](https://developer.pagopa.it/send/guides/knowledge-base/v2.5/readme/creazione-e-gestione-degli-stream/stream-di-timeline/decodifiche-send_analog#codici-send_analog_progress-comuni-a-tutte-le-tipologie)
-        attachments:
-          type: array
-          items:
-            $ref: '#/components/schemas/AttachmentDetails'
-        sendRequestId:
-          type: string
-          description: RequestId della richiesta d'invio
-          maxLength: 512
-        registeredLetterCode:
-          type: string
-          description: Codice della raccomandata
-          maxLength: 128
-    schemas-BaseRegisteredLetterDetails:
-      type: object
-      required:
-        - recIndex
-        - physicalAddress
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-    schemas-SimpleRegisteredLetterDetails:
-      type: object
-      required:
-        - recIndex
-        - physicalAddress
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        productType:
-          type: string
-          maxLength: 10
-          description: |
-            Tipo di invio cartaceo effettivamente inviato
-              - __RS__: Raccomandata nazionale Semplice (per Avviso di mancato Recapito)
-              - __RIS__: Raccomandata internazionale Semplice
-        analogCost:
-          type: number
-          description: costo in eurocent dell'invio
-        numberOfPages:
-          type: number
-          description: numero delle pagina che compongono la spedizione cartacea
-        envelopeWeight:
-          type: number
-          description: peso in grammi della busta
-        prepareRequestId:
-          type: string
-          description: request id della relativa richiesta di prepare
-          maxLength: 512
-    schemas-PrepareAnalogDomicileFailureDetails:
-      type: object
-      required:
-        - recIndex
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        foundAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        failureCause:
-          type: string
-          maxLength: 10
-          description: |
-            __Motivazione fallimento prepare
-              - __D00__ Indirizzo non trovato
-              - __D01__ Indirizzo non valido
-              - __D02__ Indirizzo coincidente con quello del primo tentativo
-        prepareRequestId:
-          type: string
-          description: RequestId della richiesta di prepare
-          maxLength: 512
-    schemas-AnalogWorkflowRecipientDeceasedDetailsV26:
-      type: object
-      required:
-        - recIndex
-        - physicalAddress
-      properties:
-        recIndex:
-          type: number
-          description: Index destinatario notifica digitale
-        physicalAddress:
-          $ref: '#/components/schemas/schemas-PhysicalAddress'
-        notificationCost:
-          description: >-
-            costo notifica in euro cents, può essere nullo se la notifica è
-            stata precedentemente visualizzata
-          example: 1220
-          type: number
   responses: {}
   securitySchemes:
     api_key_openapi:
