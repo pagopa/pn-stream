@@ -45,7 +45,7 @@ import static it.pagopa.pn.stream.service.utils.StreamUtils.checkGroups;
 @CustomLog
 public class StreamEventsServiceImpl extends PnStreamServiceImpl implements StreamEventsService {
 
-    private static final String DEFAULT_CATEGORIES = "DEFAULT";
+    public static final String DEFAULT_CATEGORIES = "DEFAULT";
     private final EventEntityDao eventEntityDao;
     private final StreamNotificationDao streamNotificationDao;
     private final EventsQuarantineEntityDao eventsQuarantineEntityDao;
@@ -387,7 +387,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         TimelineElementCategoryInt.StreamVersions streamVersion = TimelineElementCategoryInt.StreamVersions.fromIntValue(version);
         int statusVersion = streamVersionsTable.getStatusVersion(streamVersion, communicationType);
 
-        return Arrays.stream(NotificationStatusInt.getSupportedCategoriesBy(communicationType))
+        return Arrays.stream(NotificationStatusInt.getSupportedStatusBy(communicationType))
                 .filter(e -> e.getVersionNonNull(communicationType) <= statusVersion)
                 .map(NotificationStatusInt::getValue)
                 .collect(Collectors.toSet());

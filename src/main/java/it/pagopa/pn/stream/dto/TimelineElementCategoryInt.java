@@ -4,6 +4,7 @@ import it.pagopa.pn.stream.exceptions.PnStreamException;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -110,6 +111,13 @@ public enum TimelineElementCategoryInt {
     public int getVersionNonNull(CommunicationType communicationType) {
         return Optional.ofNullable(versionsByCommunicationType.get(communicationType))
                 .orElseThrow(() -> new PnStreamException("TimelineElementCategory " + this.name() + " is not supported for communication type " + communicationType, 500, "ERROR_CODE_STREAM_CONFIGURATION"));
+    }
+
+    public static List<TimelineElementCategoryInt> getSupportedCategoriesByCommunicationTypeAndVersion(CommunicationType communicationType, int version) {
+        CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
+        return Arrays.stream(TimelineElementCategoryInt.values())
+                .filter(category -> category.isSupportedBy(defaultCommunicationType) && version <= category.getVersionNonNull(defaultCommunicationType))
+                .toList();
     }
 
     TimelineElementCategoryInt(CommunicationTypeVersion... versions) {
