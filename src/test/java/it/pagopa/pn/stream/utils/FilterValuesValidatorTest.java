@@ -4,149 +4,111 @@ import it.pagopa.pn.stream.dto.EventType;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType;
+import it.pagopa.pn.stream.service.utils.StreamUtils;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
 import java.util.List;
 
 import static it.pagopa.pn.stream.service.impl.StreamEventsServiceImpl.DEFAULT_CATEGORIES;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class FilterValuesValidatorTest {
-
-    private final FilterValuesValidator validator = new FilterValuesValidator();
+    @Mock
+    private StreamUtils streamUtils;
+    @InjectMocks
+    private FilterValuesValidator validator;
 
     @Test
     void emptyFilteredValues_returnsEmpty() {
         StepVerifier.create(validator.validateFilterValues(
-                        "1", Collections.emptyList(), null, EventType.TIMELINE))
+                        "10", Collections.emptyList(), null, EventType.TIMELINE))
                 .verifyComplete();
 
         StepVerifier.create(validator.validateFilterValues(
-                        "1", Collections.emptyList(), null, EventType.STATUS))
+                        "10", Collections.emptyList(), null, EventType.STATUS))
                 .verifyComplete();
     }
 
     @Test
     void timeline_allowedValue_returnsEmpty() {
-        try (MockedStatic<TimelineElementCategoryInt> mocked =
-                     mockStatic(TimelineElementCategoryInt.class, Mockito.CALLS_REAL_METHODS)) {
+        String version = "10";
+        TimelineElementCategoryInt sample = TimelineElementCategoryInt.SENDER_ACK_CREATION_REQUEST;
+        when(streamUtils.getVersion(version)).thenReturn(10);
 
-            TimelineElementCategoryInt sample = TimelineElementCategoryInt.values()[0];
-
-            mocked.when(() -> TimelineElementCategoryInt
-                            .getSupportedCategoriesByCommunicationTypeAndVersion(any(), anyInt()))
-                    .thenReturn(List.of(sample));
-
-            StepVerifier.create(validator.validateFilterValues(
-                            "1", List.of(sample.name()), null, EventType.TIMELINE))
-                    .verifyComplete();
-        }
+        StepVerifier.create(validator.validateFilterValues(
+                        version, List.of(sample.name()), null, EventType.TIMELINE))
+                .verifyComplete();
     }
 
     @Test
     void timeline_notAllowedValue_returnsError() {
-        try (MockedStatic<TimelineElementCategoryInt> mocked =
-                     mockStatic(TimelineElementCategoryInt.class, Mockito.CALLS_REAL_METHODS)) {
+        String version = "10";
+        TimelineElementCategoryInt sample = TimelineElementCategoryInt.SENDER_ACK_CREATION_REQUEST;
+        when(streamUtils.getVersion(version)).thenReturn(10);
 
-            TimelineElementCategoryInt sample = TimelineElementCategoryInt.values()[0];
-
-            mocked.when(() -> TimelineElementCategoryInt
-                            .getSupportedCategoriesByCommunicationTypeAndVersion(any(), anyInt()))
-                    .thenReturn(List.of(sample));
-
-            StepVerifier.create(validator.validateFilterValues(
-                            "1", List.of("VALORE_NON_SUPPORTATO"), null, EventType.TIMELINE))
-                    .expectErrorSatisfies(FilterValuesValidatorTest::assertBadRequestStreamConfig)
-                    .verify();
-        }
+        StepVerifier.create(validator.validateFilterValues(
+                        version, List.of(sample.name()), CommunicationType.INFORMAL, EventType.TIMELINE))
+                .expectErrorSatisfies(FilterValuesValidatorTest::assertBadRequestStreamConfig)
+                .verify();
     }
 
     @Test
     void timeline_notAnEnumValue_returnsError() {
-        try (MockedStatic<TimelineElementCategoryInt> mocked =
-                     mockStatic(TimelineElementCategoryInt.class, Mockito.CALLS_REAL_METHODS)) {
+        String version = "10";
+        when(streamUtils.getVersion(version)).thenReturn(10);
 
-            mocked.when(() -> TimelineElementCategoryInt
-                            .getSupportedCategoriesByCommunicationTypeAndVersion(any(), anyInt()))
-                    .thenReturn(Collections.emptyList());
-
-            StepVerifier.create(validator.validateFilterValues(
-                            "1", List.of("ERROR"), null, EventType.TIMELINE))
-                    .expectErrorSatisfies(FilterValuesValidatorTest::assertBadRequestStreamConfig)
-                    .verify();
-        }
+        StepVerifier.create(validator.validateFilterValues(
+                        version, List.of("ERROR"), null, EventType.TIMELINE))
+                .expectErrorSatisfies(FilterValuesValidatorTest::assertBadRequestStreamConfig)
+                .verify();
     }
 
     @Test
     void timeline_defaultCategoriesValue_isAlwaysAllowed() {
-        try (MockedStatic<TimelineElementCategoryInt> mocked =
-                     mockStatic(TimelineElementCategoryInt.class, Mockito.CALLS_REAL_METHODS)) {
-
-            mocked.when(() -> TimelineElementCategoryInt
-                            .getSupportedCategoriesByCommunicationTypeAndVersion(any(), anyInt()))
-                    .thenReturn(Collections.emptyList());
-
-            StepVerifier.create(validator.validateFilterValues(
-                            "1", List.of(DEFAULT_CATEGORIES), null, EventType.TIMELINE))
-                    .verifyComplete();
-        }
+        String version = "10";
+        when(streamUtils.getVersion(version)).thenReturn(10);
+        StepVerifier.create(validator.validateFilterValues(
+                        version, List.of(DEFAULT_CATEGORIES), null, EventType.TIMELINE))
+                .verifyComplete();
     }
 
     @Test
     void status_allowedValue_returnsEmpty() {
-        try (MockedStatic<NotificationStatusInt> mocked =
-                     mockStatic(NotificationStatusInt.class, Mockito.CALLS_REAL_METHODS)) {
-
-            NotificationStatusInt sample = NotificationStatusInt.values()[0];
-
-            mocked.when(() -> NotificationStatusInt
-                            .getSupportedStatusByCommunicationTypeAndVersion(any(), anyInt()))
-                    .thenReturn(List.of(sample));
-
-            StepVerifier.create(validator.validateFilterValues(
-                            "1", List.of(sample.name()), null, EventType.STATUS))
-                    .verifyComplete();
-        }
+        String version = "10";
+        NotificationStatusInt sample = NotificationStatusInt.IN_VALIDATION;
+        when(streamUtils.getVersion(version)).thenReturn(10);
+        StepVerifier.create(validator.validateFilterValues(
+                        version, List.of(sample.name()), null, EventType.STATUS))
+                .verifyComplete();
     }
 
     @Test
     void status_notAllowedValue_returnsError() {
-        try (MockedStatic<NotificationStatusInt> mocked =
-                     mockStatic(NotificationStatusInt.class, Mockito.CALLS_REAL_METHODS)) {
-
-            NotificationStatusInt sample = NotificationStatusInt.values()[0];
-
-            mocked.when(() -> NotificationStatusInt
-                            .getSupportedStatusByCommunicationTypeAndVersion(any(), anyInt()))
-                    .thenReturn(List.of(sample));
-
-            StepVerifier.create(validator.validateFilterValues(
-                            "1", List.of("ERROR"), null, EventType.STATUS))
-                    .expectErrorSatisfies(FilterValuesValidatorTest::assertBadRequestStreamConfig)
-                    .verify();
-        }
+        String version = "10";
+        NotificationStatusInt sample = NotificationStatusInt.DELIVERING;
+        when(streamUtils.getVersion(version)).thenReturn(10);
+        StepVerifier.create(validator.validateFilterValues(
+                        version, List.of(sample.name()), CommunicationType.INFORMAL, EventType.STATUS))
+                .expectErrorSatisfies(FilterValuesValidatorTest::assertBadRequestStreamConfig)
+                .verify();
     }
 
     @Test
-    void status_nullCommunicationType_doesNotThrow() {
-        try (MockedStatic<NotificationStatusInt> mocked =
-                     mockStatic(NotificationStatusInt.class, Mockito.CALLS_REAL_METHODS)) {
-
-            NotificationStatusInt sample = NotificationStatusInt.values()[0];
-
-            mocked.when(() -> NotificationStatusInt
-                            .getSupportedStatusByCommunicationTypeAndVersion(eq(null), anyInt()))
-                    .thenReturn(List.of(sample));
-
-            StepVerifier.create(validator.validateFilterValues(
-                            "2", List.of(sample.name()), null, EventType.STATUS))
-                    .verifyComplete();
-        }
+    void status_notAnEnumValue_returnsError() {
+        String version = "10";
+        when(streamUtils.getVersion(version)).thenReturn(10);
+        StepVerifier.create(validator.validateFilterValues(
+                        version, List.of("ERROR"), null, EventType.STATUS))
+                .expectErrorSatisfies(FilterValuesValidatorTest::assertBadRequestStreamConfig)
+                .verify();
     }
 
     private static void assertBadRequestStreamConfig(Throwable throwable) {

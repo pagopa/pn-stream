@@ -5,7 +5,10 @@ import it.pagopa.pn.stream.dto.EventType;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
+import it.pagopa.pn.stream.service.utils.StreamUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -13,32 +16,33 @@ import java.util.List;
 import static it.pagopa.pn.stream.service.impl.StreamEventsServiceImpl.DEFAULT_CATEGORIES;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class FilterValuesValidator {
+    private final StreamUtils streamUtils;
 
     public Mono<Void> validateFilterValues(String version, List<String> filteredValues, it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType communicationType, EventType eventType) {
         if (filteredValues.isEmpty()) {
             return Mono.empty();
         }
+
         CommunicationType communicationTypeint = null;
         if (communicationType != null) {
             communicationTypeint = CommunicationType.valueOf(communicationType.getValue());
         }
 
-        if (EventType.TIMELINE.equals(eventType)) {
-            return validateTimelineFilters(version, filteredValues, communicationTypeint);
-        }
+        int parsedVersion = streamUtils.getVersion(version);
 
-        if (EventType.STATUS.equals(eventType)) {
-            return validateStatusFilters(version, filteredValues, communicationTypeint);
-        }
+        return switch (eventType) {
+            case TIMELINE -> validateTimelineFilters(parsedVersion, filteredValues, communicationTypeint);
+            case STATUS -> validateStatusFilters(parsedVersion, filteredValues, communicationTypeint);
+        };
 
-        return Mono.empty();
     }
 
-    private Mono<Void> validateTimelineFilters(String version, List<String> filteredValues, CommunicationType communicationType) {
-        int parsedVersion = Integer.parseInt(version);
+    private Mono<Void> validateTimelineFilters(int version, List<String> filteredValues, CommunicationType communicationType) {
         List<TimelineElementCategoryInt> allowedCategories =
-                TimelineElementCategoryInt.getSupportedCategoriesByCommunicationTypeAndVersion(communicationType, parsedVersion);
+                TimelineElementCategoryInt.getSupportedCategoriesByCommunicationTypeAndVersion(communicationType, version);
 
         List<String> forbiddenValues = filteredValues.stream()
                 .filter(value -> !isDefault(value) && !isTimelineCategoryAllowed(value, allowedCategories))
@@ -54,25 +58,20 @@ public class FilterValuesValidator {
         return Mono.empty();
     }
 
-    private Mono<Void> validateStatusFilters(String version, List<String> filteredValues, CommunicationType communicationType) {
-        try {
-            int parsedVersion = Integer.parseInt(version);
-            List<NotificationStatusInt> allowedStatuses =
-                    NotificationStatusInt.getSupportedStatusByCommunicationTypeAndVersion(communicationType, parsedVersion);
+    private Mono<Void> validateStatusFilters(int version, List<String> filteredValues, CommunicationType communicationType) {
+        List<NotificationStatusInt> allowedStatuses =
+                NotificationStatusInt.getSupportedStatusByCommunicationTypeAndVersion(communicationType, version);
 
-            List<String> forbiddenValues = filteredValues.stream()
-                    .filter(value -> !isNotificationStatusAllowed(value, allowedStatuses))
-                    .toList();
+        List<String> forbiddenValues = filteredValues.stream()
+                .filter(value -> !isNotificationStatusAllowed(value, allowedStatuses))
+                .toList();
 
-            if (!forbiddenValues.isEmpty()) {
-                return Mono.error(new PnStreamException(
-                        "Invalid filteredValue for STATUS stream: " + forbiddenValues,
-                        400,
-                        "ERROR_CODE_STREAM_CONFIGURATION"
-                ));
-            }
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid filteredValue for STATUS stream: {}", filteredValues, e);
+        if (!forbiddenValues.isEmpty()) {
+            return Mono.error(new PnStreamException(
+                    "Invalid filteredValue for STATUS stream: " + forbiddenValues,
+                    400,
+                    "ERROR_CODE_STREAM_CONFIGURATION"
+            ));
         }
         return Mono.empty();
     }
