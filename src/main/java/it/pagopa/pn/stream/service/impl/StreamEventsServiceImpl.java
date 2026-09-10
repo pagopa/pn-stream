@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.*;
 import it.pagopa.pn.stream.dto.CommunicationType;
@@ -22,7 +21,6 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.So
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.*;
 import it.pagopa.pn.stream.service.mapper.ProgressResponseElementMapper;
-import it.pagopa.pn.stream.service.mapper.TimelineElementStreamMapper;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import it.pagopa.pn.stream.utils.CommunicationTypeUtils;
 import it.pagopa.pn.stream.utils.MetricUtils;
@@ -111,7 +109,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                     return addConfidentialInformationAtEventTimelineList(removeDuplicatedItems(items));
                                 })
                                 // converto l'eventTimelineInternalDTO in ProgressResponseElementV30
-                                .map(this::getProgressResponseFromEventTimeline)
+                                .map(ProgressResponseElementMapper::internalToExternal)
                                 .collectList()
                                 .flatMap(this::checkIfReworkElementAndAddConfidentialInfoToRelated)
                                 .flatMapIterable(progressResponseElementV30s -> progressResponseElementV30s)
@@ -157,7 +155,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         items.forEach(item -> {
             String iun = item.getIun();
             List<String> elements = iunWithTimelineElementId.get(iun);
-            String description = item.getElement().getTimestamp() + "_" + item.getElement().getElementId();
+            String description = item.getElement() != null
+                    ? item.getElement().getTimestamp() + "_" + item.getElement().getElementId()
+                    : item.getInformalElement().getTimestamp() + "_" + item.getInformalElement().getElementId();
             description = description.replace(".IUN_" + iun, "");
 
             if (elements == null) {
@@ -185,19 +185,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         retryAfterEntity.setRetryAfter(retryAfter);
         retryAfterEntity.setTtl(retryAfter.getEpochSecond());
         return retryAfterEntity;
-    }
-
-    private ProgressResponseElementV30 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
-        var response = ProgressResponseElementMapper.internalToExternal(eventTimeline.getEventEntity());
-        if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
-            TimelineElementV28 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());
-            response.setElement(timelineElement);
-        }
-        if (eventTimeline.getTimelineElementInternal() != null) {
-            CommunicationType defaultCommunicationType = CommunicationTypeUtils.getDefaultCommunicationType(eventTimeline.getTimelineElementInternal().getCommunicationType());
-            response.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.valueOf(defaultCommunicationType.name()));
-        }
-        return response;
     }
 
     private Flux<EventTimelineInternalDto> toEventTimelineInternalFromEventEntity(List<EventEntity> events) throws PnInternalException {
@@ -480,7 +467,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
     protected Mono<List<ProgressResponseElementV30>> checkIfReworkElementAndAddConfidentialInfoToRelated(List<ProgressResponseElementV30> progressResponseElementsV30) {
         List<ProgressResponseElementV30> reworkElements = progressResponseElementsV30.stream()
-                .filter(element -> element.getElement().getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED))
+                .filter(element -> TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED.equals(element.getTimelineEventCategory()))
                 .toList();
 
         if (CollectionUtils.isEmpty(reworkElements)) {

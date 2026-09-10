@@ -554,7 +554,7 @@ paths:
         associati allo stream e non ancora consumati.
       tags:
         - Streams
-      operationId: removeEventStreamV29                         # ONLY EXTERNAL
+      operationId: removeEventStreamV30                         # ONLY EXTERNAL
       responses:
         '204':
           description: OK

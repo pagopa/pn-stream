@@ -568,7 +568,7 @@ paths:
       tags:
         - Streams
       operationId: deleteEventStreamV30                          # NO EXTERNAL
-#      operationId: removeEventStreamV29                         # ONLY EXTERNAL
+#      operationId: removeEventStreamV30                         # ONLY EXTERNAL
       responses:
         '204':
           description: OK
