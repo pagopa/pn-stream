@@ -93,10 +93,6 @@ public enum TimelineElementCategoryInt {
 
     private final Map<CommunicationType, Integer> versionsByCommunicationType;
 
-    TimelineElementCategoryInt(Map<CommunicationType, Integer> versionsByCommunicationType) {
-        this.versionsByCommunicationType = versionsByCommunicationType;
-    }
-
     public boolean isSupportedBy(CommunicationType communicationType) {
         return versionsByCommunicationType.containsKey(communicationType);
     }

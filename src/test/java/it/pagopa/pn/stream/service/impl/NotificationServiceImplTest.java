@@ -6,7 +6,6 @@ import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -21,7 +20,7 @@ class NotificationServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        pnDeliveryClientReactive = Mockito.mock(PnDeliveryClientReactive.class);
+        pnDeliveryClientReactive = mock(PnDeliveryClientReactive.class);
         notificationService = new NotificationServiceImpl(pnDeliveryClientReactive);
     }
 
@@ -45,7 +44,7 @@ class NotificationServiceImplTest {
                 .verifyComplete();
 
         verify(pnDeliveryClientReactive, times(1)).getSentNotification(iun);
-        verify(pnDeliveryClientReactive, never()).getSentInformalNotificationPrivateV1(Mockito.anyString(), Mockito.anyBoolean());
+        verify(pnDeliveryClientReactive, never()).getSentInformalNotificationPrivateV1(anyString(), anyBoolean());
     }
 
     @Test
@@ -68,7 +67,7 @@ class NotificationServiceImplTest {
                 .verifyComplete();
 
         verify(pnDeliveryClientReactive, times(1)).getSentNotification(iun);
-        verify(pnDeliveryClientReactive, never()).getSentInformalNotificationPrivateV1(Mockito.anyString(), Mockito.anyBoolean());
+        verify(pnDeliveryClientReactive, never()).getSentInformalNotificationPrivateV1(anyString(), anyBoolean());
     }
 
     @Test

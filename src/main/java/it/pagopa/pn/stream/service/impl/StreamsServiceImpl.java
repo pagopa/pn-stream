@@ -79,7 +79,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 .flatMap(streamCreationRequestV28 -> {
                     if (Boolean.TRUE.equals(streamCreationRequestV28.getWaitForAccepted())) {
                         if (streamCreationRequestV28.getFilterValues() == null || streamCreationRequestV28.getFilterValues().isEmpty() ||
-                                !streamCreationRequestV28.getFilterValues().stream().anyMatch(f -> f.equals(DEFAULT_CATEGORIES) || f.equals("REQUEST_ACCEPTED")))
+                                streamCreationRequestV28.getFilterValues().stream().noneMatch(f -> f.equals(DEFAULT_CATEGORIES) || f.equals("REQUEST_ACCEPTED")))
                             return Mono.error(new PnStreamForbiddenException("Not Allowed the creation of sorted streams without  DEFAULT or REQUEST_ACCEPTED filter"));
                     }
                     return Mono.just(streamCreationRequestV28);

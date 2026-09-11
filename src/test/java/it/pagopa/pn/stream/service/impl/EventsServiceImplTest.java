@@ -44,8 +44,7 @@ import static it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElemen
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -215,8 +214,8 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -283,8 +282,8 @@ class EventsServiceImplTest {
         Assertions.assertNull(element.getElement(), "element deve restare null per CommunicationType.INFORMAL");
         Assertions.assertNull(element.getTimelineEventCategory(), "timelineEventCategory deve restare null per CommunicationType.INFORMAL");
 
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -351,8 +350,8 @@ class EventsServiceImplTest {
         Assertions.assertNull(element.getInformalElement(), "informalElement deve restare null per comunicazioni non-INFORMAL");
         Assertions.assertEquals(TimelineElementCategoryV28.AAR_GENERATION, element.getTimelineEventCategory());
 
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -438,8 +437,8 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -526,8 +525,8 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -560,8 +559,8 @@ class EventsServiceImplTest {
         assertThrows(PnStreamForbiddenException.class, () -> mono.block(d));
 
         //THEN
-        Mockito.verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
-        Mockito.verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
+        verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -644,7 +643,7 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(2, res.getProgressResponseElementList().size());
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -718,7 +717,7 @@ class EventsServiceImplTest {
         assertNotNull(res);
         Assertions.assertEquals(0, res.getProgressResponseElementList().size());
         Assertions.assertEquals(1000, res.getRetryAfter());
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -802,7 +801,7 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(2, res.getProgressResponseElementList().size());
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -901,8 +900,8 @@ class EventsServiceImplTest {
         assertThrows(PnStreamForbiddenException.class, () -> mono.block(d));
 
         //THEN
-        Mockito.verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
-        Mockito.verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
+        verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -1128,8 +1127,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
     }
 
 
@@ -1147,8 +1146,8 @@ class EventsServiceImplTest {
         webhookEventsService.purgeEvents(xpagopacxid, lasteventid, true).block(d);
 
         //THEN
-        Mockito.verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
-        Mockito.verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
+        verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
     @Test
@@ -1166,8 +1165,8 @@ class EventsServiceImplTest {
         webhookEventsService.purgeEvents(xpagopacxid, lasteventid, true).block(d);
 
         //THEN
-        Mockito.verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
-        Mockito.verify(schedulerService, Mockito.times(1)).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
+        verify(schedulerService, times(1)).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -1231,9 +1230,9 @@ class EventsServiceImplTest {
         Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
         webhookEventsService.saveEvent(newtimeline).block(d);
         //THEN
-        Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(2)).save(Mockito.any(EventEntity.class));
-        Mockito.verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(2)).save(Mockito.any(EventEntity.class));
+        verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -1273,9 +1272,9 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
-        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+        verify(streamEntityDao).findByPa(xpagopacxid);
+        verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
     }
 
     @Test
@@ -1336,10 +1335,10 @@ class EventsServiceImplTest {
 
         webhookEventsService.saveEvent(newtimeline).block(d);
 
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(streamEntityDao, Mockito.times(1)).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(informalStream.getStreamId())));
-        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(legalStream.getStreamId())));
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(streamEntityDao, times(1)).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(informalStream.getStreamId())));
+        verify(streamEntityDao, never()).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(legalStream.getStreamId())));
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
     }
 
 
@@ -1405,8 +1404,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(2)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(4)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(2)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(4)).save(Mockito.any(EventEntity.class));
     }
 
     @Test
@@ -1486,9 +1485,9 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline2 ).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(2)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(3)).save(Mockito.any(EventEntity.class));
-        Mockito.verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao, times(2)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(3)).save(Mockito.any(EventEntity.class));
+        verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
 
@@ -1595,8 +1594,8 @@ class EventsServiceImplTest {
         timeline.forEach(t -> webhookEventsService.saveEvent(t).block(d));
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(timeline.size())).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(6)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(timeline.size())).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(6)).save(Mockito.any(EventEntity.class));
     }
 
     @Test
@@ -1642,7 +1641,7 @@ class EventsServiceImplTest {
                 .block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1))
+        verify(streamEntityDao, times(1))
                 .findByPa(xpagopacxid);
 
 
@@ -1662,9 +1661,9 @@ class EventsServiceImplTest {
                 .block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(2))
+        verify(streamEntityDao, times(2))
                 .findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(0)).save(Mockito.any());
+        verify(eventEntityDao, times(0)).save(Mockito.any());
     }
 
     @Test
@@ -1725,13 +1724,13 @@ class EventsServiceImplTest {
                 .block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1))
+        verify(streamEntityDao, times(1))
                 .findByPa(xpagopacxid);
-        Mockito.verify(streamEntityDao, Mockito.times(1))
+        verify(streamEntityDao, times(1))
                 .updateAndGetAtomicCounter(Mockito.any());
-        Mockito.verify(eventEntityDao, Mockito.times(1))
+        verify(eventEntityDao, times(1))
                 .save(Mockito.any());
-        Mockito.verify(notificationService, Mockito.times(1))
+        verify(notificationService, times(1))
                 .constructNotificationEntity(iun, communicationType);
     }
 
@@ -1780,8 +1779,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1841,8 +1840,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1901,8 +1900,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1962,10 +1961,10 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(notificationUnlockedEntityDao, Mockito.times(1)).putItem(Mockito.any());
-        Mockito.verify(schedulerService, Mockito.times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(notificationUnlockedEntityDao, times(1)).putItem(Mockito.any());
+        verify(schedulerService, times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
     }
 
     @Test
@@ -2022,12 +2021,12 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventsQuarantineEntityDao, Mockito.times(1)).putItem(Mockito.any());
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventsQuarantineEntityDao, times(1)).putItem(Mockito.any());
 
-        Mockito.verify(notificationUnlockedEntityDao, Mockito.times(0)).putItem(Mockito.any());
-        Mockito.verify(schedulerService, Mockito.times(0)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(eventEntityDao, Mockito.times(0)).save(Mockito.any(EventEntity.class));
+        verify(notificationUnlockedEntityDao, times(0)).putItem(Mockito.any());
+        verify(schedulerService, times(0)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, times(0)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -2085,8 +2084,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -2144,8 +2143,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 }

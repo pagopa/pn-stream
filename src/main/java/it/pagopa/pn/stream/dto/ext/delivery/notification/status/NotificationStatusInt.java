@@ -79,7 +79,7 @@ public enum NotificationStatusInt {
         CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
         return Arrays.stream(NotificationStatusInt.values())
                 .filter(category -> category.isSupportedBy(defaultCommunicationType) && category.getVersionNonNull(defaultCommunicationType) <= version)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

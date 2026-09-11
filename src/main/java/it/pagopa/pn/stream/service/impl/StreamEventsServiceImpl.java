@@ -50,7 +50,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     private final StreamNotificationDao streamNotificationDao;
     private final EventsQuarantineEntityDao eventsQuarantineEntityDao;
     private final UnlockedNotificationEntityDao notificationUnlockedEntityDao;
-    private final PnDeliveryClientReactive pnDeliveryClientReactive;
     private final SchedulerService schedulerService;
     private final TimelineService timelineService;
     private final ConfidentialInformationService confidentialInformationService;
@@ -72,7 +71,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         this.timelineService = timeLineService;
         this.confidentialInformationService = confidentialInformationService;
         this.streamNotificationDao = streamNotificationDao;
-        this.pnDeliveryClientReactive = pnDeliveryClientReactive;
         this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
         this.notificationUnlockedEntityDao = notificationUnlockedEntityDao;
         this.streamVersionsTable = streamVersionsTable;
