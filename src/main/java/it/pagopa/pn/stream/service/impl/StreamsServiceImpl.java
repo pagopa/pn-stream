@@ -283,7 +283,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     private boolean isDifferentCommunicationType(StreamEntity persistedEntity, StreamEntity newEntity) {
         CommunicationType persistedCommType = CommunicationTypeUtils.getDefaultCommunicationType(persistedEntity.getCommunicationType());
         CommunicationType newCommType = CommunicationTypeUtils.getDefaultCommunicationType(newEntity.getCommunicationType());
-        return persistedCommType == newCommType;
+        return persistedCommType != newCommType;
     }
 
     private List<String> getGroups(StreamEntity streamEntity) {
