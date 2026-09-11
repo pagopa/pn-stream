@@ -2,6 +2,7 @@ package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.InformalSentNotificationV1;
 import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
+import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import reactor.test.StepVerifier;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 class NotificationServiceImplTest {
@@ -21,7 +23,9 @@ class NotificationServiceImplTest {
     @BeforeEach
     void setUp() {
         pnDeliveryClientReactive = mock(PnDeliveryClientReactive.class);
-        notificationService = new NotificationServiceImpl(pnDeliveryClientReactive);
+        PnStreamConfigs pnStreamConfigs = mock(PnStreamConfigs.class);
+        when(pnStreamConfigs.getStreamNotificationTtl()).thenReturn(3600L);
+        notificationService = new NotificationServiceImpl(pnDeliveryClientReactive, pnStreamConfigs);
     }
 
     @Test
@@ -40,6 +44,7 @@ class NotificationServiceImplTest {
                     assertEquals(iun, entity.getHashKey());
                     assertEquals("LEGAL_GROUP", entity.getGroup());
                     assertEquals(sentAt, entity.getCreationDate());
+                    assertNotNull(entity.getTtl());
                 })
                 .verifyComplete();
 
@@ -63,6 +68,7 @@ class NotificationServiceImplTest {
                     assertEquals(iun, entity.getHashKey());
                     assertEquals("GROUP_LEGAL", entity.getGroup());
                     assertEquals(sentAt, entity.getCreationDate());
+                    assertNotNull(entity.getTtl());
                 })
                 .verifyComplete();
 
@@ -86,6 +92,7 @@ class NotificationServiceImplTest {
                     assertEquals(iun, entity.getHashKey());
                     assertEquals("GROUP_INFORMAL", entity.getGroup());
                     assertEquals(sentAt, entity.getCreationDate());
+                    assertNotNull(entity.getTtl());
                 })
                 .verifyComplete();
 

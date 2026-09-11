@@ -374,8 +374,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         TimelineElementCategoryInt.StreamVersions streamVersion = TimelineElementCategoryInt.StreamVersions.fromIntValue(version);
         int timelineVersion = streamVersionsTable.getTimelineVersion(streamVersion, communicationType);
 
-        return Arrays.stream(TimelineElementCategoryInt.getSupportedCategoriesBy(communicationType))
-                .filter(e -> e.getVersionNonNull(communicationType) <= timelineVersion)
+        return TimelineElementCategoryInt.getSupportedCategoriesByCommunicationTypeAndVersion(communicationType, timelineVersion)
+                .stream()
                 .map(Enum::name)
                 .collect(Collectors.toSet());
     }
@@ -384,8 +384,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         TimelineElementCategoryInt.StreamVersions streamVersion = TimelineElementCategoryInt.StreamVersions.fromIntValue(version);
         int statusVersion = streamVersionsTable.getStatusVersion(streamVersion, communicationType);
 
-        return Arrays.stream(NotificationStatusInt.getSupportedStatusBy(communicationType))
-                .filter(e -> e.getVersionNonNull(communicationType) <= statusVersion)
+        return NotificationStatusInt.getSupportedStatusByCommunicationTypeAndVersion(communicationType, statusVersion)
+                .stream()
                 .map(NotificationStatusInt::getValue)
                 .collect(Collectors.toSet());
     }

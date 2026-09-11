@@ -97,13 +97,6 @@ public enum TimelineElementCategoryInt {
         return versionsByCommunicationType.containsKey(communicationType);
     }
 
-    public static TimelineElementCategoryInt[] getSupportedCategoriesBy(CommunicationType communicationType) {
-        CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
-        return Arrays.stream(TimelineElementCategoryInt.values())
-                .filter(category -> category.isSupportedBy(defaultCommunicationType))
-                .toArray(TimelineElementCategoryInt[]::new);
-    }
-
     public int getVersionNonNull(CommunicationType communicationType) {
         return Optional.ofNullable(versionsByCommunicationType.get(communicationType))
                 .orElseThrow(() -> new PnStreamException("TimelineElementCategory " + this.name() + " is not supported for communication type " + communicationType, 500, "ERROR_CODE_STREAM_CONFIGURATION"));
@@ -112,7 +105,7 @@ public enum TimelineElementCategoryInt {
     public static List<TimelineElementCategoryInt> getSupportedCategoriesByCommunicationTypeAndVersion(CommunicationType communicationType, int version) {
         CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
         return Arrays.stream(TimelineElementCategoryInt.values())
-                .filter(category -> category.isSupportedBy(defaultCommunicationType) && version <= category.getVersionNonNull(defaultCommunicationType))
+                .filter(category -> category.isSupportedBy(defaultCommunicationType) && category.getVersionNonNull(defaultCommunicationType) <= version)
                 .toList();
     }
 

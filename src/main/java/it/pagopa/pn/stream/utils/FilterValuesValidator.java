@@ -9,6 +9,7 @@ import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class FilterValuesValidator {
     private final StreamUtils streamUtils;
 
     public Mono<Void> validateFilterValues(String version, List<String> filteredValues, it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType communicationType, EventType eventType) {
-        if (filteredValues.isEmpty()) {
+        if (CollectionUtils.isEmpty(filteredValues)) {
             return Mono.empty();
         }
 

@@ -55,7 +55,7 @@ public class TimelineElementMapper {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         InformalTimelineElementV1.InformalTimelineElementV1Builder builder;
         try {
-            InformalTimelineElementDetailsV1 InformalTimelineElementDetail = objectMapper.readValue(internalDto.getDetails(), InformalTimelineElementDetailsV1.class);
+            InformalTimelineElementDetailsV1 informalTimelineElementDetail = objectMapper.readValue(internalDto.getDetails(), InformalTimelineElementDetailsV1.class);
 
             builder = InformalTimelineElementV1.builder()
                     .category(internalDto.getCategory() != null ? InformalTimelineElementCategoryV1.fromValue(internalDto.getCategory()) : null)
@@ -64,7 +64,7 @@ public class TimelineElementMapper {
                     .notificationSentAt(internalDto.getNotificationSentAt())
                     .ingestionTimestamp(internalDto.getIngestionTimestamp())
                     .eventTimestamp(internalDto.getEventTimestamp())
-                    .details(InformalTimelineElementDetail);
+                    .details(informalTimelineElementDetail);
 
         } catch (JsonProcessingException e) {
             throw new PnStreamException(e.getMessage(), 500, ERROR_CODE_GENERIC);

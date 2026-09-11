@@ -65,14 +65,7 @@ public enum NotificationStatusInt {
 
     public int getVersionNonNull(CommunicationType communicationType) {
         return Optional.ofNullable(versionsByCommunicationType.get(communicationType))
-                .orElseThrow(() -> new PnStreamException("TimelineElementCategory " + this.name() + " is not supported for communication type " + communicationType, 500, "ERROR_CODE_STREAM_CONFIGURATION"));
-    }
-
-    public static NotificationStatusInt[] getSupportedStatusBy(CommunicationType communicationType) {
-        CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
-        return Arrays.stream(NotificationStatusInt.values())
-                .filter(category -> category.isSupportedBy(defaultCommunicationType))
-                .toArray(NotificationStatusInt[]::new);
+                .orElseThrow(() -> new PnStreamException("NotificationStatus " + this.name() + " is not supported for communication type " + communicationType, 500, "ERROR_CODE_STREAM_CONFIGURATION"));
     }
 
     public static List<NotificationStatusInt> getSupportedStatusByCommunicationTypeAndVersion(CommunicationType communicationType, int version) {

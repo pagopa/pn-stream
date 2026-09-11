@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.service.impl;
 
+import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamNotificationEntity;
 import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
@@ -9,11 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
     private final PnDeliveryClientReactive pnDeliveryClientReactive;
+    private final PnStreamConfigs pnStreamConfigs;
 
     @Override
     public Mono<StreamNotificationEntity> constructNotificationEntity(String iun, CommunicationType communicationType) {
@@ -26,6 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
                         streamNotificationEntity.setHashKey(informalNotification.getIun());
                         streamNotificationEntity.setGroup(informalNotification.getGroup());
                         streamNotificationEntity.setCreationDate(informalNotification.getSentAt());
+                        streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
                         return streamNotificationEntity;
                     });
         }
@@ -36,6 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
                     streamNotificationEntity.setHashKey(legalNotification.getIun());
                     streamNotificationEntity.setGroup(legalNotification.getGroup());
                     streamNotificationEntity.setCreationDate(legalNotification.getSentAt());
+                    streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
                     return streamNotificationEntity;
                 });
     }

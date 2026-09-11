@@ -993,7 +993,6 @@ components:
       type: object
       required:
         - eventId
-        - element
       properties:
         eventId:
           description: >-

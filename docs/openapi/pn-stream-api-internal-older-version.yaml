@@ -3964,12 +3964,6 @@ components:
             Tutti gli eventi dello stato IN_VALIDATION vengono pubblicati senza ritardo.
             Stream di tipo STATUS: se true pubblica gli stati garantendo che il primo stato sia l'ACCEPTED o il REFUSED
           type: boolean
-        communicationType:
-          description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà ad una notifica legale, se invece valorizzato con INFORMAL afferirà ad una notifica bonaria
-          type: string
-          enum:
-            - INFORMAL
-            - LEGAL
 
     StreamMetadataResponseV29:
       description: Configurazioni di un flusso di eventi
@@ -4030,6 +4024,33 @@ components:
           $ref: 'remote-refs.yaml#/components/schemas/NotificationStatusV26'
         element:
           $ref: 'remote-refs.yaml#/components/schemas/TimelineElementV28'
+        # proprietà necessarie per retro compatibilità nel transitorio, ma che non saranno esposte nella V24 # NO EXTERNAL
+        # potranno essere eliminate (assieme al RefusedReason) quando non saranno più presenti eventi della v1 # NO EXTERNAL
+        timestamp: # NO EXTERNAL
+          type: string                                                                                     # NO EXTERNAL
+          format: date-time                                                                                # NO EXTERNAL
+        timelineEventCategory: # NO EXTERNAL
+          $ref: 'remote-refs.yaml#/components/schemas/TimelineElementCategoryV28'                # NO EXTERNAL
+        recipientIndex: # NO EXTERNAL
+          type: integer                                                                                    # NO EXTERNAL
+          format: int32                                                                                    # NO EXTERNAL
+          minimum: 0                                                                                       # NO EXTERNAL
+        analogCost: # NO EXTERNAL
+          type: integer                                                                                    # NO EXTERNAL
+          format: int32                                                                                    # NO EXTERNAL
+        channel: # NO EXTERNAL
+          type: string                                                                                     # NO EXTERNAL
+        legalfactIds: # NO EXTERNAL
+          type: array                                                                                      # NO EXTERNAL
+          items: # NO EXTERNAL
+            type: string                                                                                   # NO EXTERNAL
+          example: [ "PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9Q", "PN_LEGAL_FACTS-0002-9G2S-RK3M-JI62-JK9E" ]  # NO EXTERNAL
+          description: chiavi degli eventuali allegati associati all'evento                                # NO EXTERNAL
+        validationErrors: # NO EXTERNAL
+          type: array                                                                                      # NO EXTERNAL
+          description: eventuali errori di validazione associati all'evento                                # NO EXTERNAL
+          items: # NO EXTERNAL
+            $ref: '#/components/schemas/RefusedReason'
 
   securitySchemes:        # ONLY EXTERNAL
     ApiKeyAuth:           # ONLY EXTERNAL
