@@ -16,7 +16,6 @@ import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.Confidenti
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
-import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
 import it.pagopa.pn.stream.service.*;
@@ -63,7 +62,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    SchedulerService schedulerService, StreamUtils streamUtils,
                                    PnStreamConfigs pnStreamConfigs, TimelineService timeLineService,
                                    ConfidentialInformationService confidentialInformationService,
-                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive,
+                                   StreamNotificationDao streamNotificationDao,
                                    EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao, StreamVersionsTable streamVersionsTable, NotificationService notificationService) {
         super(streamEntityDao, pnStreamConfigs, streamUtils);
         this.eventEntityDao = eventEntityDao;

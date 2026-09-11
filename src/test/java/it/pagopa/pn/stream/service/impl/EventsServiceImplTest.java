@@ -15,7 +15,6 @@ import it.pagopa.pn.stream.exceptions.PnTooManyRequestException;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
-import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.service.ConfidentialInformationService;
 import it.pagopa.pn.stream.service.NotificationService;
 import it.pagopa.pn.stream.service.SchedulerService;
@@ -67,8 +66,6 @@ class EventsServiceImplTest {
     private ConfidentialInformationService confidentialInformationService;
     @Mock
     private StreamNotificationDao streamNotificationDao;
-    @Mock
-    private PnDeliveryClientReactive pnDeliveryClientReactive;
     @Mock
     private UnlockedNotificationEntityDao notificationUnlockedEntityDao;
     @Mock
