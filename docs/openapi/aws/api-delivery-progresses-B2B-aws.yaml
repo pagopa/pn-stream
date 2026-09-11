@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: jlWWH5MGYpW6LYYurlFelLmxgQNKv/xkeN0Yny+rWYQ=
+  version: pwaF/BYYIZ30Xcu0LqO2Qs5ruIgXoD1ROFlEGXbd2FY=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -3916,7 +3916,7 @@ paths:
       tags:
         - Streams
       operationId: createEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       requestBody:
         required: true
@@ -3960,7 +3960,7 @@ paths:
         - api_key_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2WebhookLambda:live/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2StreamLambda:live/invocations
         httpMethod: POST
         requestParameters:
           integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
@@ -3982,7 +3982,7 @@ paths:
       tags:
         - Streams
       operationId: listEventStreamsV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
         '200':
@@ -4008,7 +4008,7 @@ paths:
         - api_key_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2WebhookLambda:live/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2StreamLambda:live/invocations
         httpMethod: POST
         requestParameters:
           integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
@@ -4033,7 +4033,7 @@ paths:
       tags:
         - Streams
       operationId: retrieveEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
         '200':
@@ -4071,7 +4071,7 @@ paths:
         - api_key_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2WebhookLambda:live/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2StreamLambda:live/invocations
         httpMethod: POST
         requestParameters:
           integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
@@ -4096,7 +4096,7 @@ paths:
       tags:
         - Streams
       operationId: updateEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       requestBody:
         required: true
@@ -4140,7 +4140,7 @@ paths:
         - api_key_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2WebhookLambda:live/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2StreamLambda:live/invocations
         httpMethod: POST
         requestParameters:
           integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
@@ -4165,7 +4165,7 @@ paths:
       tags:
         - Streams
       operationId: removeEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
         '204':
@@ -4199,7 +4199,7 @@ paths:
         - api_key_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2WebhookLambda:live/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2StreamLambda:live/invocations
         httpMethod: POST
         requestParameters:
           integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
@@ -4250,7 +4250,7 @@ paths:
       tags:
         - Streams
       operationId: disableEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       parameters:
         - $ref: '#/components/parameters/pathStreamId'
@@ -4290,7 +4290,7 @@ paths:
         - api_key_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2WebhookLambda:live/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2StreamLambda:live/invocations
         httpMethod: POST
         requestParameters:
           integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
@@ -4317,7 +4317,7 @@ paths:
       tags:
         - Events
       operationId: consumeEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       parameters:
         - $ref: '#/components/parameters/pathStreamId'
@@ -4380,7 +4380,7 @@ paths:
         - api_key_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2WebhookLambda:live/invocations
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-versioningV1V2StreamLambda:live/invocations
         httpMethod: POST
         requestParameters:
           integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id

@@ -3004,7 +3004,7 @@ paths:
       tags:
         - Streams
       operationId: createEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       requestBody:
         required: true
@@ -3049,7 +3049,7 @@ paths:
       tags:
         - Streams
       operationId: listEventStreamsV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
         '200':
@@ -3079,7 +3079,7 @@ paths:
       tags:
         - Streams
       operationId: retrieveEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
         '200':
@@ -3120,7 +3120,7 @@ paths:
       tags:
         - Streams
       operationId: updateEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       requestBody:
         required: true
@@ -3167,7 +3167,7 @@ paths:
       tags:
         - Streams
       operationId: removeEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       responses:
         '204':
@@ -3217,7 +3217,7 @@ paths:
       tags:
         - Streams
       operationId: disableEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       parameters:
         - $ref: '#/components/parameters/pathStreamId'
@@ -3263,7 +3263,7 @@ paths:
       tags:
         - Events
       operationId: consumeEventStreamV29
-      x-pagopa-lambda-name: pn-versioningV1V2WebhookLambda:live
+      x-pagopa-lambda-name: pn-versioningV1V2StreamLambda:live
       x-pagopa-lambda-account: core
       parameters:
         - $ref: '#/components/parameters/pathStreamId'
