@@ -1,5 +1,6 @@
 package it.pagopa.pn.stream.dto.timeline;
 
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class TimelineElementInternal{
     private String timelineElementId;
     private Instant timestamp;
     private String paId;
+    private CommunicationType communicationType;
     private List<LegalFactsIdV20> legalFactId;
     private String category;
     private String details;

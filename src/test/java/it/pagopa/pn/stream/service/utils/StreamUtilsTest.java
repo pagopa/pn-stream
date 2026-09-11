@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.CustomPaConfiguration;
-import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
 import it.pagopa.pn.stream.dto.PaConfiguration;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactCategoryV20;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.LegalFactsIdV20;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.EventEntity;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.NotificationUnlockedEntity;
@@ -102,6 +101,30 @@ class StreamUtilsTest {
         assertNotNull(eventEntity.getTtl());
     }
 
+    @Test
+    void buildEventEntity_roundTripCommunicationType() {
+        String iun = "IUN-ABC-123";
+        String xpagopacxid = "PF-123456";
+
+        TimelineElementInternal timelineElementInternal = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name())
+                .iun(iun)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE)
+                .timestamp(Instant.now())
+                .paId(xpagopacxid)
+                .communicationType(CommunicationType.INFORMAL)
+                .details("{\"recIndex\":\"0\"}")
+                .build();
+
+        StreamEntity streamEntity = new StreamEntity("paid", "abc");
+        EventEntity eventEntity = streamUtils.buildEventEntity(1L, streamEntity, "ACCEPTED", timelineElementInternal);
+
+        TimelineElementInternal restored = streamUtils.getTimelineInternalFromEvent(eventEntity);
+
+        assertNotNull(restored);
+            assertEquals(CommunicationType.INFORMAL, restored.getCommunicationType());
+    }
+
 
     @Test
     void buildEventEntity_3() {
@@ -190,7 +213,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
-                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY1").build(), LegalFactsIdV20.builder().category(LegalFactCategoryV20.SENDER_ACK).key("KEY2").build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().category("SENDER_ACK").key("KEY1").build(), LegalFactsIdV20.builder().category("SENDER_ACK").key("KEY2").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION)
                 .timestamp(t0.plusMillis(1000))
@@ -199,7 +222,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
-                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().category("PEC_RECEIPT").key("KEY1").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
@@ -208,7 +231,7 @@ class StreamUtilsTest {
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_ANALOG_DOMICILE.name())
-                .legalFactId(List.of(LegalFactsIdV20.builder().category(LegalFactCategoryV20.PEC_RECEIPT).key("KEY1").build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().category("PEC_RECEIPT").key("KEY1").build()))
                 .iun(iun)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_ANALOG_DOMICILE)
                 .timestamp(t0.plusMillis(1000))
