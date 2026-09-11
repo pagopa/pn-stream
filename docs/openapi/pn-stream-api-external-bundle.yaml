@@ -3102,7 +3102,6 @@ components:
       type: object
       required:
         - eventId
-        - element
       properties:
         eventId:
           description: Elemento che garantisce univocità all'interno dello stream
@@ -3877,12 +3876,6 @@ components:
         waitForAccepted:
           description: 'Stream di tipo TIMELINE: se true pubblica gli eventi sullo stream solo dopo la pubblicazione dell''evento di accettazione/rifiuto della notifica. Tutti gli eventi dello stato IN_VALIDATION vengono pubblicati senza ritardo. Stream di tipo STATUS: se true pubblica gli stati garantendo che il primo stato sia l''ACCEPTED o il REFUSED'
           type: boolean
-        communicationType:
-          description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà ad una notifica legale, se invece valorizzato con INFORMAL afferirà ad una notifica bonaria
-          type: string
-          enum:
-            - INFORMAL
-            - LEGAL
     StreamMetadataResponseV29:
       description: Configurazioni di un flusso di eventi
       allOf:
