@@ -29,6 +29,7 @@
     "DeliveryProgressesApiPathNew": "delivery-progresses",
     "PnCronAnalyzer": "-",
     "WireTapLogActivation": "false",
-    "MountEfs": "false"
+    "MountEfs": "false",
+    "JavaToolOptions": "-Dreactor.netty.ioWorkerCount=50"
   }
 }
