@@ -4050,7 +4050,7 @@ components:
           type: array                                                                                      # NO EXTERNAL
           description: eventuali errori di validazione associati all'evento                                # NO EXTERNAL
           items: # NO EXTERNAL
-            $ref: '#/components/schemas/RefusedReason'
+            $ref: '#/components/schemas/RefusedReason' # NO EXTERNAL
 
   securitySchemes:        # ONLY EXTERNAL
     ApiKeyAuth:           # ONLY EXTERNAL
