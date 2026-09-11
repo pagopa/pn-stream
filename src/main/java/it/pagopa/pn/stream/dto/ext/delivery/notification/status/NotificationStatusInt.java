@@ -6,6 +6,7 @@ import it.pagopa.pn.stream.exceptions.PnStreamException;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -67,11 +68,18 @@ public enum NotificationStatusInt {
                 .orElseThrow(() -> new PnStreamException("TimelineElementCategory " + this.name() + " is not supported for communication type " + communicationType, 500, "ERROR_CODE_STREAM_CONFIGURATION"));
     }
 
-    public static NotificationStatusInt[] getSupportedCategoriesBy(CommunicationType communicationType) {
+    public static NotificationStatusInt[] getSupportedStatusBy(CommunicationType communicationType) {
         CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
         return Arrays.stream(NotificationStatusInt.values())
                 .filter(category -> category.isSupportedBy(defaultCommunicationType))
                 .toArray(NotificationStatusInt[]::new);
+    }
+
+    public static List<NotificationStatusInt> getSupportedStatusByCommunicationTypeAndVersion(CommunicationType communicationType, int version) {
+        CommunicationType defaultCommunicationType = getDefaultCommunicationType(communicationType);
+        return Arrays.stream(NotificationStatusInt.values())
+                .filter(category -> category.isSupportedBy(defaultCommunicationType) && category.getVersionNonNull(defaultCommunicationType) <= version)
+                .collect(Collectors.toList());
     }
 
     @Override

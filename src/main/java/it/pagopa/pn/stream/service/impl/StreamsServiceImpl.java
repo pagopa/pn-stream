@@ -2,6 +2,7 @@ package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
+import it.pagopa.pn.stream.dto.EventType;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.exceptions.PnStreamMaxStreamsCountReachedException;
 import it.pagopa.pn.stream.exceptions.PnStreamNotFoundException;
@@ -19,6 +20,7 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.St
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
+import it.pagopa.pn.stream.utils.FilterValuesValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
+import static it.pagopa.pn.stream.service.impl.StreamEventsServiceImpl.DEFAULT_CATEGORIES;
 
 @Service
 @Slf4j
@@ -40,15 +43,17 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     public static final int DELAY = 60;
     private final SchedulerService schedulerService;
     private final PnExternalRegistryClient pnExternalRegistryClient;
+    private final FilterValuesValidator filterValuesValidator;
 
     private final int purgeDeletionWaittime;
 
     public StreamsServiceImpl(StreamEntityDao streamEntityDao, SchedulerService schedulerService, StreamUtils streamUtils
-            , PnStreamConfigs pnStreamConfigs, PnExternalRegistryClient pnExternalRegistryClient) {
+            , PnStreamConfigs pnStreamConfigs, PnExternalRegistryClient pnExternalRegistryClient, FilterValuesValidator filterValuesValidator) {
         super(streamEntityDao, pnStreamConfigs, streamUtils);
         this.schedulerService = schedulerService;
         this.pnExternalRegistryClient = pnExternalRegistryClient;
         this.purgeDeletionWaittime = pnStreamConfigs.getPurgeDeletionWaittime();
+        this.filterValuesValidator = filterValuesValidator;
     }
 
     @Override
@@ -60,7 +65,9 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
         return streamCreationRequest.doOnNext(payload -> {
                     String[] fullArgs = ArrayUtils.add(args, payload.toString());
                     generateAuditLog(PnAuditLogEventType.AUD_WH_CREATE, msg + ", request={} ", fullArgs).log();
-                }).flatMap(x ->
+                })
+                .flatMap(dto -> filterValuesValidator.validateFilterValues(xPagopaPnApiVersion, dto.getFilterValues(), dto.getCommunicationType(), EventType.valueOf(dto.getEventType().name())).thenReturn(dto))
+                .flatMap(x ->
                         (x.getReplacedStreamId() == null ? checkStreamCount(xPagopaPnCxId) : Mono.just(Boolean.TRUE)).then(Mono.just(x))
                 )
                 .map(streamCreationRequestV28 -> {
@@ -72,7 +79,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 .flatMap(streamCreationRequestV28 -> {
                     if (Boolean.TRUE.equals(streamCreationRequestV28.getWaitForAccepted())) {
                         if (streamCreationRequestV28.getFilterValues() == null || streamCreationRequestV28.getFilterValues().isEmpty() ||
-                                !streamCreationRequestV28.getFilterValues().stream().anyMatch(f -> f.equals("DEFAULT") || f.equals("REQUEST_ACCEPTED")))
+                                !streamCreationRequestV28.getFilterValues().stream().anyMatch(f -> f.equals(DEFAULT_CATEGORIES) || f.equals("REQUEST_ACCEPTED")))
                             return Mono.error(new PnStreamForbiddenException("Not Allowed the creation of sorted streams without  DEFAULT or REQUEST_ACCEPTED filter"));
                     }
                     return Mono.just(streamCreationRequestV28);
@@ -157,7 +164,8 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                     List<String> values = new ArrayList<>(args);
                     values.add(payload.toString());
                     generateAuditLog(PnAuditLogEventType.AUD_WH_UPDATE, msg, values.toArray(new String[0])).log();
-                })
+                }).flatMap(dto -> filterValuesValidator.validateFilterValues(xPagopaPnApiVersion, dto.getFilterValues(), dto.getCommunicationType(), EventType.valueOf(dto.getEventType().name())))
+                .then(streamRequest)
                 .flatMap(request -> getStreamEntityToWrite(apiVersion(xPagopaPnApiVersion), xPagopaPnCxId, xPagopaPnCxGroups, streamId, false)
                         .filter(checkDisableDate())
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException(String.format("Stream [%s] is disabled, cannot be updated", streamId))))
