@@ -50,10 +50,12 @@ public class FilterValuesValidator {
                 .toList();
 
         if (!forbiddenValues.isEmpty()) {
+            String message = "Invalid filteredValue for TIMELINE stream: " + forbiddenValues;
             return Mono.error(new PnStreamException(
-                    "Invalid filteredValue for TIMELINE stream: " + forbiddenValues,
+                    message,
                     400,
-                    "ERROR_CODE_STREAM_CONFIGURATION"
+                    "ERROR_CODE_STREAM_CONFIGURATION",
+                    message
             ));
         }
         return Mono.empty();
@@ -68,10 +70,12 @@ public class FilterValuesValidator {
                 .toList();
 
         if (!forbiddenValues.isEmpty()) {
+            String message = "Invalid filteredValue for STATUS stream: " + forbiddenValues;
             return Mono.error(new PnStreamException(
-                    "Invalid filteredValue for STATUS stream: " + forbiddenValues,
+                    message,
                     400,
-                    "ERROR_CODE_STREAM_CONFIGURATION"
+                    "ERROR_CODE_STREAM_CONFIGURATION",
+                    message
             ));
         }
         return Mono.empty();

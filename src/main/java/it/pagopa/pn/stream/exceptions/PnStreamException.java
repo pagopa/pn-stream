@@ -13,4 +13,9 @@ public class PnStreamException extends PnRuntimeException {
         this.code = code;
     }
 
+    public PnStreamException(String message, int status, String code, String detail){
+        super(message, message, status, code, null, detail);
+        this.code = code;
+    }
+
 }
