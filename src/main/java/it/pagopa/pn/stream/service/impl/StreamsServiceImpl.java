@@ -21,11 +21,9 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.St
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
-import it.pagopa.pn.stream.utils.CommunicationTypeUtils;
 import it.pagopa.pn.stream.utils.FilterValuesValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
@@ -36,6 +34,7 @@ import java.util.function.Predicate;
 
 import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
 import static it.pagopa.pn.stream.service.impl.StreamEventsServiceImpl.DEFAULT_CATEGORIES;
+import static it.pagopa.pn.stream.utils.CommunicationTypeUtils.getDefaultCommunicationType;
 
 @Service
 @Slf4j
@@ -68,7 +67,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                     String[] fullArgs = ArrayUtils.add(args, payload.toString());
                     generateAuditLog(PnAuditLogEventType.AUD_WH_CREATE, msg + ", request={} ", fullArgs).log();
                 })
-                .flatMap(dto -> filterValuesValidator.validateFilterValues(xPagopaPnApiVersion, dto.getFilterValues(), dto.getCommunicationType(), EventType.valueOf(dto.getEventType().name())).thenReturn(dto))
+                .flatMap(dto -> filterValuesValidator.validateFilterValues(xPagopaPnApiVersion, dto.getFilterValues(), getDefaultCommunicationType(dto.getCommunicationType()), EventType.valueOf(dto.getEventType().name())).thenReturn(dto))
                 .flatMap(x ->
                         (x.getReplacedStreamId() == null ? checkStreamCount(xPagopaPnCxId) : Mono.just(Boolean.TRUE)).then(Mono.just(x))
                 )
@@ -167,17 +166,14 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                     values.add(payload.toString());
                     generateAuditLog(PnAuditLogEventType.AUD_WH_UPDATE, msg, values.toArray(new String[0])).log();
                 })
-                .flatMap(dto -> filterValuesValidator.validateFilterValues(xPagopaPnApiVersion, dto.getFilterValues(), dto.getCommunicationType(), EventType.valueOf(dto.getEventType().name())).thenReturn(dto))
                 .flatMap(request -> getStreamEntityToWrite(apiVersion(xPagopaPnApiVersion), xPagopaPnCxId, xPagopaPnCxGroups, streamId, false)
                         .filter(checkDisableDate())
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException(String.format("Stream [%s] is disabled, cannot be updated", streamId))))
                         .filter(filterUpdateRequest(xPagopaPnUid, xPagopaPnCxId, xPagopaPnCxGroups, request))
                         .switchIfEmpty(Mono.error(new PnStreamForbiddenException("Not supported operation, groups cannot be removed")))
+                        .flatMap(streamEntity -> filterValuesValidator.validateFilterValues(xPagopaPnApiVersion, request.getFilterValues(), streamEntity.getCommunicationType(), EventType.valueOf(request.getEventType().name())).thenReturn(streamEntity))
                         .flatMap(currentEntity -> {
                             StreamEntity entity = DtoToEntityStreamMapper.dtoToEntity(xPagopaPnCxId, streamId.toString(), xPagopaPnApiVersion, request);
-                            if (isDifferentCommunicationType(currentEntity, entity)) {
-                                return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
-                            }
                             entity.setEventAtomicCounter(null);
                             entity.setSorting(null);
                             return Mono.just(entity);
@@ -281,8 +277,8 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     }
 
     private boolean isDifferentCommunicationType(StreamEntity persistedEntity, StreamEntity newEntity) {
-        CommunicationType persistedCommType = CommunicationTypeUtils.getDefaultCommunicationType(persistedEntity.getCommunicationType());
-        CommunicationType newCommType = CommunicationTypeUtils.getDefaultCommunicationType(newEntity.getCommunicationType());
+        CommunicationType persistedCommType = getDefaultCommunicationType(persistedEntity.getCommunicationType());
+        CommunicationType newCommType = getDefaultCommunicationType(newEntity.getCommunicationType());
         return persistedCommType != newCommType;
     }
 

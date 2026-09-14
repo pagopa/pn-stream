@@ -4,7 +4,7 @@ import it.pagopa.pn.stream.dto.EventType;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
-import it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

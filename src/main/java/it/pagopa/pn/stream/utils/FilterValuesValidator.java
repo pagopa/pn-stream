@@ -22,21 +22,16 @@ import static it.pagopa.pn.stream.service.impl.StreamEventsServiceImpl.DEFAULT_C
 public class FilterValuesValidator {
     private final StreamUtils streamUtils;
 
-    public Mono<Void> validateFilterValues(String version, List<String> filteredValues, it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType communicationType, EventType eventType) {
+    public Mono<Void> validateFilterValues(String version, List<String> filteredValues, CommunicationType communicationType, EventType eventType) {
         if (CollectionUtils.isEmpty(filteredValues)) {
             return Mono.empty();
-        }
-
-        CommunicationType communicationTypeint = null;
-        if (communicationType != null) {
-            communicationTypeint = CommunicationType.valueOf(communicationType.getValue());
         }
 
         int parsedVersion = streamUtils.getVersion(version);
 
         return switch (eventType) {
-            case TIMELINE -> validateTimelineFilters(parsedVersion, filteredValues, communicationTypeint);
-            case STATUS -> validateStatusFilters(parsedVersion, filteredValues, communicationTypeint);
+            case TIMELINE -> validateTimelineFilters(parsedVersion, filteredValues, communicationType);
+            case STATUS -> validateStatusFilters(parsedVersion, filteredValues, communicationType);
         };
 
     }

@@ -1382,7 +1382,6 @@ class StreamsServiceImplTest {
         req.setTitle("titolo");
         req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
         req.setFilterValues(null);
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -1452,7 +1451,6 @@ class StreamsServiceImplTest {
         req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
         req.setFilterValues(null);
         req.setGroups(Arrays.asList("gruppo1","gruppo2"));
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -1524,7 +1522,6 @@ class StreamsServiceImplTest {
         req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
         req.setFilterValues(null);
         req.setGroups(Arrays.asList("gruppo1","gruppo2"));
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -1561,7 +1558,6 @@ class StreamsServiceImplTest {
         req.setFilterValues(null);
         req.setGroups(Arrays.asList("gruppo1","gruppo2"));
         req.setWaitForAccepted(false);
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -1599,7 +1595,6 @@ class StreamsServiceImplTest {
         req.setFilterValues(null);
         req.setGroups(Arrays.asList("gruppo1","gruppo2"));
         req.setWaitForAccepted(true);
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -1625,80 +1620,6 @@ class StreamsServiceImplTest {
         verify(streamEntityDao, times(1)).update(any());
         verify(schedulerService, never()).scheduleSortEvent(any(),any(),any(),any());
     }
-
-    @Test
-    void updateEventStreamChangingCommunicationTypeNotAllowed() {
-        String xpagopacxid = "PA-xpagopacxid";
-        String xpagopapnuid = "PA-xpagopapnuid";
-        StreamRequestV30 req = new StreamRequestV30();
-        req.setTitle("titolo");
-        req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL);
-        req.setFilterValues(null);
-        req.setGroups(Arrays.asList("gruppo1", "gruppo2"));
-
-        UUID uuidd = UUID.randomUUID();
-        String uuid = uuidd.toString();
-        StreamEntity entity = new StreamEntity();
-        entity.setStreamId(uuid);
-        entity.setTitle(req.getTitle());
-        entity.setPaId(xpagopacxid);
-        entity.setEventType(req.getEventType().toString());
-        entity.setFilterValues(new HashSet<>());
-        entity.setActivationDate(Instant.now());
-        entity.setGroups(List.of("gruppo1"));
-        entity.setVersion("v26");
-        entity.setCommunicationType(CommunicationType.LEGAL);
-
-        when(streamEntityDao.getWithRetryAfter(any(), any())).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
-        when(streamEntityDao.update(any())).thenReturn(Mono.just(entity));
-
-        Mono<StreamMetadataResponseV30> mono = webhookService.updateEventStream(
-                xpagopapnuid, xpagopacxid, Arrays.asList("gruppo1", "gruppo2"), null, uuidd, Mono.just(req)
-        );
-        assertThrows(PnStreamForbiddenException.class, () -> mono.block(d));
-
-        verify(streamEntityDao, never()).update(any());
-    }
-
-    @Test
-    void updateEventStreamWithCommunicationType() {
-        String xpagopacxid = "PA-xpagopacxid";
-        String xpagopapnuid = "PA-xpagopapnuid";
-        UUID uuidd = UUID.randomUUID();
-        String uuid = uuidd.toString();
-
-        StreamRequestV30 req = new StreamRequestV30();
-        req.setTitle("titolo");
-        req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL);
-        req.setFilterValues(null);
-        req.setGroups(Arrays.asList("gruppo1", "gruppo2"));
-
-        StreamEntity currentEntity = new StreamEntity();
-        currentEntity.setStreamId(uuid);
-        currentEntity.setTitle(req.getTitle());
-        currentEntity.setPaId(xpagopacxid);
-        currentEntity.setEventType(req.getEventType().toString());
-        currentEntity.setFilterValues(new HashSet<>());
-        currentEntity.setActivationDate(Instant.now());
-        currentEntity.setGroups(List.of("gruppo1"));
-        currentEntity.setVersion("v26");
-        currentEntity.setCommunicationType(CommunicationType.INFORMAL);
-
-        ArgumentCaptor<StreamEntity> captor = ArgumentCaptor.forClass(StreamEntity.class);
-        when(streamEntityDao.getWithRetryAfter(any(), any())).thenReturn(Mono.just(Tuples.of(currentEntity, Optional.empty())));
-        when(streamEntityDao.update(captor.capture())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0, StreamEntity.class)));
-
-        StreamMetadataResponseV30 res = webhookService.updateEventStream(
-                xpagopapnuid, xpagopacxid, Arrays.asList("gruppo1", "gruppo2"), null, uuidd, Mono.just(req)
-        ).block(d);
-
-        assertNotNull(res);
-        assertEquals(CommunicationType.INFORMAL, captor.getValue().getCommunicationType());
-        assertEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, res.getCommunicationType());
-    }
-
 
     @Test
     void updateEventStreamWithGroupDelGroup() {
@@ -1745,7 +1666,6 @@ class StreamsServiceImplTest {
         req.setFilterValues(null);
         req.setGroups(List.of("gruppo1"));
         req.setWaitForAccepted(null);
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -2046,7 +1966,6 @@ class StreamsServiceImplTest {
         req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
         req.setFilterValues(null);
         req.setGroups(Collections.emptyList());
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -2091,7 +2010,6 @@ class StreamsServiceImplTest {
         req.setTitle("titolo");
         req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
         req.setFilterValues(null);
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -2132,7 +2050,6 @@ class StreamsServiceImplTest {
         req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
         req.setFilterValues(Arrays.asList("CCCC","DDDD"));
         req.setGroups(Arrays.asList("gruppo1","gruppo2"));
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -2240,7 +2157,6 @@ class StreamsServiceImplTest {
         req.setEventType(StreamRequestV30.EventTypeEnum.STATUS);
         req.setFilterValues(null);
         req.setGroups(Collections.emptyList());
-        req.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.LEGAL);
 
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
@@ -2266,8 +2182,5 @@ class StreamsServiceImplTest {
         //THEN
         verify(streamEntityDao, times(1)).update(any());
     }
-
-
-
 
 }

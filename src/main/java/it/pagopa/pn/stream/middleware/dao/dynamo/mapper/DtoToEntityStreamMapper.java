@@ -37,9 +37,6 @@ public class DtoToEntityStreamMapper {
         StreamCreationRequestV30 creationRequestv30 = new StreamCreationRequestV30();
         BeanUtils.copyProperties(dto, creationRequestv30);
         creationRequestv30.setEventType(StreamCreationRequestV30.EventTypeEnum.fromValue(dto.getEventType().getValue()));
-        if (dto.getCommunicationType() != null) {
-            creationRequestv30.setCommunicationType(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.valueOf((dto.getCommunicationType().getValue())));
-        }
         return dtoToEntity(paId, streamId, version, creationRequestv30);
     }
 }
