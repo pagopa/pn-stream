@@ -3000,6 +3000,8 @@ components:
               description: opzionale, eventuale streamId che viene sostituito da questo. Se specificato, lo stream indicato sarà disabilitato contestualmente alla creazione del nuovo stream, permettendo di consumare tutti gli eventi del vecchio stream senza che ne vengano aggiunti di nuovi. Inoltre, il nuovo stream partirà da un eventId successivo rispetto al vecchio stream (anche se non "esattamente" successivo per evitare sovrapposizioni con eventuali eventi salvati durante il cambio di configurazione). La creazione del nuovo stream è soggetta al controllo di autorizzazione dell'apiKey sui gruppi del precedente stream.
               type: string
               format: uuid
+            communicationType:
+              $ref: '#/components/schemas/CommunicationType'
     StreamRequestV30:
       description: Struttura comune per eventi di creazione/aggiornamento di uno stream di eventi di avanzamento delle notifiche. L'aggiornamento delle proprietà dello stream è soggetta al controllo di autorizzazione dell'apiKey sui gruppi.
       type: object
@@ -3040,10 +3042,8 @@ components:
         waitForAccepted:
           description: 'Stream di tipo TIMELINE: se true pubblica gli eventi sullo stream solo dopo la pubblicazione dell''evento di accettazione/rifiuto della notifica.  Tutti gli eventi dello stato IN_VALIDATION vengono pubblicati senza ritardo. Stream di tipo STATUS: se true pubblica gli stati garantendo che il primo stato sia l''ACCEPTED o il REFUSED'
           type: boolean
-        communicationType:
-          $ref: '#/components/schemas/CommunicationType'
     CommunicationType:
-      description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà alla tipologia di notifica legale, se invece valorizzato con INFORMAL afferirà alla tipologia di una notifica bonaria
+      description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà alla tipologia di notifica legale, se invece valorizzato con INFORMAL afferirà alla tipologia di notifica bonaria
       type: string
       enum:
         - INFORMAL
@@ -3076,6 +3076,8 @@ components:
               description: versione di base dello stream.
               type: string
               pattern: ^v\d\d\d?$
+            communicationType:
+              $ref: '#/components/schemas/CommunicationType'
     StreamListResponse:
       description: Elenco di flussi di eventi
       type: array

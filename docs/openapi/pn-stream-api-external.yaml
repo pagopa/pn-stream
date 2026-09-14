@@ -775,6 +775,8 @@ components:
                 La creazione del nuovo stream è soggetta al controllo di autorizzazione dell'apiKey sui gruppi del precedente stream.
               type: string
               format: uuid
+            communicationType:
+              $ref: '#/components/schemas/CommunicationType'
 
     StreamRequestV30:
       description: >-
@@ -828,11 +830,9 @@ components:
             Tutti gli eventi dello stato IN_VALIDATION vengono pubblicati senza ritardo.
             Stream di tipo STATUS: se true pubblica gli stati garantendo che il primo stato sia l'ACCEPTED o il REFUSED
           type: boolean
-        communicationType:
-          $ref: '#/components/schemas/CommunicationType'
 
     CommunicationType:
-      description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà alla tipologia di notifica legale, se invece valorizzato con INFORMAL afferirà alla tipologia di una notifica bonaria
+      description: Rappresenta la tipologia di notifica a cui lo stream afferisce, se null o vuoto lo stream afferirà alla tipologia di notifica legale, se invece valorizzato con INFORMAL afferirà alla tipologia di notifica bonaria
       type: string
       enum:
         - INFORMAL
@@ -871,6 +871,8 @@ components:
                 versione di base dello stream.
               type: string
               pattern: ^v\d\d\d?$
+            communicationType:
+              $ref: '#/components/schemas/CommunicationType'
 
     StreamListResponse:
       description: Elenco di flussi di eventi

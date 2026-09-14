@@ -3370,6 +3370,8 @@ components:
                 autorizzazione dell'apiKey sui gruppi del precedente stream.
               type: string
               format: uuid
+            communicationType:
+              $ref: '#/components/schemas/CommunicationType'
     StreamRequestV30:
       description: >-
         Struttura comune per eventi di creazione/aggiornamento di uno stream di
@@ -3437,13 +3439,11 @@ components:
             pubblicati senza ritardo. Stream di tipo STATUS: se true pubblica
             gli stati garantendo che il primo stato sia l'ACCEPTED o il REFUSED
           type: boolean
-        communicationType:
-          $ref: '#/components/schemas/CommunicationType'
     CommunicationType:
       description: >-
         Rappresenta la tipologia di notifica a cui lo stream afferisce, se null
         o vuoto lo stream afferirà alla tipologia di notifica legale, se invece
-        valorizzato con INFORMAL afferirà alla tipologia di una notifica bonaria
+        valorizzato con INFORMAL afferirà alla tipologia di notifica bonaria
       type: string
       enum:
         - INFORMAL
@@ -3476,6 +3476,8 @@ components:
               description: versione di base dello stream.
               type: string
               pattern: ^v\d\d\d?$
+            communicationType:
+              $ref: '#/components/schemas/CommunicationType'
     StreamListResponse:
       description: Elenco di flussi di eventi
       type: array
