@@ -4,6 +4,8 @@ const { createStreamMetadataResponseV10 } = require("./mapper/transformStreamMet
 const { createStreamCreationRequestV22 } = require("./mapper/transformStreamCreationRequestFromV10ToV23.js");
 const { createStreamMetadataResponseV26 } = require("./mapper/transformStreamMetadataResponseFromV27ToV26");
 const { createStreamCreationRequestV26 } = require("./mapper/transformStreamCreationRequestFromV27ToV26");
+const { createStreamCreationRequestV29 } = require("./mapper/transformStreamCreationRequestFromV30ToV29.js");
+const { createStreamMetadataResponseV29 } = require("./mapper/transformStreamMetadataResponseFromV30ToV29.js");
 
 class CreateEventStreamHandler extends EventHandler {
     constructor() {
@@ -36,7 +38,8 @@ class CreateEventStreamHandler extends EventHandler {
                 break;
             case 27:
             case 28:
-                requestBody = requestBody;
+            case 29:
+                requestBody = createStreamCreationRequestV29(requestBody);
                 break;
             default:
                 console.error('Invalid version ', version)
@@ -56,25 +59,18 @@ class CreateEventStreamHandler extends EventHandler {
         // RESPONSE BODY
         switch(version) {
             case 10:
-                transformedObject = createStreamMetadataResponseV10(response.data);
+                transformedObject = createStreamMetadataResponseV10(createStreamMetadataResponseV26(createStreamMetadataResponseV29(response.data)));
             break;
             case 23:
-                transformedObject = createStreamMetadataResponseV26(response.data);
-            break;
             case 24:
-                transformedObject = createStreamMetadataResponseV26(response.data);
-            break;
             case 25:
-                transformedObject = createStreamMetadataResponseV26(response.data);
-            break;
             case 26:
-                transformedObject = createStreamMetadataResponseV26(response.data);
+                transformedObject = createStreamMetadataResponseV26(createStreamMetadataResponseV29(response.data));
             break;
             case 27:
-                transformedObject = response.data;
-            break;
             case 28:
-                transformedObject = response.data;
+            case 29:
+                transformedObject = createStreamMetadataResponseV29(response.data);
             break;
             default:
                 console.error('Invalid version ', version)

@@ -3,7 +3,9 @@ const axiosRetry = require("axios-retry").default;
 const EventHandler  = require('./baseHandler.js');
 const { createStreamMetadataResponseV10 } = require("./mapper/transformStreamMetadataResponseFromV23ToV10.js");
 const { createStreamMetadataResponseV26 } = require("./mapper/transformStreamMetadataResponseFromV27ToV26");
+const { createStreamMetadataResponseV29 } = require("./mapper/transformStreamMetadataResponseFromV30ToV29");
 const { createStreamRequestV22 } = require("./mapper/transformStreamRequestFromV10ToV23")
+const { createStreamRequestV30 } = require("./mapper/transformStreamRequestFromV29ToV30")
 class UpdateEventStreamHandler extends EventHandler {
     constructor() {
         super();
@@ -26,21 +28,14 @@ class UpdateEventStreamHandler extends EventHandler {
         switch(version) {
             case 10:
                 requestBody = createStreamRequestV22(requestBody);
-            break;
             case 23:
-                requestBody = requestBody;
-            break;
             case 24:
-                requestBody = requestBody;
-            break;
+            case 25:
             case 26:
-                requestBody = requestBody;
-            break;
             case 27:
-                requestBody = requestBody;
-            break;
             case 28:
-                requestBody = requestBody;
+            case 29:
+                requestBody = createStreamRequestV30(requestBody);
             break;
             default:
                 console.error('Invalid version ', version)
@@ -73,7 +68,7 @@ class UpdateEventStreamHandler extends EventHandler {
         
         switch(version) {
             case 10:
-                transformedObject = createStreamMetadataResponseV10(response.data);
+                transformedObject = createStreamMetadataResponseV10(createStreamMetadataResponseV26(createStreamMetadataResponseV29(response.data)));
             break;
             case 23:
             case 24:
@@ -81,7 +76,10 @@ class UpdateEventStreamHandler extends EventHandler {
             case 26:
             case 27:
             case 28:
-                transformedObject = createStreamMetadataResponseV26(response.data);
+                transformedObject = createStreamMetadataResponseV26(createStreamMetadataResponseV29(response.data));
+            break;
+            case 29:
+                transformedObject = createStreamMetadataResponseV29(response.data);
             break;
             default:
                 console.error('Invalid version ', version)

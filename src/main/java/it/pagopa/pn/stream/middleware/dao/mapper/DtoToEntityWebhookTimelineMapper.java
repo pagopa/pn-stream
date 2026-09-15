@@ -20,6 +20,7 @@ public class DtoToEntityWebhookTimelineMapper {
                 .iun( dto.getIun() )
                 .timelineElementId( dto.getTimelineElementId() )
                 .paId( dto.getPaId() )
+                .communicationType(dto.getCommunicationType())
                 .category(dto.getCategory())
                 .details(objectMapper.readValue(dto.getDetails(), new TypeReference<>() {}))
                 .legalFactIds(dto.getLegalFactId())

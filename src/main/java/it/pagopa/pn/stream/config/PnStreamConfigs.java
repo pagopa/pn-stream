@@ -41,6 +41,7 @@ public class PnStreamConfigs {
     private Integer maxWrittenCounter;
     private Integer queryEventQuarantineLimit;
     public Integer saveEventMaxConcurrency;
+    private List<String> listInformalCategoriesPa;
 
     @Data
     public static class Dao {

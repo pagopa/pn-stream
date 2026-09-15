@@ -1,12 +1,10 @@
 package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.commons.exceptions.PnInternalException;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
+import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV26;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.dto.CustomRetryAfterParameter;
-import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
-import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
-import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
+import it.pagopa.pn.stream.dto.*;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.address.PhysicalAddressInt;
 import it.pagopa.pn.stream.dto.ext.datavault.ConfidentialTimelineElementDtoInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
@@ -17,8 +15,8 @@ import it.pagopa.pn.stream.exceptions.PnTooManyRequestException;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
-import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.service.ConfidentialInformationService;
+import it.pagopa.pn.stream.service.NotificationService;
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.TimelineService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
@@ -29,13 +27,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 import reactor.util.function.Tuples;
 
 import java.time.Duration;
@@ -46,8 +43,7 @@ import static it.pagopa.pn.stream.generated.openapi.server.v1.dto.TimelineElemen
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -71,11 +67,13 @@ class EventsServiceImplTest {
     @Mock
     private StreamNotificationDao streamNotificationDao;
     @Mock
-    private PnDeliveryClientReactive pnDeliveryClientReactive;
-    @Mock
     private UnlockedNotificationEntityDao notificationUnlockedEntityDao;
     @Mock
     private EventsQuarantineEntityDao eventsQuarantineEntityDao;
+    @Spy
+    private StreamVersionsTable streamVersionsTable;
+    @Mock
+    private NotificationService notificationService;
 
     Duration d = Duration.ofSeconds(3);
 
@@ -108,6 +106,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(t0)
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.AAR_GENERATION.name())
@@ -116,6 +115,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("REFUSED").statusChanged(true).build())
                 .timestamp(t0.plusMillis(1000))
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
         res.add(TimelineElementInternal.builder()
                 .category(TimelineElementCategoryInt.SEND_DIGITAL_DOMICILE.name())
@@ -124,6 +124,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(t0.plusMillis(1000))
                 .paId(paId)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         return res;
@@ -142,7 +143,7 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
@@ -184,6 +185,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
         timelineElementInternal.setCategory(AAR_GENERATION.name());
         timelineElementInternal.setPaId("PaId");
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
 
@@ -209,8 +211,144 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void consumeEventStream_whenInformalCommunicationType_shouldPopulateInformalElement() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        List<String> xPagopaPnCxGroups = new ArrayList<>();
+        String xPagopaPnApiVersion = "v10";
+
+        UUID uuidd = UUID.randomUUID();
+        String uuid = uuidd.toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle("");
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setVersion("v10");
+
+        List<EventEntity> list = new ArrayList<>();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setNewStatus(NotificationStatusInt.ACCEPTED.getValue());
+        eventEntity.setTimelineEventCategory(InformalTimelineElementCategoryV1.REQUEST_ACCEPTED.name());
+        eventEntity.setIun("");
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(uuid);
+        eventEntity.setEventDescription("2025-01-17T15:51:42.217434925Z_SEND_DIGITAL_FEEDBACK.IUN_DHZW-LJLR-RKXT-202501-D-1.RECINDEX_0.SOURCE_PLATFORM.REPEAT_false.ATTEMPT_0");
+        eventEntity.setElement("{\"timelineElementId\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST.IUN_EWEU-VWQE-DQTL-202501-R-1\",\"iun\":\"EWEU-VWQE-DQTL-202501-R-1\",\"statusInfo\":{\"actual\":\"IN_VALIDATION\",\"statusChangeTimestamp\":\"2025-01-28T10:51:30.521908236Z\",\"statusChanged\":false},\"notificationSentAt\":\"2025-01-28T10:51:30.521908236Z\",\"ingestionTimestamp\":\"2025-01-28T10:52:00.126937484Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"legalFactIds\":[],\"details\":{\"nextSourceAttemptsMade\":0},\"category\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST\",\"timestamp\":\"2025-01-28T10:52:00.126937484Z\",\"eventTimestamp\":\"2025-01-28T10:52:00.126937484Z\"}");
+        list.add(eventEntity);
+
+        EventEntityBatch eventEntityBatch = new EventEntityBatch();
+        eventEntityBatch.setEvents(list);
+        eventEntityBatch.setStreamId(uuid);
+        eventEntityBatch.setLastEventIdRead(null);
+
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimelineElementId("id");
+        timelineElementInternal.setTimestamp(Instant.now());
+        timelineElementInternal.setIun("Iun");
+        timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
+        timelineElementInternal.setCategory(InformalTimelineElementCategoryV1.REQUEST_ACCEPTED.name());
+        timelineElementInternal.setPaId("PaId");
+        timelineElementInternal.setCommunicationType(CommunicationType.INFORMAL);
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
+        timelineElementInternal.setStatusInfo(null);
+
+        when(webhookUtils.getVersion("v10")).thenReturn(10);
+        when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
+        when(eventEntityDao.findByStreamId(uuid, "00000000000000000000000000000000000001")).thenReturn(Mono.just(eventEntityBatch));
+        when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
+
+        //WHEN
+        ProgressResponseElementDto res = webhookEventsService.consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, uuidd, "00000000000000000000000000000000000001").block(d);
+
+        //THEN
+        assertNotNull(res);
+        ProgressResponseElementV30 element = res.getProgressResponseElementList().get(0);
+
+        Assertions.assertEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, element.getCommunicationType());
+        Assertions.assertNotNull(element.getInformalElement(), "informalElement deve essere valorizzato per CommunicationType.INFORMAL");
+        Assertions.assertNull(element.getElement(), "element deve restare null per CommunicationType.INFORMAL");
+        Assertions.assertNull(element.getTimelineEventCategory(), "timelineEventCategory deve restare null per CommunicationType.INFORMAL");
+
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void consumeEventStream_whenLegalCommunicationType_shouldPopulateElement() {
+        //GIVEN
+        String xpagopacxid = "PA-xpagopacxid";
+        List<String> xPagopaPnCxGroups = new ArrayList<>();
+        String xPagopaPnApiVersion = "v10";
+
+        UUID uuidd = UUID.randomUUID();
+        String uuid = uuidd.toString();
+        StreamEntity entity = new StreamEntity();
+        entity.setStreamId(uuid);
+        entity.setTitle("");
+        entity.setPaId(xpagopacxid);
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
+        entity.setFilterValues(new HashSet<>());
+        entity.setActivationDate(Instant.now());
+        entity.setVersion("v10");
+
+        List<EventEntity> list = new ArrayList<>();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setNewStatus(NotificationStatusInt.ACCEPTED.getValue());
+        eventEntity.setTimelineEventCategory(AAR_GENERATION.name());
+        eventEntity.setIun("");
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(uuid);
+        eventEntity.setEventDescription("2025-01-17T15:51:42.217434925Z_SEND_DIGITAL_FEEDBACK.IUN_DHZW-LJLR-RKXT-202501-D-1.RECINDEX_0.SOURCE_PLATFORM.REPEAT_false.ATTEMPT_0");
+        eventEntity.setElement("{\"timelineElementId\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST.IUN_EWEU-VWQE-DQTL-202501-R-1\",\"iun\":\"EWEU-VWQE-DQTL-202501-R-1\",\"statusInfo\":{\"actual\":\"IN_VALIDATION\",\"statusChangeTimestamp\":\"2025-01-28T10:51:30.521908236Z\",\"statusChanged\":false},\"notificationSentAt\":\"2025-01-28T10:51:30.521908236Z\",\"ingestionTimestamp\":\"2025-01-28T10:52:00.126937484Z\",\"paId\":\"a95dace4-4a47-4149-a814-0e669113ce40\",\"legalFactIds\":[],\"details\":{\"nextSourceAttemptsMade\":0},\"category\":\"VALIDATE_NORMALIZE_ADDRESSES_REQUEST\",\"timestamp\":\"2025-01-28T10:52:00.126937484Z\",\"eventTimestamp\":\"2025-01-28T10:52:00.126937484Z\"}");
+        list.add(eventEntity);
+
+        EventEntityBatch eventEntityBatch = new EventEntityBatch();
+        eventEntityBatch.setEvents(list);
+        eventEntityBatch.setStreamId(uuid);
+        eventEntityBatch.setLastEventIdRead(null);
+
+        TimelineElementInternal timelineElementInternal = new TimelineElementInternal();
+        timelineElementInternal.setTimelineElementId("id");
+        timelineElementInternal.setTimestamp(Instant.now());
+        timelineElementInternal.setIun("Iun");
+        timelineElementInternal.setDetails("{\"recIndex\":0,\"digitalAddressSource\":\"GENERAL\",\"isAvailable\":true,\"attemptDate\":\"2025-01-21T15:12:28.172984718Z\",\"nextSourceAttemptsMade\":0}");
+        timelineElementInternal.setCategory(AAR_GENERATION.name());
+        timelineElementInternal.setPaId("PaId");
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
+        timelineElementInternal.setLegalFactId(new ArrayList<>());
+        timelineElementInternal.setStatusInfo(null);
+
+        when(webhookUtils.getVersion("v10")).thenReturn(10);
+        when(webhookUtils.getTimelineInternalFromEvent(Mockito.any())).thenReturn(timelineElementInternal);
+        when(eventEntityDao.findByStreamId(uuid, "00000000000000000000000000000000000001")).thenReturn(Mono.just(eventEntityBatch));
+        when(streamEntityDao.getWithRetryAfter(xpagopacxid, uuid)).thenReturn(Mono.just(Tuples.of(entity, Optional.empty())));
+
+        //WHEN
+        ProgressResponseElementDto res = webhookEventsService.consumeEventStream(xpagopacxid, xPagopaPnCxGroups, xPagopaPnApiVersion, uuidd, "00000000000000000000000000000000000001").block(d);
+
+        //THEN
+        assertNotNull(res);
+        ProgressResponseElementV30 element = res.getProgressResponseElementList().get(0);
+
+        Assertions.assertNotEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, element.getCommunicationType());
+        Assertions.assertNotNull(element.getElement(), "element deve essere valorizzato per comunicazioni non-INFORMAL");
+        Assertions.assertNull(element.getInformalElement(), "informalElement deve restare null per comunicazioni non-INFORMAL");
+        Assertions.assertEquals(TimelineElementCategoryV28.AAR_GENERATION, element.getTimelineEventCategory());
+
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -226,10 +364,11 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
         List<EventEntity> list = new ArrayList<>();
         EventEntity eventEntity = new EventEntity();
@@ -270,6 +409,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
@@ -294,8 +434,8 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -312,10 +452,11 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -358,7 +499,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
-
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         ConfidentialTimelineElementDtoInt timelineElementDtoInt = new ConfidentialTimelineElementDtoInt();
         timelineElementDtoInt.toBuilder()
                 .timelineElementId("id")
@@ -381,8 +522,8 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(list.size(), res.getProgressResponseElementList().size());
-        Mockito.verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).getWithRetryAfter(xpagopacxid, uuid);
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -398,7 +539,7 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v23");
@@ -415,8 +556,8 @@ class EventsServiceImplTest {
         assertThrows(PnStreamForbiddenException.class, () -> mono.block(d));
 
         //THEN
-        Mockito.verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
-        Mockito.verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
+        verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -436,9 +577,10 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -481,6 +623,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         lasteventid = list.get(0).getEventId();
 
@@ -497,7 +640,7 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(2, res.getProgressResponseElementList().size());
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -517,7 +660,7 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
 
@@ -571,7 +714,7 @@ class EventsServiceImplTest {
         assertNotNull(res);
         Assertions.assertEquals(0, res.getProgressResponseElementList().size());
         Assertions.assertEquals(1000, res.getRetryAfter());
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -589,9 +732,10 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
 
         List<EventEntity> list = new ArrayList<>();
@@ -634,6 +778,7 @@ class EventsServiceImplTest {
         timelineElementInternal.setPaId("PaId");
         timelineElementInternal.setLegalFactId(new ArrayList<>());
         timelineElementInternal.setStatusInfo(null);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
 
         StreamRetryAfter streamRetryAfter = new StreamRetryAfter();
         streamRetryAfter.setPaId(xpagopacxid);
@@ -653,7 +798,7 @@ class EventsServiceImplTest {
         //THEN
         assertNotNull(res);
         Assertions.assertEquals(2, res.getProgressResponseElementList().size());
-        Mockito.verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(schedulerService).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -672,7 +817,7 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
 
@@ -736,7 +881,7 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setVersion("v10");
@@ -752,8 +897,8 @@ class EventsServiceImplTest {
         assertThrows(PnStreamForbiddenException.class, () -> mono.block(d));
 
         //THEN
-        Mockito.verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
-        Mockito.verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, never()).findByStreamId(Mockito.anyString(), Mockito.any());
+        verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -776,7 +921,7 @@ class EventsServiceImplTest {
                 .timestamp(Instant.now())
                 .paId("paId")
                 .statusInfo(StatusInfoInternal.builder().actual("actual").statusChanged(true).build())
-                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category("DIGITAL_DELIVERY").build()))
                 .build();
 
         EventTimelineInternalDto eventTimelineInternalDto = EventTimelineInternalDto.builder()
@@ -837,7 +982,7 @@ class EventsServiceImplTest {
                 .timestamp(Instant.now())
                 .paId("paId")
                 .statusInfo(StatusInfoInternal.builder().actual("actual").statusChanged(true).build())
-                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
+                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category("DIGITAL_DELIVERY").build()))
                 .build();
 
         EventTimelineInternalDto eventTimelineInternalDto = EventTimelineInternalDto.builder()
@@ -879,21 +1024,21 @@ class EventsServiceImplTest {
 
         reworkElement.setCategory(NOTIFICATION_TIMELINE_REWORKED);
         reworkElement.setDetails(detail);
-        ProgressResponseElementV29 element = new ProgressResponseElementV29();
+        ProgressResponseElementV30 element = new ProgressResponseElementV30();
         element.setElement(reworkElement);
 
-        List<ProgressResponseElementV29> progressResponseElementsV29 = List.of(element);
+        List<ProgressResponseElementV30> progressResponseElementsV30 = List.of(element);
 
         Flux<ConfidentialTimelineElementDtoInt> flux = Flux.just(confidentialTimelineElementDtoInt);
 
         when(confidentialInformationService.getTimelineConfidentialInformationFromConfidentialElementIds(any()))
                 .thenReturn(flux);
 
-        List<ProgressResponseElementV29> resultList = webhookEventsService.checkIfReworkElementAndAddConfidentialInfoToRelated(progressResponseElementsV29).block();
+        List<ProgressResponseElementV30> resultList = webhookEventsService.checkIfReworkElementAndAddConfidentialInfoToRelated(progressResponseElementsV30).block();
 
         Assertions.assertNotNull(resultList);
 
-        ProgressResponseElementV29 dto = resultList.stream().findFirst().get();
+        ProgressResponseElementV30 dto = resultList.stream().findFirst().get();
 
         assert dto != null;
 //        Assertions.assertEquals("eventId", dto.getEventEntity().getEventId());
@@ -930,22 +1075,24 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setGroups(groupsList);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
         entity.setStreamId(UUID.randomUUID().toString());
         entity.setTitle("2");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(Set.of(TimelineElementCategoryInt.ANALOG_FAILURE_WORKFLOW.name()));
         entity.setActivationDate(Instant.now());
         entity.setGroups(groupsList);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -964,6 +1111,7 @@ class EventsServiceImplTest {
         notificationInt.setGroup(authGroup);
 
         TimelineElementInternal timelineElementInternal = Mockito.mock(TimelineElementInternal.class);
+        timelineElementInternal.setCommunicationType(CommunicationType.LEGAL);
         Mockito.when(timelineElementInternal.getCategory()).thenReturn(TimelineElementCategoryInt.REQUEST_ACCEPTED.name());
 
         Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
@@ -976,8 +1124,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
     }
 
 
@@ -995,8 +1143,8 @@ class EventsServiceImplTest {
         webhookEventsService.purgeEvents(xpagopacxid, lasteventid, true).block(d);
 
         //THEN
-        Mockito.verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
-        Mockito.verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
+        verify(schedulerService, never()).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
     @Test
@@ -1014,8 +1162,8 @@ class EventsServiceImplTest {
         webhookEventsService.purgeEvents(xpagopacxid, lasteventid, true).block(d);
 
         //THEN
-        Mockito.verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
-        Mockito.verify(schedulerService, Mockito.times(1)).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao).delete(xpagopacxid, lasteventid, true);
+        verify(schedulerService, times(1)).scheduleStreamEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
 
     }
 
@@ -1032,22 +1180,24 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
         entity.setStreamId(UUID.randomUUID().toString());
         entity.setTitle("2");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1077,9 +1227,9 @@ class EventsServiceImplTest {
         Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
         webhookEventsService.saveEvent(newtimeline).block(d);
         //THEN
-        Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(2)).save(Mockito.any(EventEntity.class));
-        Mockito.verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(2)).save(Mockito.any(EventEntity.class));
+        verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -1093,11 +1243,12 @@ class EventsServiceImplTest {
         entity.setStreamId(UUID.randomUUID().toString());
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         TimelineElementInternal newtimeline = TimelineElementInternal.builder()
@@ -1107,6 +1258,7 @@ class EventsServiceImplTest {
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         StreamNotificationEntity notificationInt = new StreamNotificationEntity();
@@ -1117,9 +1269,73 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
-        Mockito.verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+        verify(streamEntityDao).findByPa(xpagopacxid);
+        verify(eventEntityDao, never()).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, never()).updateAndGetAtomicCounter(Mockito.any());
+    }
+
+    @Test
+    void saveEventFiltersByCommunicationType() {
+        String xpagopacxid = "PA-xpagopacxid";
+        String iun = "IUN-ABC-FGHI-A-1";
+
+        List<StreamEntity> list = new ArrayList<>();
+        StreamEntity legalStream = new StreamEntity();
+        legalStream.setStreamId(UUID.randomUUID().toString());
+        legalStream.setTitle("1");
+        legalStream.setPaId(xpagopacxid);
+        legalStream.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
+        legalStream.setFilterValues(new HashSet<>());
+        legalStream.setActivationDate(Instant.now());
+        legalStream.setEventAtomicCounter(1L);
+        legalStream.setCommunicationType(CommunicationType.LEGAL);
+        list.add(legalStream);
+
+        StreamEntity informalStream = new StreamEntity();
+        informalStream.setStreamId(UUID.randomUUID().toString());
+        informalStream.setTitle("2");
+        informalStream.setPaId(xpagopacxid);
+        informalStream.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
+        informalStream.setFilterValues(new HashSet<>());
+        informalStream.setActivationDate(Instant.now());
+        informalStream.setEventAtomicCounter(2L);
+        informalStream.setCommunicationType(CommunicationType.INFORMAL);
+        informalStream.setVersion("30");
+        list.add(informalStream);
+
+        TimelineElementInternal newtimeline = TimelineElementInternal.builder()
+                .category(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name())
+                .iun(iun)
+                .timelineElementId(iun + "_" + TimelineElementCategoryInt.SEND_COURTESY_MESSAGE)
+                .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .timestamp(Instant.now())
+                .paId(xpagopacxid)
+                .communicationType(CommunicationType.INFORMAL)
+                .build();
+
+        StreamNotificationEntity notificationInt = new StreamNotificationEntity();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventId(Instant.now() + "_" + newtimeline.getTimelineElementId());
+        eventEntity.setTimestamp(Instant.now());
+        eventEntity.setTimelineEventCategory(TimelineElementCategoryInt.SEND_COURTESY_MESSAGE.name());
+        eventEntity.setNewStatus(NotificationStatusInt.DELIVERING.getValue());
+        eventEntity.setIun(iun);
+        eventEntity.setNotificationRequestId("");
+        eventEntity.setStreamId(informalStream.getStreamId());
+
+        when(webhookUtils.getVersion(anyString())).thenReturn(30);
+        when(webhookUtils.buildEventEntity(anyLong(), any(), anyString(), any())).thenReturn(eventEntity);
+        when(streamEntityDao.findByPa(xpagopacxid)).thenReturn(Flux.fromIterable(list));
+        when(streamEntityDao.updateAndGetAtomicCounter(argThat(entity -> entity != null && entity.getStreamId().equals(informalStream.getStreamId())))).thenReturn(Mono.just(2L));
+        when(eventEntityDao.save(Mockito.any(EventEntity.class))).thenReturn(Mono.just(new EventEntity()));
+        when(streamNotificationDao.findByIun(anyString())).thenReturn(Mono.just(notificationInt));
+
+        webhookEventsService.saveEvent(newtimeline).block(d);
+
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(streamEntityDao, times(1)).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(informalStream.getStreamId())));
+        verify(streamEntityDao, never()).updateAndGetAtomicCounter(argThat(entity -> entity.getStreamId().equals(legalStream.getStreamId())));
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
     }
 
 
@@ -1137,21 +1353,23 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.getFilterValues().add(NotificationStatusInt.ACCEPTED.getValue());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
         entity.setStreamId(UUID.randomUUID().toString());
         entity.setTitle("2");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1183,8 +1401,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(2)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(4)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(2)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(4)).save(Mockito.any(EventEntity.class));
     }
 
     @Test
@@ -1200,25 +1418,27 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.getFilterValues().add(TimelineElementCategoryInt.AAR_GENERATION.name());
         entity.setActivationDate(Instant.now());
         entity.setVersion("V23");
         entity.setEventAtomicCounter(1L);
         entity.setSorting(false);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
         entity.setStreamId(UUID.randomUUID().toString());
         entity.setTitle("2");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
         entity.setSorting(false);
         entity.setVersion("V23");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1262,9 +1482,9 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline2 ).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(2)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(3)).save(Mockito.any(EventEntity.class));
-        Mockito.verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(streamEntityDao, times(2)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(3)).save(Mockito.any(EventEntity.class));
+        verify(schedulerService, never()).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
 
@@ -1281,22 +1501,24 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
         entity = new StreamEntity();
         entity.setStreamId(UUID.randomUUID().toString());
         entity.setTitle("2");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(2L);
         entity.setVersion("V10");
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1316,6 +1538,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLATION_REQUEST )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1324,6 +1547,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.NOTIFICATION_CANCELLED )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         timeline.add(TimelineElementInternal.builder()
@@ -1332,6 +1556,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.PROBABLE_SCHEDULING_ANALOG_DATE )
                 .timestamp(Instant.now())
                 .paId(xpagopacxid)
+                .communicationType(CommunicationType.LEGAL)
                 .build());
 
         StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
@@ -1366,8 +1591,8 @@ class EventsServiceImplTest {
         timeline.forEach(t -> webhookEventsService.saveEvent(t).block(d));
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(timeline.size())).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(6)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(timeline.size())).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(6)).save(Mockito.any(EventEntity.class));
     }
 
     @Test
@@ -1393,11 +1618,12 @@ class EventsServiceImplTest {
         streamEntity.setStreamId(uuid);
         streamEntity.setTitle("1");
         streamEntity.setPaId(xpagopacxid);
-        streamEntity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        streamEntity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         streamEntity.setFilterValues(Set.of(TimelineElementCategoryInt.REQUEST_ACCEPTED.name()));
         streamEntity.setActivationDate(Instant.now());
         streamEntity.setEventAtomicCounter(1L);
         streamEntity.setGroups(groupsList);
+        streamEntity.setCommunicationType(CommunicationType.LEGAL);
         streamEntityList.add(streamEntity);
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid))
@@ -1412,7 +1638,7 @@ class EventsServiceImplTest {
                 .block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1))
+        verify(streamEntityDao, times(1))
                 .findByPa(xpagopacxid);
 
 
@@ -1432,9 +1658,9 @@ class EventsServiceImplTest {
                 .block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(2))
+        verify(streamEntityDao, times(2))
                 .findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(0)).save(Mockito.any());
+        verify(eventEntityDao, times(0)).save(Mockito.any());
     }
 
     @Test
@@ -1453,17 +1679,19 @@ class EventsServiceImplTest {
         List<StreamEntity> streamEntityList = new ArrayList<>();
         UUID uuidd = UUID.randomUUID();
         String uuid = uuidd.toString();
+        CommunicationType communicationType = CommunicationType.LEGAL;
         StreamEntity streamEntity = new StreamEntity();
         streamEntity.setStreamId(uuid);
         streamEntity.setStreamId(uuid);
         streamEntity.setTitle("1");
         streamEntity.setPaId(xpagopacxid);
-        streamEntity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        streamEntity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         streamEntity.setFilterValues(Set.of("DEFAULT"));
         streamEntity.setActivationDate(Instant.now());
         streamEntity.setEventAtomicCounter(1L);
         streamEntity.setVersion("V23");
         streamEntity.setGroups(groupsList);
+        streamEntity.setCommunicationType(communicationType);
         streamEntityList.add(streamEntity);
 
         Mockito.when(streamEntityDao.findByPa(xpagopacxid))
@@ -1473,12 +1701,12 @@ class EventsServiceImplTest {
         Mockito.when(timelineElementInternal.getCategory())
                 .thenReturn(TimelineElementCategoryInt.REQUEST_ACCEPTED.name());
 
-        SentNotificationV25 sentNotification = new SentNotificationV25();
+        SentNotificationV26 sentNotification = new SentNotificationV26();
         sentNotification.setGroup(authGroup);
         StreamNotificationEntity streamNotification = new StreamNotificationEntity();
         streamNotification.setGroup(authGroup);
         when(streamNotificationDao.findByIun(anyString())).thenReturn(Mono.empty());
-        when(pnDeliveryClientReactive.getSentNotification(anyString())).thenReturn(Mono.just(sentNotification));
+        when(notificationService.constructNotificationEntity(iun, communicationType)).thenReturn(Mono.just(streamNotification));
         when(streamNotificationDao.putItem(any())).thenReturn(Mono.just(streamNotification));
         Mockito.when(schedulerService.scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn("test");
 
@@ -1493,14 +1721,14 @@ class EventsServiceImplTest {
                 .block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1))
+        verify(streamEntityDao, times(1))
                 .findByPa(xpagopacxid);
-        Mockito.verify(streamEntityDao, Mockito.times(1))
+        verify(streamEntityDao, times(1))
                 .updateAndGetAtomicCounter(Mockito.any());
-        Mockito.verify(eventEntityDao, Mockito.times(1))
+        verify(eventEntityDao, times(1))
                 .save(Mockito.any());
-        Mockito.verify(pnDeliveryClientReactive, Mockito.times(1))
-                .getSentNotification(anyString());
+        verify(notificationService, times(1))
+                .constructNotificationEntity(iun, communicationType);
     }
 
     @Test
@@ -1514,10 +1742,11 @@ class EventsServiceImplTest {
         entity.setStreamId(streamId);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
+        entity.setCommunicationType(CommunicationType.LEGAL);
 
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventId(Instant.now() + "_" + "timeline_event_id");
@@ -1534,6 +1763,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.SENDER_ACK_CREATION_REQUEST )
                 .statusInfo(StatusInfoInternal.builder().actual("IN_VALIDATION").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         Mockito.when(webhookUtils.buildEventEntity(Mockito.anyLong(), Mockito.any(), Mockito.anyString(), Mockito.any())).thenReturn(eventEntity);
@@ -1546,8 +1776,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1565,12 +1795,13 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.getFilterValues().add(NotificationStatusInt.ACCEPTED.getValue());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1590,6 +1821,7 @@ class EventsServiceImplTest {
                 .notificationSentAt(Instant.now())
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         NotificationUnlockedEntity unlockNotification = new NotificationUnlockedEntity();
@@ -1605,8 +1837,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1624,11 +1856,12 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1647,6 +1880,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now().minus(Duration.ofHours(48)));
@@ -1663,8 +1897,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1682,12 +1916,13 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.STATUS.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.STATUS.toString());
         entity.setFilterValues(new HashSet<>());
         entity.getFilterValues().add(NotificationStatusInt.ACCEPTED.getValue());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1706,6 +1941,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.REQUEST_ACCEPTED )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(true).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1722,10 +1958,10 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(notificationUnlockedEntityDao, Mockito.times(1)).putItem(Mockito.any());
-        Mockito.verify(schedulerService, Mockito.times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(notificationUnlockedEntityDao, times(1)).putItem(Mockito.any());
+        verify(schedulerService, times(1)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
     }
 
     @Test
@@ -1742,11 +1978,12 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1765,6 +2002,7 @@ class EventsServiceImplTest {
                 .paId(xpagopacxid)
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1780,12 +2018,12 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventsQuarantineEntityDao, Mockito.times(1)).putItem(Mockito.any());
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventsQuarantineEntityDao, times(1)).putItem(Mockito.any());
 
-        Mockito.verify(notificationUnlockedEntityDao, Mockito.times(0)).putItem(Mockito.any());
-        Mockito.verify(schedulerService, Mockito.times(0)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.verify(eventEntityDao, Mockito.times(0)).save(Mockito.any(EventEntity.class));
+        verify(notificationUnlockedEntityDao, times(0)).putItem(Mockito.any());
+        verify(schedulerService, times(0)).scheduleSortEvent(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any());
+        verify(eventEntityDao, times(0)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1803,12 +2041,13 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(true);
         entity.setActivationDate(Instant.now().plus(Duration.ofDays(1)));
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1828,6 +2067,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
                 .notificationSentAt(Instant.now())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1841,8 +2081,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 
@@ -1860,12 +2100,13 @@ class EventsServiceImplTest {
         entity.setStreamId(uuid);
         entity.setTitle("1");
         entity.setPaId(xpagopacxid);
-        entity.setEventType(StreamMetadataResponseV29.EventTypeEnum.TIMELINE.toString());
+        entity.setEventType(StreamMetadataResponseV30.EventTypeEnum.TIMELINE.toString());
         entity.setFilterValues(new HashSet<>());
         entity.setActivationDate(Instant.now());
         entity.setEventAtomicCounter(1L);
         entity.setSorting(false);
         entity.setActivationDate(Instant.now().plus(Duration.ofDays(1)));
+        entity.setCommunicationType(CommunicationType.LEGAL);
         list.add(entity);
 
 
@@ -1885,6 +2126,7 @@ class EventsServiceImplTest {
                 .timelineElementId(iun + "_" + TimelineElementCategoryInt.AAR_GENERATION )
                 .statusInfo(StatusInfoInternal.builder().actual("ACCEPTED").statusChanged(false).build())
                 .notificationSentAt(Instant.now())
+                .communicationType(CommunicationType.LEGAL)
                 .build();
 
         newtimeline.setNotificationSentAt(Instant.now());
@@ -1898,8 +2140,8 @@ class EventsServiceImplTest {
         webhookEventsService.saveEvent(newtimeline).block(d);
 
         //THEN
-        Mockito.verify(streamEntityDao, Mockito.times(1)).findByPa(xpagopacxid);
-        Mockito.verify(eventEntityDao, Mockito.times(1)).save(Mockito.any(EventEntity.class));
+        verify(streamEntityDao, times(1)).findByPa(xpagopacxid);
+        verify(eventEntityDao, times(1)).save(Mockito.any(EventEntity.class));
 
     }
 }

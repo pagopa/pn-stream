@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
-import it.pagopa.pn.deliverypush.generated.openapi.msclient.delivery.model.SentNotificationV25;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.dto.EventTimelineInternalDto;
-import it.pagopa.pn.stream.dto.ProgressResponseElementDto;
-import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
+import it.pagopa.pn.stream.dto.*;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.stats.StreamStatsEnum;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
@@ -18,16 +16,12 @@ import it.pagopa.pn.stream.generated.openapi.msclient.datavault.model.Confidenti
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.*;
 import it.pagopa.pn.stream.middleware.dao.dynamo.entity.*;
-import it.pagopa.pn.stream.middleware.externalclient.pnclient.delivery.PnDeliveryClientReactive;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.SortEventType;
 import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.StreamEventType;
-import it.pagopa.pn.stream.service.ConfidentialInformationService;
-import it.pagopa.pn.stream.service.SchedulerService;
-import it.pagopa.pn.stream.service.StreamEventsService;
-import it.pagopa.pn.stream.service.TimelineService;
+import it.pagopa.pn.stream.service.*;
 import it.pagopa.pn.stream.service.mapper.ProgressResponseElementMapper;
-import it.pagopa.pn.stream.service.mapper.TimelineElementStreamMapper;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
+import it.pagopa.pn.stream.utils.CommunicationTypeUtils;
 import it.pagopa.pn.stream.utils.MetricUtils;
 import lombok.CustomLog;
 import org.springframework.stereotype.Service;
@@ -39,7 +33,6 @@ import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.pagopa.pn.commons.exceptions.PnExceptionsCodes.ERROR_CODE_PN_GENERIC_ERROR;
@@ -51,15 +44,16 @@ import static it.pagopa.pn.stream.service.utils.StreamUtils.checkGroups;
 @CustomLog
 public class StreamEventsServiceImpl extends PnStreamServiceImpl implements StreamEventsService {
 
-    private static final String DEFAULT_CATEGORIES = "DEFAULT";
+    public static final String DEFAULT_CATEGORIES = "DEFAULT";
     private final EventEntityDao eventEntityDao;
     private final StreamNotificationDao streamNotificationDao;
     private final EventsQuarantineEntityDao eventsQuarantineEntityDao;
     private final UnlockedNotificationEntityDao notificationUnlockedEntityDao;
-    private final PnDeliveryClientReactive pnDeliveryClientReactive;
     private final SchedulerService schedulerService;
     private final TimelineService timelineService;
     private final ConfidentialInformationService confidentialInformationService;
+    private final StreamVersionsTable streamVersionsTable;
+    private final NotificationService notificationService;
 
     private static final String LOG_MSG_JSON_COMPRESSION = "Error while compressing timeline elements into JSON for the audit";
 
@@ -68,17 +62,18 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                    SchedulerService schedulerService, StreamUtils streamUtils,
                                    PnStreamConfigs pnStreamConfigs, TimelineService timeLineService,
                                    ConfidentialInformationService confidentialInformationService,
-                                   StreamNotificationDao streamNotificationDao, PnDeliveryClientReactive pnDeliveryClientReactive,
-                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao) {
+                                   StreamNotificationDao streamNotificationDao,
+                                   EventsQuarantineEntityDao eventsQuarantineEntityDao, UnlockedNotificationEntityDao notificationUnlockedEntityDao, StreamVersionsTable streamVersionsTable, NotificationService notificationService) {
         super(streamEntityDao, pnStreamConfigs, streamUtils);
         this.eventEntityDao = eventEntityDao;
         this.schedulerService = schedulerService;
         this.timelineService = timeLineService;
         this.confidentialInformationService = confidentialInformationService;
         this.streamNotificationDao = streamNotificationDao;
-        this.pnDeliveryClientReactive = pnDeliveryClientReactive;
         this.eventsQuarantineEntityDao = eventsQuarantineEntityDao;
         this.notificationUnlockedEntityDao = notificationUnlockedEntityDao;
+        this.streamVersionsTable = streamVersionsTable;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -110,12 +105,12 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                         return Flux.fromStream(items.stream());
                                     return addConfidentialInformationAtEventTimelineList(removeDuplicatedItems(items));
                                 })
-                                // converto l'eventTimelineInternalDTO in ProgressResponseElementV29
-                                .map(this::getProgressResponseFromEventTimeline)
+                                // converto l'eventTimelineInternalDTO in ProgressResponseElementV30
+                                .map(ProgressResponseElementMapper::internalToExternal)
                                 .collectList()
                                 .flatMap(this::checkIfReworkElementAndAddConfidentialInfoToRelated)
-                                .flatMapIterable(progressResponseElementV29s -> progressResponseElementV29s)
-                                .sort(Comparator.comparing(ProgressResponseElementV29::getEventId))
+                                .flatMapIterable(progressResponseElementV30s -> progressResponseElementV30s)
+                                .sort(Comparator.comparing(ProgressResponseElementV30::getEventId))
                                 .collectList()
                                     .zipWith(Mono.just(streamUtils.retrieveRetryAfter(xPagopaPnCxId)))
                                 .flatMap(tuple2 -> updateStreamRetryAfterAndStats(xPagopaPnCxId, streamId, tuple2.getT1(), tuple2.getT2()).thenReturn(tuple2))
@@ -140,7 +135,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={})", lastEventIDToPrint,error).log());
     }
 
-    private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV29> eventList, Long retryAfter) {
+    private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV30> eventList, Long retryAfter) {
         if (eventList.isEmpty()) {
             log.logMetric(List.of(MetricUtils.generateGeneralMetric(xPagopaPnCxId, streamId.toString(), StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name(), 1, Instant.now().toEpochMilli(), 0)), "Logging metric : " + StreamStatsEnum.NUMBER_OF_EMPTY_READINGS.name());
             return streamEntityDao.updateStreamRetryAfter(constructNewRetryAfterEntity(xPagopaPnCxId, streamId, Instant.now().plusMillis(retryAfter)));
@@ -149,7 +144,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return Mono.empty();
     }
 
-    private String createAuditLogOfElementsId(List<ProgressResponseElementV29> items) {
+    private String createAuditLogOfElementsId(List<ProgressResponseElementV30> items) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode rootNode = mapper.createObjectNode();
         Map<String, List<String>> iunWithTimelineElementId = new LinkedHashMap<>();
@@ -157,7 +152,9 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         items.forEach(item -> {
             String iun = item.getIun();
             List<String> elements = iunWithTimelineElementId.get(iun);
-            String description = item.getElement().getTimestamp() + "_" + item.getElement().getElementId();
+            String description = item.getElement() != null
+                    ? item.getElement().getTimestamp() + "_" + item.getElement().getElementId()
+                    : item.getInformalElement().getTimestamp() + "_" + item.getInformalElement().getElementId();
             description = description.replace(".IUN_" + iun, "");
 
             if (elements == null) {
@@ -187,15 +184,6 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return retryAfterEntity;
     }
 
-    private ProgressResponseElementV29 getProgressResponseFromEventTimeline(EventTimelineInternalDto eventTimeline) {
-        var response = ProgressResponseElementMapper.internalToExternal(eventTimeline.getEventEntity());
-        if (StringUtils.hasText(eventTimeline.getEventEntity().getElement())) {
-            TimelineElementV28 timelineElement = TimelineElementStreamMapper.internalToExternal(eventTimeline.getTimelineElementInternal());
-            response.setElement(timelineElement);
-        }
-        return response;
-    }
-
     private Flux<EventTimelineInternalDto> toEventTimelineInternalFromEventEntity(List<EventEntity> events) throws PnInternalException {
         return Flux.fromStream(events.stream())
                 .map(item -> {
@@ -219,12 +207,13 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
+                .filter(entity -> CommunicationTypeUtils.getDefaultCommunicationType(entity.getCommunicationType()).equals(timelineElementInternal.getCommunicationType()))
                 .collectList()
                 .flatMap(stream -> {
                     if (stream.isEmpty()) {
                         return Mono.empty();
                     } else {
-                        return getNotification(timelineElementInternal.getIun())
+                        return getNotification(timelineElementInternal.getIun(), timelineElementInternal.getCommunicationType())
                                 .map(notification -> Tuples.of(stream, timelineElementInternal, notification));
                     }
                 })
@@ -282,21 +271,16 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
     }
 
 
-    public Mono<StreamNotificationEntity> getNotification(String iun) {
+    public Mono<StreamNotificationEntity> getNotification(String iun, CommunicationType communicationType) {
         return streamNotificationDao.findByIun(iun)
                 .doOnNext(entity -> log.info("founded notification on dynamo for iun={}", iun))
-                .switchIfEmpty(Mono.defer(() -> pnDeliveryClientReactive.getSentNotification(iun))
-                        .flatMap(this::constructAndSaveNotificationEntity));
+                .switchIfEmpty(Mono.defer(() -> this.constructAndSaveNotificationEntity(iun, communicationType)));
     }
 
-    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(SentNotificationV25 SentNotificationV25) {
-        StreamNotificationEntity streamNotificationEntity = new StreamNotificationEntity();
-        streamNotificationEntity.setHashKey(SentNotificationV25.getIun());
-        streamNotificationEntity.setGroup(SentNotificationV25.getGroup());
-        streamNotificationEntity.setTtl(Instant.now().plusSeconds(pnStreamConfigs.getStreamNotificationTtl()).getEpochSecond());
-        streamNotificationEntity.setCreationDate(SentNotificationV25.getSentAt());
-        return streamNotificationDao.putItem(streamNotificationEntity)
-                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", SentNotificationV25.getIun()));
+    private Mono<StreamNotificationEntity> constructAndSaveNotificationEntity(String iun, CommunicationType communicationType) {
+        return notificationService.constructNotificationEntity(iun, communicationType)
+                .flatMap(streamNotificationDao::putItem)
+                .doOnNext(entity -> log.info("saved notification on dynamo for iun={}", iun));
     }
 
     private Mono<StreamEntity> processEvent(StreamEntity stream, TimelineElementInternal timelineElementInternal, String groups) {
@@ -310,8 +294,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
             return Mono.empty();
         }
 
-        StreamCreationRequestV29.EventTypeEnum eventType = StreamCreationRequestV29.EventTypeEnum.fromValue(stream.getEventType());
-        if (eventType == StreamCreationRequestV29.EventTypeEnum.STATUS && !timelineElementInternal.getStatusInfo().isStatusChanged()) {
+        StreamCreationRequestV30.EventTypeEnum eventType = StreamCreationRequestV30.EventTypeEnum.fromValue(stream.getEventType());
+        if (eventType == StreamCreationRequestV30.EventTypeEnum.STATUS && !timelineElementInternal.getStatusInfo().isStatusChanged()) {
             log.info("skipping saving webhook event for stream={} because there was no change in status iun={}", stream.getStreamId(), timelineElementInternal.getIun());
             return Mono.empty();
         }
@@ -324,8 +308,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         Set<String> filteredValues = retrieveFilteredValues(stream, eventType);
 
-        if ((eventType == StreamCreationRequestV29.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
-                || (eventType == StreamCreationRequestV29.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
+        if ((eventType == StreamCreationRequestV30.EventTypeEnum.STATUS && filteredValues.contains(timelineElementInternal.getStatusInfo().getActual()))
+                || (eventType == StreamCreationRequestV30.EventTypeEnum.TIMELINE && filteredValues.contains(timelineEventCategory))) {
             return Mono.just(stream);
         } else {
             log.info("skipping saving webhook event for stream={} because timelineeventcategory is not in list timelineeventcategory={} iun={}", stream.getStreamId(), timelineEventCategory, timelineElementInternal.getIun());
@@ -333,10 +317,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         return Mono.empty();
     }
 
-    private Set<String> retrieveFilteredValues(StreamEntity stream, StreamCreationRequestV29.EventTypeEnum eventType) {
-        if (eventType == StreamCreationRequestV29.EventTypeEnum.TIMELINE) {
+    private Set<String> retrieveFilteredValues(StreamEntity stream, StreamCreationRequestV30.EventTypeEnum eventType) {
+        if (eventType == StreamCreationRequestV30.EventTypeEnum.TIMELINE) {
             return categoriesByFilter(stream);
-        } else if (eventType == StreamCreationRequestV29.EventTypeEnum.STATUS) {
+        } else if (eventType == StreamCreationRequestV30.EventTypeEnum.STATUS) {
             return statusByFilter(stream);
         }
         return Collections.emptySet();
@@ -386,34 +370,39 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .then();
     }
 
-    private Set<String> categoriesByVersion(int version) {
-        return Arrays.stream(TimelineElementCategoryInt.values())
-                .filter(e -> e.getVersion() <= TimelineElementCategoryInt.StreamVersions.fromIntValue(version).getTimelineVersion())
+    private Set<String> categoriesByVersion(int version, CommunicationType communicationType) {
+        TimelineElementCategoryInt.StreamVersions streamVersion = TimelineElementCategoryInt.StreamVersions.fromIntValue(version);
+        int timelineVersion = streamVersionsTable.getTimelineVersion(streamVersion, communicationType);
+
+        return TimelineElementCategoryInt.getSupportedCategoriesByCommunicationTypeAndVersion(communicationType, timelineVersion)
+                .stream()
                 .map(Enum::name)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> statusByVersion(int version) {
-        return Arrays.stream(NotificationStatusInt.values())
-                .filter(e -> e.getVersion() <= TimelineElementCategoryInt.StreamVersions.fromIntValue(version).getStatusVersion())
+    private Set<String> statusByVersion(int version, CommunicationType communicationType) {
+        TimelineElementCategoryInt.StreamVersions streamVersion = TimelineElementCategoryInt.StreamVersions.fromIntValue(version);
+        int statusVersion = streamVersionsTable.getStatusVersion(streamVersion, communicationType);
+
+        return NotificationStatusInt.getSupportedStatusByCommunicationTypeAndVersion(communicationType, statusVersion)
+                .stream()
                 .map(NotificationStatusInt::getValue)
                 .collect(Collectors.toSet());
     }
 
     private Set<String> categoriesByFilter(StreamEntity stream) {
-        Set<String> versionedCategoriesSet = categoriesByVersion(streamUtils.getVersion(stream.getVersion()));
+        Set<String> versionedCategoriesSet = categoriesByVersion(streamUtils.getVersion(stream.getVersion()), stream.getCommunicationType());
 
         if (CollectionUtils.isEmpty(stream.getFilterValues())) {
             return versionedCategoriesSet;
         }
 
         Set<String> categoriesSet = stream.getFilterValues().stream()
-                .filter(v -> !v.equalsIgnoreCase(DEFAULT_CATEGORIES))
+                .filter(v -> !v.equals(DEFAULT_CATEGORIES))
                 .collect(Collectors.toSet());
 
         if (stream.getFilterValues().contains(DEFAULT_CATEGORIES)) {
-            log.debug("pnDeliveryPushConfigs.getListCategoriesPa[0]={}", pnStreamConfigs.getListCategoriesPa().get(0));
-            categoriesSet.addAll(pnStreamConfigs.getListCategoriesPa());
+            categoriesSet.addAll(retrieveDefaultCategoriesByCommunicationType(stream.getCommunicationType()));
         }
 
         return categoriesSet.stream()
@@ -421,8 +410,21 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .collect(Collectors.toSet());
     }
 
+    private List<String> retrieveDefaultCategoriesByCommunicationType(CommunicationType communicationType) {
+        CommunicationType defaultCommunicationType = CommunicationTypeUtils.getDefaultCommunicationType(communicationType);
+        if(defaultCommunicationType == CommunicationType.LEGAL) {
+            log.debug("pnDeliveryPushConfigs.getListCategoriesPa[0]={}", pnStreamConfigs.getListCategoriesPa().get(0));
+            return pnStreamConfigs.getListCategoriesPa();
+        } else if (defaultCommunicationType == CommunicationType.INFORMAL) {
+            log.debug("pnDeliveryPushConfigs.getListInformalCategoriesPa[0]={}", pnStreamConfigs.getListInformalCategoriesPa().get(0));
+            return pnStreamConfigs.getListInformalCategoriesPa();
+        }
+
+        return Collections.emptyList();
+    }
+
     private Set<String> statusByFilter(StreamEntity stream) {
-        Set<String> versionedStatusSet = statusByVersion(streamUtils.getVersion(stream.getVersion()));
+        Set<String> versionedStatusSet = statusByVersion(streamUtils.getVersion(stream.getVersion()), stream.getCommunicationType());
         if (CollectionUtils.isEmpty(stream.getFilterValues())) {
             return versionedStatusSet;
         }
@@ -460,13 +462,13 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                 .flatMapMany(item -> Flux.fromStream(eventEntities.stream()));
     }
 
-    protected Mono<List<ProgressResponseElementV29>> checkIfReworkElementAndAddConfidentialInfoToRelated(List<ProgressResponseElementV29> progressResponseElementsV29) {
-        List<ProgressResponseElementV29> reworkElements = progressResponseElementsV29.stream()
-                .filter(element -> element.getElement().getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED))
+    protected Mono<List<ProgressResponseElementV30>> checkIfReworkElementAndAddConfidentialInfoToRelated(List<ProgressResponseElementV30> progressResponseElementsV30) {
+        List<ProgressResponseElementV30> reworkElements = progressResponseElementsV30.stream()
+                .filter(element -> TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED.equals(element.getTimelineEventCategory()))
                 .toList();
 
         if (CollectionUtils.isEmpty(reworkElements)) {
-            return Mono.just(progressResponseElementsV29);
+            return Mono.just(progressResponseElementsV30);
         }
 
         List<ConfidentialTimelineElementId> elementIds = getConfidentialElementIds(reworkElements, reworkElements.stream().findAny().get().getIun());
@@ -484,10 +486,10 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                             return timelineElementInternal;
                         })
                         .orElse(null)
-                ).then(Mono.just(progressResponseElementsV29));
+                ).then(Mono.just(progressResponseElementsV30));
     }
 
-    private List<ConfidentialTimelineElementId> getConfidentialElementIds(List<ProgressResponseElementV29> reworkElements, String iun) {
+    private List<ConfidentialTimelineElementId> getConfidentialElementIds(List<ProgressResponseElementV30> reworkElements, String iun) {
         return reworkElements.stream()
                 .map(rework -> rework.getElement().getDetails().getInvalidatedTimelineAndStatusHistory())
                 .flatMap(Collection::stream)
