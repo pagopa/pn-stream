@@ -5,6 +5,8 @@ import it.pagopa.pn.stream.dto.EventType;
 import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
+import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV30;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,5 +96,23 @@ public class FilterValuesValidator {
 
     private boolean isDefault(String filteredValue) {
         return filteredValue.equals(DEFAULT_CATEGORIES);
+    }
+
+    public Mono<StreamCreationRequestV30> validateFilterValuesIfWaitForAccepted(StreamCreationRequestV30 streamCreationRequest) {
+        List<String> filterValues = streamCreationRequest.getFilterValues();
+        if (filterValues != null && !filterValues.isEmpty()) {
+            EventType eventType = EventType.valueOf(streamCreationRequest.getEventType().name());
+            if (eventType == EventType.TIMELINE
+                    && filterValues.stream().noneMatch(f -> f.equals(DEFAULT_CATEGORIES) || f.equals("REQUEST_ACCEPTED"))) {
+                return Mono.error(new PnStreamForbiddenException(
+                        "Not Allowed the creation of sorted TIMELINE streams without DEFAULT or REQUEST_ACCEPTED filter"));
+            }
+            if (eventType == EventType.STATUS
+                    && filterValues.stream().noneMatch(f -> f.equals("ACCEPTED"))) {
+                return Mono.error(new PnStreamForbiddenException(
+                        "Not Allowed the creation of sorted STATUS streams without ACCEPTED filter"));
+            }
+        }
+        return Mono.just(streamCreationRequest);
     }
 }
