@@ -7,12 +7,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
 import it.pagopa.pn.stream.generated.openapi.server.v1.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Objects;
 
 import static it.pagopa.pn.stream.exceptions.PnStreamExceptionCodes.ERROR_CODE_GENERIC;
 
+@Slf4j
 public class TimelineElementMapper {
     private TimelineElementMapper() {
     }
@@ -31,6 +33,7 @@ public class TimelineElementMapper {
             if (Objects.isNull(timelineElement.getNextDigitalAddressSource())){
                 timelineElement.setNextSourceAttemptsMade(null);
             }
+            log.info("details produced: {}", timelineElement);
             builder = TimelineElementV28.builder()
                     .category(internalDto.getCategory() != null ? TimelineElementCategoryV28.fromValue(internalDto.getCategory()) : null)
                     .elementId(internalDto.getTimelineElementId())
