@@ -33,7 +33,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
-import static it.pagopa.pn.stream.service.impl.StreamEventsServiceImpl.DEFAULT_CATEGORIES;
 import static it.pagopa.pn.stream.utils.CommunicationTypeUtils.getDefaultCommunicationType;
 
 @Service
@@ -79,9 +78,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 })
                 .flatMap(streamCreationRequestV28 -> {
                     if (Boolean.TRUE.equals(streamCreationRequestV28.getWaitForAccepted())) {
-                        if (streamCreationRequestV28.getFilterValues() == null || streamCreationRequestV28.getFilterValues().isEmpty() ||
-                                streamCreationRequestV28.getFilterValues().stream().noneMatch(f -> f.equals(DEFAULT_CATEGORIES) || f.equals("REQUEST_ACCEPTED")))
-                            return Mono.error(new PnStreamForbiddenException("Not Allowed the creation of sorted streams without  DEFAULT or REQUEST_ACCEPTED filter"));
+                        return filterValuesValidator.validateFilterValuesIfWaitForAccepted(streamCreationRequestV28);
                     }
                     return Mono.just(streamCreationRequestV28);
                 })
