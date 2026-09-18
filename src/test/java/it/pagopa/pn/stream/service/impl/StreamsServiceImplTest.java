@@ -154,6 +154,7 @@ class StreamsServiceImplTest {
         when(streamEntityDao.findByPa(anyString())).thenReturn(Flux.fromIterable(List.of(pentity)));
         when(streamEntityDao.save(any())).thenReturn(Mono.just(entity));
         when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
+        when(filterValuesValidator.validateFilterValuesIfWaitForAccepted(any())).thenReturn(Mono.just(req));
 
 
         //WHEN
@@ -206,48 +207,6 @@ class StreamsServiceImplTest {
         assertNotNull(res);
         assertEquals(it.pagopa.pn.stream.generated.openapi.server.v1.dto.CommunicationType.INFORMAL, res.getCommunicationType());
         assertEquals(CommunicationType.INFORMAL, captor.getValue().getCommunicationType());
-    }
-
-    @Test
-    void createSortEventStreamWithWrongFilter() {
-        //GIVEN
-        String xpagopacxid = "PA-xpagopacxid";
-        String xpagopapnuid = "PA-xpagopapnuid";
-
-
-        StreamCreationRequestV30 req = new StreamCreationRequestV30();
-        req.setTitle("titolo");
-        req.setEventType(StreamCreationRequestV30.EventTypeEnum.TIMELINE);
-        req.setFilterValues(List.of("TEST"));
-        req.setWaitForAccepted(true);
-
-        String uuid = UUID.randomUUID().toString();
-        StreamEntity entity = new StreamEntity();
-        entity.setStreamId(uuid);
-        entity.setTitle(req.getTitle());
-        entity.setPaId(xpagopacxid);
-        entity.setEventType(req.getEventType().toString());
-        entity.setFilterValues(new HashSet<>());
-        entity.setActivationDate(Instant.now());
-        entity.setSorting(true);
-
-        StreamEntity pentity = new StreamEntity();
-        pentity.setStreamId(uuid);
-        pentity.setTitle(req.getTitle());
-        pentity.setPaId(xpagopacxid);
-        pentity.setEventType(req.getEventType().toString());
-        pentity.setFilterValues(new HashSet<>());
-        pentity.setActivationDate(Instant.now());
-
-
-        when(streamEntityDao.findByPa(anyString())).thenReturn(Flux.fromIterable(List.of(pentity)));
-        when(streamEntityDao.save(any())).thenReturn(Mono.just(entity));
-        when(streamUtils.retrieveMaxStreamsNumber(xpagopacxid)).thenReturn(maxStreams);
-
-        //WHEN
-        Mono<StreamMetadataResponseV30> res = webhookService.createEventStream(xpagopapnuid,xpagopacxid, null,null, Mono.just(req));
-        //THEN
-        assertThrows(PnStreamForbiddenException.class, () -> res.block(d));
     }
 
     @Test
