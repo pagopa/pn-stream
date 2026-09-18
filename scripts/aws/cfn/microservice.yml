@@ -442,6 +442,11 @@ Parameters:
     Description: "Maximum record age in seconds for NotificationStreamManagerLambdaKinesisSource"
     Default: 604800 # 7 days
 
+  JavaToolOptions:
+    Type: String
+    Default: ''
+    Description: JavaToolOptions
+
 Resources:
 
   # pn-stream microservice
@@ -496,7 +501,7 @@ Resources:
         ContainerEnvEntry27: !Sub 'PN_STREAM_PACONFIGURATIONSPREFIX=${PaConfigurationsPrefix}'
         ContainerEnvEntry28: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
         ContainerEnvEntry29: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
-        JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
+        JavaToolOptions: !Ref JavaToolOptions
         MappedPaths: '/delivery-progresses/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Join [ ',', !Ref VpcEgressSubnetsIds ]
