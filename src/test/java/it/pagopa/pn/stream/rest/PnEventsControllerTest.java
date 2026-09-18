@@ -34,12 +34,13 @@ class PnEventsControllerTest {
     @Test
     void consumeEventStreamOk() {
         String streamId = UUID.randomUUID().toString();
-        List<ProgressResponseElementV29> timelineElements = Collections.singletonList(new ProgressResponseElementV29()
+        List<ProgressResponseElementV29> timelineElements = Collections.singletonList(ProgressResponseElementV29.builder()
                 .timestamp( Instant.now() )
                 .eventId( "event_id" )
                 .iun("")
                 .newStatus(NotificationStatusV26.ACCEPTED)
                 .timelineEventCategory(TimelineElementCategoryV28.REQUEST_ACCEPTED)
+                .build()
         );
         ProgressResponseElementDto dto = ProgressResponseElementDto.builder()
                 .retryAfter(0)

@@ -18,9 +18,10 @@ class ProblemErrorTest {
 
     @Test
     void code() {
-        ProblemError expected = new ProblemError()
+        ProblemError expected = ProblemError.builder()
                 .code("code")
-                .detail("detail");
+                .detail("detail")
+                .build();
         Assertions.assertEquals(expected, problemError.code("code"));
     }
 
@@ -37,9 +38,10 @@ class ProblemErrorTest {
 
     @Test
     void testEquals() {
-        ProblemError expected = new ProblemError()
+        ProblemError expected = ProblemError.builder()
                 .code("code")
-                .detail("detail");
+                .detail("detail")
+                .build();
         Assertions.assertEquals(Boolean.TRUE, expected.equals(problemError));
     }
     

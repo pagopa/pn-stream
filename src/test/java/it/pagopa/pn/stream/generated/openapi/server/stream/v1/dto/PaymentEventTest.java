@@ -15,12 +15,13 @@ class PaymentEventTest {
     @BeforeEach
     public void setup() {
         Instant instant = Instant.parse("2021-09-16T15:24:00.00Z");
-        event = new PaymentEvent()
+        event = PaymentEvent.builder()
                 .iun("001")
                 .recipientTaxId("002")
                 .recipientType(RecipientType.PF)
                 .paymentType(PaymentEvent.PaymentTypeEnum.PAGOPA)
-                .timestamp(instant);
+                .timestamp(instant)
+                .build();
     }
 
     @Test

@@ -20,9 +20,10 @@ class StreamListElementTest {
 
     @Test
     void streamId() {
-        StreamListElement expected = new StreamListElement()
+        StreamListElement expected = StreamListElement.builder()
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
-                .title("001");
+                .title("001")
+                .build();
         Assertions.assertEquals(expected, element.streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454")));
     }
 
@@ -33,9 +34,10 @@ class StreamListElementTest {
 
     @Test
     void title() {
-        StreamListElement expected = new StreamListElement()
+        StreamListElement expected = StreamListElement.builder()
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
-                .title("001");
+                .title("001")
+                .build();
         Assertions.assertEquals(expected, element.title("001"));
     }
 
@@ -46,9 +48,10 @@ class StreamListElementTest {
 
     @Test
     void testEquals() {
-        StreamListElement expected = new StreamListElement()
+        StreamListElement expected = StreamListElement.builder()
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
-                .title("001");
+                .title("001")
+                .build();
         Assertions.assertEquals(Boolean.TRUE, expected.equals(element));
     }
 }

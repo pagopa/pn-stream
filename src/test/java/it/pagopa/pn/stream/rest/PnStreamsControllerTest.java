@@ -39,8 +39,9 @@ class PnStreamsControllerTest {
     void createEventStreamOk() {
         Mockito.when(service.createEventStream(Mockito.anyString(),Mockito.anyString(), Mockito.any(),Mockito.any(), Mockito.any()))
                 .thenReturn(Mono.just(new StreamMetadataResponseV29()));
-        StreamCreationRequestV29 request = new StreamCreationRequestV29()
-                .eventType(StreamCreationRequestV29.EventTypeEnum.STATUS);
+        StreamCreationRequestV29 request = StreamCreationRequestV29.builder()
+                .eventType(StreamCreationRequestV29.EventTypeEnum.STATUS)
+                .build();
 
         webTestClient.post()
                 .uri("/delivery-progresses/" + API_VERSION + "/streams")

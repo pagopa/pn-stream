@@ -774,7 +774,7 @@ class EventsServiceImplTest {
                 .timestamp(Instant.now())
                 .paId("paId")
                 .statusInfo(StatusInfoInternal.builder().actual("actual").statusChanged(true).build())
-                .legalFactId(List.of(new LegalFactsIdV20().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY)))
+                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
                 .build();
 
         EventTimelineInternalDto eventTimelineInternalDto = EventTimelineInternalDto.builder()
@@ -835,7 +835,7 @@ class EventsServiceImplTest {
                 .timestamp(Instant.now())
                 .paId("paId")
                 .statusInfo(StatusInfoInternal.builder().actual("actual").statusChanged(true).build())
-                .legalFactId(List.of(new LegalFactsIdV20().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY)))
+                .legalFactId(List.of(LegalFactsIdV20.builder().key("key").category(LegalFactCategoryV20.DIGITAL_DELIVERY).build()))
                 .build();
 
         EventTimelineInternalDto eventTimelineInternalDto = EventTimelineInternalDto.builder()

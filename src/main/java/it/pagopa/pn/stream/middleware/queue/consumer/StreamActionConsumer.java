@@ -21,11 +21,11 @@ public class StreamActionConsumer {
 
     private final StreamActionsEventHandler streamActionsEventHandler;
 
-    @SqsListener(value = "${pn.stream.topics.scheduled-actions}")
+    @SqsListener(value = {"${pn.stream.topics.scheduled-actions}", "${pn.stream.topics.event}"})
     public void consume(Message<StreamAction> message) {
         final String processName = "STREAM ACTION";
         setMdc(message);
-        log.debug("Handle action, with content {}", message);
+        log.debug("Handle action pnStreamActionConsumer, with content {}", message);
         try {
             MDC.put(MDCUtils.MDC_PN_CTX_TOPIC, MdcKey.STREAM_KEY);
             String iun = message.getPayload().getTimelineElementInternal() != null

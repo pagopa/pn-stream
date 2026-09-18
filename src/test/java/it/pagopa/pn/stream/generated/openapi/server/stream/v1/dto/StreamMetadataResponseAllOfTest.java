@@ -33,17 +33,19 @@ class StreamMetadataResponseAllOfTest {
 
     @Test
     void testEquals() {
-        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
+        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
                 .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
-                .activationDate(Instant.parse("2021-09-16T15:23:00.00Z"));
+                .activationDate(Instant.parse("2021-09-16T15:23:00.00Z"))
+                .build();
         Assertions.assertEquals(Boolean.TRUE, expected.equals(response));
     }
     @Test
     void testStreamId() {
         StreamMetadataResponseV29 actual = new StreamMetadataResponseV29();
         actual.streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"));
-        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
-                .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"));
+        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+                .streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454"))
+                .build();
         Assertions.assertEquals(expected, actual);
     }
 
@@ -51,8 +53,9 @@ class StreamMetadataResponseAllOfTest {
     void testActivationDate() {
         StreamMetadataResponseV29 actual = new StreamMetadataResponseV29();
         actual.activationDate(Instant.parse("2021-09-16T15:23:00.00Z"));
-        StreamMetadataResponseV29 expected = new StreamMetadataResponseV29()
-                .activationDate(Instant.parse("2021-09-16T15:23:00.00Z"));
+        StreamMetadataResponseV29 expected = StreamMetadataResponseV29.builder()
+                .activationDate(Instant.parse("2021-09-16T15:23:00.00Z"))
+                .build();
         Assertions.assertEquals(expected, actual);
     }
 }

@@ -22,12 +22,13 @@ class StreamCreationRequestTest {
 
     @Test
     void title() {
-        StreamCreationRequestV29 expected = new StreamCreationRequestV29()
+        StreamCreationRequestV29 expected = StreamCreationRequestV29.builder()
                 .title("001")
                 .eventType(StreamCreationRequestV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
-                .waitForAccepted(false);
+                .waitForAccepted(false)
+                .build();
         Assertions.assertEquals(expected, request.title("001"));
     }
 
@@ -38,12 +39,13 @@ class StreamCreationRequestTest {
 
     @Test
     void eventType() {
-        StreamCreationRequestV29 expected = new StreamCreationRequestV29()
+        StreamCreationRequestV29 expected = StreamCreationRequestV29.builder()
                 .title("001")
                 .eventType(StreamCreationRequestV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
-                .waitForAccepted(false);
+                .waitForAccepted(false)
+                .build();
         Assertions.assertEquals(expected, request.eventType(StreamCreationRequestV29.EventTypeEnum.STATUS));
     }
 
@@ -54,12 +56,13 @@ class StreamCreationRequestTest {
 
     @Test
     void filterValues() {
-        StreamCreationRequestV29 expected = new StreamCreationRequestV29()
+        StreamCreationRequestV29 expected = StreamCreationRequestV29.builder()
                 .title("001")
                 .eventType(StreamCreationRequestV29.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
                 .groups(Collections.emptyList())
-                .waitForAccepted(false);
+                .waitForAccepted(false)
+                .build();
         Assertions.assertEquals(expected, request.filterValues(Collections.singletonList("001")));
     }
 
