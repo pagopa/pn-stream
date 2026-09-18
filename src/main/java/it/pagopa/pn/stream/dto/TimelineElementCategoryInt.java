@@ -26,7 +26,7 @@ public enum TimelineElementCategoryInt {
     SEND_COURTESY_MESSAGE(legal(TimelineElementCategoryInt.VERSION_10),informal(TimelineElementCategoryInt.VERSION_10)),
     GET_ADDRESS(legal(TimelineElementCategoryInt.VERSION_10),informal(TimelineElementCategoryInt.VERSION_10)),
     PUBLIC_REGISTRY_CALL(legal(TimelineElementCategoryInt.VERSION_10),informal(TimelineElementCategoryInt.VERSION_10)),
-    PUBLIC_REGISTRY_RESPONSE(legal(TimelineElementCategoryInt.VERSION_10)),
+    PUBLIC_REGISTRY_RESPONSE(legal(TimelineElementCategoryInt.VERSION_10),informal(TimelineElementCategoryInt.VERSION_10)),
     SCHEDULE_ANALOG_WORKFLOW(legal(TimelineElementCategoryInt.VERSION_10)),
     SCHEDULE_DIGITAL_WORKFLOW(legal(TimelineElementCategoryInt.VERSION_10)),
     PREPARE_DIGITAL_DOMICILE(legal(TimelineElementCategoryInt.VERSION_10)),
@@ -71,7 +71,7 @@ public enum TimelineElementCategoryInt {
     NOTIFICATION_TIMELINE_REWORKED(legal(TimelineElementCategoryInt.VERSION_28)),
     NOTIFICATION_COST_VALIDATION_REQUEST(legal(TimelineElementCategoryInt.VERSION_28)),
     NOTIFICATION_COST_VALIDATION_RESPONSE(legal(TimelineElementCategoryInt.VERSION_28)),
-    COURTESY_CHANNEL_FAILED(legal(TimelineElementCategoryInt.VERSION_28)),
+    COURTESY_CHANNEL_FAILED(legal(TimelineElementCategoryInt.VERSION_28),informal(TimelineElementCategoryInt.VERSION_10)),
     //Timeline Element for Informal Notification
     SEND_DIGITAL_MESSAGE(informal(TimelineElementCategoryInt.VERSION_10)),
     SEND_DIGITAL_MESSAGE_SKIP(informal(TimelineElementCategoryInt.VERSION_10)),

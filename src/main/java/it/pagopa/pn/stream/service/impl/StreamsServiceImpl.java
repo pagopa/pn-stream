@@ -2,7 +2,6 @@ package it.pagopa.pn.stream.service.impl;
 
 import it.pagopa.pn.commons.log.PnAuditLogEventType;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
-import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.EventType;
 import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
 import it.pagopa.pn.stream.exceptions.PnStreamMaxStreamsCountReachedException;
@@ -21,6 +20,7 @@ import it.pagopa.pn.stream.middleware.queue.producer.abstractions.streamspool.St
 import it.pagopa.pn.stream.service.SchedulerService;
 import it.pagopa.pn.stream.service.StreamsService;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
+import it.pagopa.pn.stream.utils.CommunicationTypeUtils;
 import it.pagopa.pn.stream.utils.FilterValuesValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -33,7 +33,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static it.pagopa.pn.stream.middleware.dao.dynamo.entity.StreamRetryAfter.RETRY_PREFIX;
-import static it.pagopa.pn.stream.service.impl.StreamEventsServiceImpl.DEFAULT_CATEGORIES;
 import static it.pagopa.pn.stream.utils.CommunicationTypeUtils.getDefaultCommunicationType;
 
 @Service
@@ -79,9 +78,7 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
                 })
                 .flatMap(streamCreationRequestV28 -> {
                     if (Boolean.TRUE.equals(streamCreationRequestV28.getWaitForAccepted())) {
-                        if (streamCreationRequestV28.getFilterValues() == null || streamCreationRequestV28.getFilterValues().isEmpty() ||
-                                streamCreationRequestV28.getFilterValues().stream().noneMatch(f -> f.equals(DEFAULT_CATEGORIES) || f.equals("REQUEST_ACCEPTED")))
-                            return Mono.error(new PnStreamForbiddenException("Not Allowed the creation of sorted streams without  DEFAULT or REQUEST_ACCEPTED filter"));
+                        return filterValuesValidator.validateFilterValuesIfWaitForAccepted(streamCreationRequestV28);
                     }
                     return Mono.just(streamCreationRequestV28);
                 })
@@ -267,19 +264,13 @@ public class StreamsServiceImpl extends PnStreamServiceImpl implements StreamsSe
     private Mono<StreamEntity> replaceStreamEntity(StreamEntity entity, StreamEntity replacedStream) {
         if (replacedStream.getDisabledDate() != null) {
             return Mono.error(new PnStreamForbiddenException("Not supported operation, stream already disabled"));
-        } else if (isDifferentCommunicationType(replacedStream, entity)) {
+        } else if (!CommunicationTypeUtils.isSameCommunicationType(replacedStream.getCommunicationType(), entity.getCommunicationType())) {
             return Mono.error(new PnStreamForbiddenException("Not supported operation, communicationType cannot be changed"));
         } else {
             entity.setEventAtomicCounter(replacedStream.getEventAtomicCounter() + pnStreamConfigs.getDeltaCounter());
             return streamEntityDao.replaceEntity(replacedStream, entity);
         }
 
-    }
-
-    private boolean isDifferentCommunicationType(StreamEntity persistedEntity, StreamEntity newEntity) {
-        CommunicationType persistedCommType = getDefaultCommunicationType(persistedEntity.getCommunicationType());
-        CommunicationType newCommType = getDefaultCommunicationType(newEntity.getCommunicationType());
-        return persistedCommType != newCommType;
     }
 
     private List<String> getGroups(StreamEntity streamEntity) {

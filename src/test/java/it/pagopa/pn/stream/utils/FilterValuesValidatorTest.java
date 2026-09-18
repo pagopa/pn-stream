@@ -5,6 +5,8 @@ import it.pagopa.pn.stream.dto.TimelineElementCategoryInt;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.exceptions.PnStreamException;
 import it.pagopa.pn.stream.dto.CommunicationType;
+import it.pagopa.pn.stream.exceptions.PnStreamForbiddenException;
+import it.pagopa.pn.stream.generated.openapi.server.v1.dto.StreamCreationRequestV30;
 import it.pagopa.pn.stream.service.utils.StreamUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -118,4 +120,117 @@ class FilterValuesValidatorTest {
         org.assertj.core.api.Assertions.assertThat(ex.getStatus()).isEqualTo(400);
     }
 
+    @Test
+    void sortedStream_nullFilterValues_isAllowed() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.TIMELINE, null);
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectNext(request)
+                .verifyComplete();
+    }
+
+    @Test
+    void sortedStream_emptyFilterValues_isAllowed() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.STATUS, Collections.emptyList());
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectNext(request)
+                .verifyComplete();
+    }
+
+    @Test
+    void sortedTimeline_withDefaultCategories_isAllowed() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.TIMELINE, List.of(DEFAULT_CATEGORIES));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectNext(request)
+                .verifyComplete();
+    }
+
+    @Test
+    void sortedTimeline_withRequestAccepted_isAllowed() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.TIMELINE,
+                List.of(TimelineElementCategoryInt.SENDER_ACK_CREATION_REQUEST.name(), "REQUEST_ACCEPTED"));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectNext(request)
+                .verifyComplete();
+    }
+
+    @Test
+    void sortedTimeline_withoutDefaultOrRequestAccepted_returnsError() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.TIMELINE,
+                List.of(TimelineElementCategoryInt.SENDER_ACK_CREATION_REQUEST.name()));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectError(PnStreamForbiddenException.class)
+                .verify();
+    }
+
+    @Test
+    void sortedTimeline_withAcceptedOnly_returnsError() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.TIMELINE,
+                List.of(NotificationStatusInt.ACCEPTED.name()));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectError(PnStreamForbiddenException.class)
+                .verify();
+    }
+
+    @Test
+    void sortedStatus_withAccepted_isAllowed() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.STATUS,
+                List.of(NotificationStatusInt.ACCEPTED.name()));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectNext(request)
+                .verifyComplete();
+    }
+
+    @Test
+    void sortedStatus_withAcceptedAmongOthers_isAllowed() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.STATUS,
+                List.of(NotificationStatusInt.DELIVERING.name(), NotificationStatusInt.ACCEPTED.name()));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectNext(request)
+                .verifyComplete();
+    }
+
+    @Test
+    void sortedStatus_withoutAccepted_returnsError() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.STATUS,
+                List.of(NotificationStatusInt.DELIVERING.name(), NotificationStatusInt.VIEWED.name()));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectError(PnStreamForbiddenException.class)
+                .verify();
+    }
+
+    @Test
+    void sortedStatus_withRequestAcceptedOnly_returnsError() {
+        StreamCreationRequestV30 request = buildRequest(
+                StreamCreationRequestV30.EventTypeEnum.STATUS, List.of("REQUEST_ACCEPTED"));
+
+        StepVerifier.create(validator.validateFilterValuesIfWaitForAccepted(request))
+                .expectError(PnStreamForbiddenException.class)
+                .verify();
+    }
+
+    private StreamCreationRequestV30 buildRequest(StreamCreationRequestV30.EventTypeEnum eventType,
+                                                  List<String> filterValues) {
+        StreamCreationRequestV30 request = new StreamCreationRequestV30();
+        request.setEventType(eventType);
+        request.setFilterValues(filterValues);
+        return request;
+    }
 }

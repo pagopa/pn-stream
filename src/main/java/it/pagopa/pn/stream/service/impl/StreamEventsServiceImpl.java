@@ -25,6 +25,7 @@ import it.pagopa.pn.stream.utils.CommunicationTypeUtils;
 import it.pagopa.pn.stream.utils.MetricUtils;
 import lombok.CustomLog;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -132,7 +133,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
                                 })
                                 .doOnSuccess(progressResponseElementDto -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateSuccess("ProgressResponseElementDto size={} lastEventId={} streamId={} timelineElementIds {} ", progressResponseElementDto.getProgressResponseElementList().size(), lastEventIDToPrint, streamId, createAuditLogOfElementsId(progressResponseElementDto.getProgressResponseElementList())).log())
                 )
-                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={})", lastEventIDToPrint,error).log());
+                .doOnError(error -> generateAuditLog(PnAuditLogEventType.AUD_WH_CONSUME, msg, args).generateFailure("Error in consumeEventStream (lastEventId={} streamId={})", lastEventIDToPrint, streamId, error).log());
     }
 
     private Mono<Void> updateStreamRetryAfterAndStats(String xPagopaPnCxId, UUID streamId, List<ProgressResponseElementV30> eventList, Long retryAfter) {
@@ -150,7 +151,8 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         Map<String, List<String>> iunWithTimelineElementId = new LinkedHashMap<>();
 
         items.forEach(item -> {
-            String iun = item.getIun();
+            // Leggiamo lo iun da getNotificationRequestId() e non da getIun() poichè quest'ultimo non viene valorizzato per gli elementi afferenti allo status VALIDATION
+            String iun = new String(Base64Utils.decodeFromString(item.getNotificationRequestId()));
             List<String> elements = iunWithTimelineElementId.get(iun);
             String description = item.getElement() != null
                     ? item.getElement().getTimestamp() + "_" + item.getElement().getElementId()
@@ -207,7 +209,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
         log.info("Received timeline element: {}", timelineElementInternal.getTimelineElementId());
         return streamEntityDao.findByPa(timelineElementInternal.getPaId())
                 .filter(entity -> entity.getDisabledDate() == null && !entity.getStreamId().startsWith(RETRY_PREFIX))
-                .filter(entity -> CommunicationTypeUtils.getDefaultCommunicationType(entity.getCommunicationType()).equals(timelineElementInternal.getCommunicationType()))
+                .filter(entity -> CommunicationTypeUtils.isSameCommunicationType(entity.getCommunicationType(), timelineElementInternal.getCommunicationType()))
                 .collectList()
                 .flatMap(stream -> {
                     if (stream.isEmpty()) {
