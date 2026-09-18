@@ -64,6 +64,7 @@ components:
       #   * `ANALOG_FAILURE_WORKFLOW_TIMEOUT` - Completato con fallimento il workflow di invio cartaceo per l'assenza di esiti per ogni tentativo di spedizione nell'intervallo temporale stabilito  # NO EXTERNAL
       #   * `NOTIFICATION_COST_VALIDATION_REQUEST` - Invio richiesta di validazione del costo della notifica per una notifica # NO EXTERNAL
       #   * `NOTIFICATION_COST_VALIDATION_RESPONSE` - Ricezione risposta di validazione del costo della notifica per una notifica # NO EXTERNAL
+      #   * `COURTESY_CHANNEL_FAILED` - Fallimento dell'invio del messaggio di cortesia su un canale # NO EXTERNAL
       enum:
         - SENDER_ACK_CREATION_REQUEST
         - VALIDATE_NORMALIZE_ADDRESSES_REQUEST
