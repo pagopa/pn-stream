@@ -16,10 +16,10 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.MediaType;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -38,7 +38,7 @@ import static org.mockserver.model.HttpResponse.response;
 class PnDeliveryClientReactiveImplTestIT extends MockAWSObjectsTest {
     @Mock
     private InternalOnlyApi pnDeliveryApi;
-    @MockBean
+    @MockitoBean
     private PnDeliveryClientReactiveImpl client;
     private static ClientAndServer mockServer;
 
