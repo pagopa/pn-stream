@@ -9,7 +9,7 @@
     "MemoryAmount": "2GB",
     "ScheduleInterval": "60000",
     "MaxLength": "50",
-    "MaxStreams": "70",
+    "MaxStreams": "10",
     "PaConfigurationsPrefix": "/pn-stream/paConfigurations",
     "RetryAfterEnabled": "false",
     "StreamNotificationTtl": "7889400",
