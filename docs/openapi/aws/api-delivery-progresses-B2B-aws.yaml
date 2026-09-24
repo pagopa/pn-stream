@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: E18VObE9soNdVDsBYA4/kQxoojUqhybi1Q2pRpRWuyc=
+  version: FKtYduyLEwdw45Q3E2ylPbjDHZu3qtC1IRuwX4nnF7c=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -6142,6 +6142,7 @@ components:
           * `SEND_COURTESY_MESSAGE` - Invio di un messaggio di cortesia
           * `GET_ADDRESS` - Disponibilità dell’indirizzo specifico (domicilio digitale di piattaforma, domicilio digitale speciale, domicilio digitale generale, indirizzo fisico sulla notifica o sui registri nazionali)
           * `PUBLIC_REGISTRY_CALL` - Richiesta ai registri pubblici per ottenere domicilio digitale generale o per ottenere indirizzo fisico da ANPR, da registro della imprese, da anagrafe tributaria.
+          * `PUBLIC_REGISTRY_RESPONSE` - Ricevuta la risposta dei registri pubblici
       enum:
         - PUBLIC_REGISTRY_VALIDATION_CALL
         - PUBLIC_REGISTRY_VALIDATION_RESPONSE
@@ -6168,6 +6169,7 @@ components:
         - PAYMENT
         - GET_ADDRESS
         - PUBLIC_REGISTRY_CALL
+        - PUBLIC_REGISTRY_RESPONSE
         - SEND_COURTESY_MESSAGE
     RecIndex:
       type: number
@@ -6685,6 +6687,7 @@ components:
         - $ref: '#/components/schemas/InformalGetAddressInfoDetails'
         - $ref: '#/components/schemas/PublicRegistryCallDetails'
         - $ref: '#/components/schemas/SendCourtesyMessageDetails'
+        - $ref: '#/components/schemas/PublicRegistryResponseDetails'
     InformalTimelineElementV1:
       type: object
       additionalProperties: false
