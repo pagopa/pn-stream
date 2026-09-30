@@ -35,7 +35,7 @@ class UnlockConsumerTest {
     void consumeUnlockShouldDelegateToUnlockEvents() {
         SortEventAction payload = mock(SortEventAction.class);
         Message<SortEventAction> message = MessageBuilder.withPayload(payload)
-                .setHeader("eventType", SortEventType.UNLOCK_EVENTS)
+                .setHeader("eventType", SortEventType.UNLOCK_EVENTS.name())
                 .build();
 
         unlockConsumer.consumeUnlock(message);
@@ -48,7 +48,7 @@ class UnlockConsumerTest {
     void consumeUnlockShouldDelegateToUnlockAllEvents() {
         SortEventAction payload = mock(SortEventAction.class);
         Message<SortEventAction> message = MessageBuilder.withPayload(payload)
-                .setHeader("eventType", SortEventType.UNLOCK_ALL_EVENTS)
+                .setHeader("eventType", SortEventType.UNLOCK_ALL_EVENTS.name())
                 .build();
 
         unlockConsumer.consumeUnlock(message);
