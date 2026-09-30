@@ -25,7 +25,9 @@ public class UnlockConsumer {
 
     @SqsListener(value = "${pn.stream.topics.event-schedule}")
     public void consumeUnlock(Message<SortEventAction> message) {
-        SortEventType eventType = message.getHeaders().get("eventType", SortEventType.class);
+        String eventTypeStr = message.getHeaders().get("eventType", String.class);
+        SortEventType eventType = eventTypeStr != null ? SortEventType.valueOf(eventTypeStr) : null;
+
         if(eventType == null) {
             throw new PnStreamException("Missing required eventType header", 500, "PN_STREAM_MISSING_EVENT_TYPE");
         }
