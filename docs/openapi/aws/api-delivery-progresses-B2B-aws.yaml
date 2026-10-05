@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: 30YMNpa2MgOVTdZ5Zwhi/nzA4FbzTJ2eadekUSJpFO0=
+  version: TzFdlZ8YkP2tqnHfahFx0eBE3aAP8h7350Mii5nNUEw=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -13,10 +13,10 @@ servers:
 paths:
   /v3.0/streams:
     post:
-      summary: Crea nuovo stream di eventi v3.0
+      summary: EXPERIMENTAL - Crea nuovo stream di eventi v3.0
       description: >-
-        Creazione di un flusso di eventi specificando se gli eventi saranno
-        relativi ai cambi di stato o agli eventi di timeline.
+        (EXPERIMENTAL) Creazione di un flusso di eventi specificando se gli
+        eventi saranno relativi ai cambi di stato o agli eventi di timeline.
 
 
         In risposta, Piattaforma Notifiche, comunicherà un identificativo dello
@@ -85,8 +85,8 @@ paths:
         type: http_proxy
       parameters: []
     get:
-      summary: Elenca stream di eventi v3.0
-      description: Elenca gli stream di eventi
+      summary: EXPERIMENTAL - Elenca stream di eventi v3.0
+      description: (EXPERIMENTAL) Elenca gli stream di eventi
       tags:
         - Streams
       operationId: listEventStreamsV30
@@ -147,8 +147,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/pathStreamId'
     get:
-      summary: Leggi metadata dello stream v3.0
-      description: Lettura delle configurazioni di uno stream di eventi.
+      summary: EXPERIMENTAL - Leggi metadata dello stream v3.0
+      description: (EXPERIMENTAL) Lettura delle configurazioni di uno stream di eventi.
       tags:
         - Streams
       operationId: retrieveEventStreamV30
@@ -207,10 +207,11 @@ paths:
         type: http_proxy
       parameters: []
     put:
-      summary: Update Stream metadata v3.0
+      summary: EXPERIMENTAL - Update Stream metadata v3.0
       description: >-
-        Modifica delle configurazioni dei filtri associati a uno stream di
-        eventi, non è possibile cambiare il valore del flag waitForAccepted.
+        (EXPERIMENTAL) Modifica delle configurazioni dei filtri associati a uno
+        stream di eventi, non è possibile cambiare il valore del flag
+        waitForAccepted.
       tags:
         - Streams
       operationId: updateEventStreamV30
@@ -275,10 +276,11 @@ paths:
         type: http_proxy
       parameters: []
     delete:
-      summary: Remove Event Stream v3.0
+      summary: EXPERIMENTAL - Remove Event Stream v3.0
       description: >-
-        Cancellazione dello steam di eventi: elimina sia le configurazioni sia
-        tutti gli eventi associati allo stream e non ancora consumati.
+        (EXPERIMENTAL) Cancellazione dello steam di eventi: elimina sia le
+        configurazioni sia tutti gli eventi associati allo stream e non ancora
+        consumati.
       tags:
         - Streams
       operationId: removeEventStreamV30
@@ -347,9 +349,9 @@ paths:
         type: http_proxy
   /v3.0/streams/{streamId}/action/disable:
     post:
-      summary: Disabilita uno stream v3.0
+      summary: EXPERIMENTAL - Disabilita uno stream v3.0
       description: >-
-        Disabilita uno stream.
+        (EXPERIMENTAL) Disabilita uno stream.
 
 
         Da uno stream disabilitato è possibile leggere gli eventi presenti nello
@@ -436,12 +438,12 @@ paths:
         type: http_proxy
   /v3.0/streams/{streamId}/events:
     get:
-      summary: Leggi progressi notifiche v3.0
+      summary: EXPERIMENTAL - Leggi progressi notifiche v3.0
       description: >-
-        Lettura degli eventi presenti nello stream di aggiornamenti con
-        indicazione che il mittente ha ricevuto e memorizzato l'evento
-        identificato dal parametro _lastEventId_ e tutti gli eventi precedenti.
-        Tali eventi potranno essere cancellati dallo stream.
+        (EXPERIMENTAL) Lettura degli eventi presenti nello stream di
+        aggiornamenti con indicazione che il mittente ha ricevuto e memorizzato
+        l'evento identificato dal parametro _lastEventId_ e tutti gli eventi
+        precedenti. Tali eventi potranno essere cancellati dallo stream.
       tags:
         - Events
       operationId: consumeEventStreamV30
