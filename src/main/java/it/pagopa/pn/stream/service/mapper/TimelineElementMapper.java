@@ -24,6 +24,9 @@ public class TimelineElementMapper {
         TimelineElementV28.TimelineElementV28Builder builder;
         try {
             TimelineElementDetailsV28 timelineElement = objectMapper.readValue(internalDto.getDetails(), TimelineElementDetailsV28.class);
+
+            manageArraysForSpecificCategories(internalDto, timelineElement);
+
             //TODO: remove this when the digital feedback and progress will be managed correctly by the new service
             if (!CollectionUtils.isEmpty(timelineElement.getSendingReceipts())) {
                 timelineElement.sendingReceipts(timelineElement.getSendingReceipts().stream().map(elem -> SendingReceipt.builder().build()).toList());
@@ -47,6 +50,15 @@ public class TimelineElementMapper {
 
 
         return builder.build();
+    }
+
+    private static void manageArraysForSpecificCategories(TimelineElementInternal internalDto, TimelineElementDetailsV28 timelineElement) {
+        assert internalDto.getCategory() != null;
+        if (timelineElement != null) {
+            if(!internalDto.getCategory().equals(TimelineElementCategoryV28.PUBLIC_REGISTRY_VALIDATION_CALL.name())) timelineElement.setRecIndexes(null);
+            if(!internalDto.getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_CANCELLED.name())) timelineElement.setNotRefinedRecipientIndexes(null);
+            if(!internalDto.getCategory().equals(TimelineElementCategoryV28.NOTIFICATION_TIMELINE_REWORKED.name())) timelineElement.setInvalidatedTimelineAndStatusHistory(null);
+        }
     }
 
     public static InformalTimelineElementV1 internalToInformalExternal(TimelineElementInternal internalDto) {
