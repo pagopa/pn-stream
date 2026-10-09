@@ -500,7 +500,7 @@ Resources:
         ContainerEnvEntry26: !Sub 'PN_STREAM_PACONFIGURATIONSPREFIX=${PaConfigurationsPrefix}'
         ContainerEnvEntry27: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
         ContainerEnvEntry28: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
-        //TODO controllare
+        # TODO controllare
         JavaToolOptions: '-Dreactor.netty.ioWorkerCount=50'
         MappedPaths: '/delivery-progresses/*'
         ECSClusterName: !Ref ECSClusterName
