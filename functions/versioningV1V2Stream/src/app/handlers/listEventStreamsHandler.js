@@ -15,8 +15,10 @@ class ListEventStreamsHandler extends EventHandler {
     async handlerEvent(event, context) {
         console.log("Versioning_V1-V2.x_ListEventStreams_Lambda function started");
 
+
         // HEADERS
-        const headers = this.prepareHeaders(event);
+        let version = this.getVersion(event);
+        const headers = this.prepareHeaders(event, version);
         const url = `${this.baseUrl}/streams`;
         axiosRetry(axios, {
             retries: this.numRetry,
