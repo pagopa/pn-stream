@@ -1,12 +1,15 @@
 package it.pagopa.pn.stream;
 
+import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -46,5 +49,14 @@ public class LocalStackTestConfig {
 
     }
 
+    // Bean che evita l'autostart del listener SQS, che nel contesto dei TestIT non è necessario.
+    @Bean
+    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory(SqsAsyncClient sqsAsyncClient) {
+        return SqsMessageListenerContainerFactory
+                .builder()
+                .configure(options -> options.autoStartup(false))
+                .sqsAsyncClient(sqsAsyncClient)
+                .build();
+    }
 
 }
