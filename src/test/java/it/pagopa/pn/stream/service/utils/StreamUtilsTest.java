@@ -20,9 +20,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +35,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -123,6 +129,34 @@ class StreamUtilsTest {
 
         assertNotNull(restored);
             assertEquals(CommunicationType.INFORMAL, restored.getCommunicationType());
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0, 7})
+    void buildEventEntity_informalTtl(long ttlDays) {
+        Duration informalTtl = Duration.ofDays(ttlDays);
+        PnStreamConfigs configs = new PnStreamConfigs();
+        configs.setTtl(Duration.ofDays(30));
+        configs.setTtlInformal(informalTtl);
+        StreamUtils utils = new StreamUtils(timelineMapper, new EntityToDtoWebhookTimelineMapper(),
+                timelineElementJsonConverter, configs, ssmParameterConsumerActivation);
+
+        StreamEntity streamEntity = new StreamEntity("paid", "abc");
+        streamEntity.setCommunicationType(CommunicationType.INFORMAL);
+        TimelineElementInternal timelineElement = generateTimeline("IUN-ABC-123", "PF-123456").get(5);
+        timelineElement.setCommunicationType(CommunicationType.INFORMAL);
+
+        long earliestTtl = LocalDateTime.now().plus(informalTtl).atZone(ZoneId.systemDefault()).toEpochSecond();
+        EventEntity eventEntity = utils.buildEventEntity(1L, streamEntity, "ACCEPTED", timelineElement);
+        long latestTtl = LocalDateTime.now().plus(informalTtl).atZone(ZoneId.systemDefault()).toEpochSecond();
+
+        if (informalTtl.isZero()) {
+            assertNull(eventEntity.getTtl());
+        } else {
+            assertNotNull(eventEntity.getTtl());
+            assertTrue(eventEntity.getTtl() >= earliestTtl && eventEntity.getTtl() <= latestTtl,
+                    "Event TTL should be calculated using the informal TTL");
+        }
     }
 
 
