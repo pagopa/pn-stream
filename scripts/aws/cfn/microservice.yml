@@ -738,7 +738,7 @@ Resources:
       MaximumBatchingWindowInSeconds: !Sub ${StreamEventManagerLambdaMaximumBatchingWindowInSeconds}
       MaximumRetryAttempts: !Ref MaximumRetryAttemptsValueStream
       MaximumRecordAgeInSeconds: !Ref StreamEventManagerMaximumRecordAge
-      StartingPosition: LATEST
+      StartingPosition: TRIM_HORIZON
       DestinationConfig:
         OnFailure:
           Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
