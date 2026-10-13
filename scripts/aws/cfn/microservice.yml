@@ -709,7 +709,42 @@ Resources:
           Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
       FilterCriteria:
         Filters:
-          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"]}}'
+          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": [{ "exists": false }]}} }}}'
+
+  # a new version at each deploy
+  StreamEventManagerLambdaVersionPnPlaceholderEpochSeconds:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref StreamEventManagerLambda
+
+  StreamEventManagerLambdaAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref StreamEventManagerLambda
+      FunctionVersion: !GetAtt StreamEventManagerLambdaVersionPnPlaceholderEpochSeconds.Version
+      Name: informal-timeline
+
+  # CDC to Stream Event Manager (only records WITH communicationType)
+  StreamEventManagerLambdaAliasKinesisSource:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn: StreamEventManagerLambdaPolicy
+    Properties:
+      BatchSize: !Sub ${StreamEventManagerLambdaBatchSize}
+      BisectBatchOnFunctionError: true
+      EventSourceArn: !Ref CdcKinesisSourceStreamArn
+      FunctionName: !Ref StreamEventManagerLambdaAlias
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
+      MaximumBatchingWindowInSeconds: !Sub ${StreamEventManagerLambdaMaximumBatchingWindowInSeconds}
+      MaximumRetryAttempts: !Ref MaximumRetryAttemptsValueStream
+      MaximumRecordAgeInSeconds: !Ref StreamEventManagerMaximumRecordAge
+      StartingPosition: LATEST
+      DestinationConfig:
+        OnFailure:
+          Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+      FilterCriteria:
+        Filters:
+          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": [{ "exists": true }]}} }}}'
 
   StreamEventManagerLambdaKinesisFailuresAlarm:
     Type: AWS::CloudWatch::Alarm
