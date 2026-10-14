@@ -452,6 +452,26 @@ Parameters:
     Default: ''
     Description: 'Applicative environment variable file checksum'
 
+  InformalStreamEventManagerLambdaBatchSize:
+    Type: Number
+    Default: 60
+    Description: Batch size for lambda triggering
+
+  InformalStreamEventManagerLambdaMaximumBatchingWindowInSeconds:
+    Type: Number
+    Default: 20
+    Description: Batching window size for lambda triggering
+
+  InformalMaximumRetryAttemptsValueStream:
+    Type: Number
+    Description: 'Maximum number of retries for stream lambda function'
+    Default: 5
+
+  InformalStreamEventManagerMaximumRecordAge:
+    Type: Number
+    Description: "Maximum record age in seconds for StreamEventManagerLambdaKinesisSource"
+    Default: -1 # Limitato alla retention dello stream
+
 Resources:
 
   # pn-stream microservice
@@ -729,15 +749,15 @@ Resources:
     Type: AWS::Lambda::EventSourceMapping
     DependsOn: StreamEventManagerLambdaPolicy
     Properties:
-      BatchSize: !Sub ${StreamEventManagerLambdaBatchSize}
+      BatchSize: !Sub ${InformalStreamEventManagerLambdaBatchSize}
       BisectBatchOnFunctionError: true
       EventSourceArn: !Ref CdcKinesisSourceStreamArn
       FunctionName: !Ref StreamEventManagerLambdaAlias
       FunctionResponseTypes:
         - ReportBatchItemFailures
-      MaximumBatchingWindowInSeconds: !Sub ${StreamEventManagerLambdaMaximumBatchingWindowInSeconds}
-      MaximumRetryAttempts: !Ref MaximumRetryAttemptsValueStream
-      MaximumRecordAgeInSeconds: !Ref StreamEventManagerMaximumRecordAge
+      MaximumBatchingWindowInSeconds: !Sub ${InformalStreamEventManagerLambdaMaximumBatchingWindowInSeconds}
+      MaximumRetryAttempts: !Ref InformalMaximumRetryAttemptsValueStream
+      MaximumRecordAgeInSeconds: !Ref InformalStreamEventManagerMaximumRecordAge
       StartingPosition: TRIM_HORIZON
       DestinationConfig:
         OnFailure:

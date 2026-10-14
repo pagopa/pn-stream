@@ -30,6 +30,10 @@
     "PnCronAnalyzer": "-",
     "WireTapLogActivation": "false",
     "MountEfs": "false",
-    "JavaToolOptions": "-Dreactor.netty.ioWorkerCount=50"
+    "JavaToolOptions": "-Dreactor.netty.ioWorkerCount=50",
+    "InformalStreamEventManagerLambdaBatchSize": "60",
+    "InformalStreamEventManagerLambdaMaximumBatchingWindowInSeconds": "20",
+    "InformalMaximumRetryAttemptsValueStream": "5",
+    "InformalStreamEventManagerMaximumRecordAge": "604800"
   }
 }
