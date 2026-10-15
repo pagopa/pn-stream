@@ -447,6 +447,31 @@ Parameters:
     Default: ''
     Description: JavaToolOptions
 
+  ApplicativeEnvFileChecksum:
+    Type: String
+    Default: ''
+    Description: 'Applicative environment variable file checksum'
+
+  InformalStreamEventManagerLambdaBatchSize:
+    Type: Number
+    Default: 60
+    Description: Batch size for lambda triggering
+
+  InformalStreamEventManagerLambdaMaximumBatchingWindowInSeconds:
+    Type: Number
+    Default: 20
+    Description: Batching window size for lambda triggering
+
+  InformalMaximumRetryAttemptsValueStream:
+    Type: Number
+    Description: 'Maximum number of retries for stream lambda function'
+    Default: 5
+
+  InformalStreamEventManagerMaximumRecordAge:
+    Type: Number
+    Description: "Maximum record age in seconds for StreamEventManagerLambdaKinesisSource"
+    Default: -1 # Limitato alla retention dello stream
+
 Resources:
 
   # pn-stream microservice
@@ -500,6 +525,7 @@ Resources:
         ContainerEnvEntry26: !Sub 'PN_STREAM_PACONFIGURATIONSPREFIX=${PaConfigurationsPrefix}'
         ContainerEnvEntry27: !Sub 'PN_CRON_ANALYZER=${PnCronAnalyzer}'
         ContainerEnvEntry28: !Sub 'WIRE_TAP_LOG=${WireTapLogActivation}'
+        ApplicativeEnvFileChecksum: !Ref ApplicativeEnvFileChecksum
         JavaToolOptions: !Ref JavaToolOptions
         MappedPaths: '/delivery-progresses/*'
         ECSClusterName: !Ref ECSClusterName
@@ -703,7 +729,42 @@ Resources:
           Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
       FilterCriteria:
         Filters:
-          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"]}}'
+          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": [{ "exists": false }]}} }}}'
+
+  # a new version at each deploy
+  StreamEventManagerLambdaVersionPnPlaceholderEpochSeconds:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref StreamEventManagerLambda
+
+  StreamEventManagerLambdaAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref StreamEventManagerLambda
+      FunctionVersion: !GetAtt StreamEventManagerLambdaVersionPnPlaceholderEpochSeconds.Version
+      Name: informal-timeline
+
+  # CDC to Stream Event Manager (only records WITH communicationType)
+  StreamEventManagerLambdaAliasKinesisSource:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn: StreamEventManagerLambdaPolicy
+    Properties:
+      BatchSize: !Sub ${InformalStreamEventManagerLambdaBatchSize}
+      BisectBatchOnFunctionError: true
+      EventSourceArn: !Ref CdcKinesisSourceStreamArn
+      FunctionName: !Ref StreamEventManagerLambdaAlias
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
+      MaximumBatchingWindowInSeconds: !Sub ${InformalStreamEventManagerLambdaMaximumBatchingWindowInSeconds}
+      MaximumRetryAttempts: !Ref InformalMaximumRetryAttemptsValueStream
+      MaximumRecordAgeInSeconds: !Ref InformalStreamEventManagerMaximumRecordAge
+      StartingPosition: TRIM_HORIZON
+      DestinationConfig:
+        OnFailure:
+          Destination: !Sub arn:aws:s3:::${ESMKinesisFailureNotificationsBucketName}
+      FilterCriteria:
+        Filters:
+          - Pattern: !Sub '{"data": {"eventName": ["INSERT"], "tableName": ["${PnTimelinesTableName}"], "dynamodb": { "NewImage": {"communicationType": {"S": [{ "exists": true }]}} }}}'
 
   StreamEventManagerLambdaKinesisFailuresAlarm:
     Type: AWS::CloudWatch::Alarm
