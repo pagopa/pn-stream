@@ -12,7 +12,7 @@
 	</parent>
 
 	<artifactId>pn-stream</artifactId>
-    <version>1.9.0-RC.5</version>
+    <version>1.9.0</version>
 	<name>pn-stream</name>
 	<description>Manage streams and events from timeline</description>
 
