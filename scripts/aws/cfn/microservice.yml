@@ -472,6 +472,12 @@ Parameters:
     Description: "Maximum record age in seconds for StreamEventManagerLambdaKinesisSource"
     Default: -1 # Limitato alla retention dello stream
 
+  InformalStreamEventManagerEventSourceMappingEnabled:
+    Type: String
+    Description: 'Enable or disable the Kinesis event source mapping of StreamEventManagerLambdaAliasKinesisSource'
+    Default: 'false'
+    AllowedValues: [ 'true', 'false' ]
+
 Resources:
 
   # pn-stream microservice
@@ -749,6 +755,7 @@ Resources:
     Type: AWS::Lambda::EventSourceMapping
     DependsOn: StreamEventManagerLambdaPolicy
     Properties:
+      Enabled: !Ref InformalStreamEventManagerEventSourceMappingEnabled
       BatchSize: !Sub ${InformalStreamEventManagerLambdaBatchSize}
       BisectBatchOnFunctionError: true
       EventSourceArn: !Ref CdcKinesisSourceStreamArn
