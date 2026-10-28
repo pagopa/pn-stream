@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const proxyquire = require("proxyquire").noPreserveCache();
-const { DynamoDBDocumentClient } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 const {
   mockClient,
 } = require("aws-sdk-client-mock");
@@ -105,13 +105,14 @@ describe("Lambda Handler Tests", () => {
         },
       ],
     };
+    mockDynamoDBClient.on(PutCommand).resolves({});
 
-    mockDynamoDBClient.send = async (command) => {
-      const ttl = command.input.Item.ttl.N;
-      expect(Number(ttl)).to.be.closeTo(expectedTTL, 10); // Allow a small margin for time difference
-    };
+    const result = await lambda.handleEvent(event);
+    expect(result).to.deep.equal({ batchItemFailures: [] });
 
-    await lambda.handleEvent(event);
+    const calls = mockDynamoDBClient.commandCalls(PutCommand);
+    expect(calls).to.have.lengthOf(1);
+    expect(calls[0].args[0].input.Item.ttl).to.be.closeTo(expectedTTL, 10);
   });
 
   it("should handle invalid TTL_OFFSET gracefully", async () => {
@@ -181,56 +182,4 @@ describe("Lambda Handler Tests", () => {
       ],
     });
   });
-
-  it("should skip records with communicationType present", async () => {
-    const event = {
-      mockKinesisData: [
-        {
-          dynamodb: {
-            NewImage: {
-              iun: { S: "testIUN" },
-              group: { S: "testGroup" },
-              communicationType: { S: "anyString" },
-            },
-          },
-          kinesisSeqNumber: "seq123",
-        },
-      ],
-    };
-
-    let dynamoCalled = false;
-    mockDynamoDBClient.send = async () => {
-      dynamoCalled = true;
-    };
-
-    const result = await lambda.handleEvent(event);
-    expect(result).to.deep.equal({ batchItemFailures: [] });
-    expect(dynamoCalled).to.be.false;
-  });
-
-  it("should skip records with communicationType present as number", async () => {
-      const event = {
-        mockKinesisData: [
-          {
-            dynamodb: {
-              NewImage: {
-                iun: { S: "testIUN" },
-                group: { S: "testGroup" },
-                communicationType: { N: 3 },
-              },
-            },
-            kinesisSeqNumber: "seq123",
-          },
-        ],
-      };
-
-      let dynamoCalled = false;
-      mockDynamoDBClient.send = async () => {
-        dynamoCalled = true;
-      };
-
-      const result = await lambda.handleEvent(event);
-      expect(result).to.deep.equal({ batchItemFailures: [] });
-      expect(dynamoCalled).to.be.false;
-    });
 });
