@@ -477,6 +477,12 @@ Parameters:
     Default: 'ARM'
     Description: CPU architecture for the Fargate tasks
 
+  InformalStreamEventManagerEventSourceMappingEnabled:
+    Type: String
+    Description: 'Enable or disable the Kinesis event source mapping of StreamEventManagerLambdaAliasKinesisSource'
+    Default: 'false'
+    AllowedValues: [ 'true', 'false' ]
+
 Resources:
 
   # pn-stream microservice
@@ -543,7 +549,6 @@ Resources:
         AlbSecurityGroup: !Ref AlbSecurityGroup
         EcsLogGroup: !Ref EcsLogGroup
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
-        CpuArchitecture: !Ref CpuArchitecture
 
   # Grant operational rights to pn-stream microservice
   StreamMicroserviceTaskManagedPolicy:
@@ -755,6 +760,7 @@ Resources:
     Type: AWS::Lambda::EventSourceMapping
     DependsOn: StreamEventManagerLambdaPolicy
     Properties:
+      Enabled: !Ref InformalStreamEventManagerEventSourceMappingEnabled
       BatchSize: !Sub ${InformalStreamEventManagerLambdaBatchSize}
       BisectBatchOnFunctionError: true
       EventSourceArn: !Ref CdcKinesisSourceStreamArn
