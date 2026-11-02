@@ -472,6 +472,11 @@ Parameters:
     Description: "Maximum record age in seconds for StreamEventManagerLambdaKinesisSource"
     Default: -1 # Limitato alla retention dello stream
 
+  CpuArchitecture:
+    Type: String
+    Default: 'ARM'
+    Description: CPU architecture for the Fargate tasks
+
 Resources:
 
   # pn-stream microservice
@@ -538,6 +543,7 @@ Resources:
         AlbSecurityGroup: !Ref AlbSecurityGroup
         EcsLogGroup: !Ref EcsLogGroup
         LogAlarmStrategyV1: !Ref LogAlarmStrategy
+        CpuArchitecture: !Ref CpuArchitecture
 
   # Grant operational rights to pn-stream microservice
   StreamMicroserviceTaskManagedPolicy:
