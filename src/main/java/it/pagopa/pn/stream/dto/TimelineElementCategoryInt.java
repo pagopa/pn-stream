@@ -50,9 +50,9 @@ public enum TimelineElementCategoryInt {
     SEND_ANALOG_DOMICILE(legal(TimelineElementCategoryInt.VERSION_10)),
     SEND_ANALOG_PROGRESS(legal(TimelineElementCategoryInt.VERSION_10)),
     SEND_ANALOG_FEEDBACK(legal(TimelineElementCategoryInt.VERSION_10)),
-    PAYMENT(legal(TimelineElementCategoryInt.VERSION_10)),
+    PAYMENT(legal(TimelineElementCategoryInt.VERSION_10), informal(TimelineElementCategoryInt.VERSION_10)),
     COMPLETELY_UNREACHABLE(legal(TimelineElementCategoryInt.VERSION_10)),
-    REQUEST_REFUSED(legal(TimelineElementCategoryInt.VERSION_10)),
+    REQUEST_REFUSED(legal(TimelineElementCategoryInt.VERSION_10), informal(TimelineElementCategoryInt.VERSION_10)),
     AAR_CREATION_REQUEST(legal(TimelineElementCategoryInt.VERSION_10)),
     AAR_GENERATION(legal(TimelineElementCategoryInt.VERSION_10)),
     NOT_HANDLED(legal(TimelineElementCategoryInt.VERSION_10)),
@@ -88,7 +88,8 @@ public enum TimelineElementCategoryInt {
     WORKFLOW_DONE_REACHED(informal(TimelineElementCategoryInt.VERSION_10)),
     WORKFLOW_DONE_UNREACHED(informal(TimelineElementCategoryInt.VERSION_10)),
     INFORMAL_NOTIFICATION_VIEWED(informal(TimelineElementCategoryInt.VERSION_10)),
-    COVERPAGE_CREATION_REQUEST(informal(TimelineElementCategoryInt.VERSION_10));
+    COVERPAGE_CREATION_REQUEST(informal(TimelineElementCategoryInt.VERSION_10)),
+    PAYMENT_NOTICE_PAID(legal(TimelineElementCategoryInt.VERSION_28),informal(TimelineElementCategoryInt.VERSION_10));
 
 
     private final Map<CommunicationType, Integer> versionsByCommunicationType;
@@ -136,7 +137,8 @@ public enum TimelineElementCategoryInt {
         ANALOG_FAILURE_WORKFLOW_TIMEOUT,
         NOTIFICATION_COST_VALIDATION_REQUEST,
         NOTIFICATION_COST_VALIDATION_RESPONSE,
-        COURTESY_CHANNEL_FAILED
+        COURTESY_CHANNEL_FAILED,
+        PAYMENT_NOTICE_PAID
     }
 
     public enum UnlockTimelineElementCategory {
@@ -151,8 +153,9 @@ public enum TimelineElementCategoryInt {
         VALIDATED_F24,
         VALIDATE_F24_REQUEST,
         PUBLIC_REGISTRY_VALIDATION_CALL,
-        PUBLIC_REGISTRY_VALIDATION_RESPONSE
-
+        PUBLIC_REGISTRY_VALIDATION_RESPONSE,
+        NOTIFICATION_COST_VALIDATION_REQUEST,
+        NOTIFICATION_COST_VALIDATION_RESPONSE
     }
 
     @Getter

@@ -23,8 +23,8 @@ function buildNotificationItem(newImage, tableName, ttlOffset) {
       hashKey: parsedData.iun,
       group: parsedData.group ? parsedData.group : null,
       creationDate: parsedData.sentAt ? parsedData.sentAt : null,
-      ttl: ttl.toString(),
-      };
+      ttl: ttl,
+  };
 }
 
 async function putNotificationItem(item) {

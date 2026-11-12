@@ -25,7 +25,6 @@ import it.pagopa.pn.stream.utils.CommunicationTypeUtils;
 import it.pagopa.pn.stream.utils.MetricUtils;
 import lombok.CustomLog;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -152,7 +151,7 @@ public class StreamEventsServiceImpl extends PnStreamServiceImpl implements Stre
 
         items.forEach(item -> {
             // Leggiamo lo iun da getNotificationRequestId() e non da getIun() poichè quest'ultimo non viene valorizzato per gli elementi afferenti allo status VALIDATION
-            String iun = new String(Base64Utils.decodeFromString(item.getNotificationRequestId()));
+            String iun = new String(Base64.getDecoder().decode(item.getNotificationRequestId()));
             List<String> elements = iunWithTimelineElementId.get(iun);
             String description = item.getElement() != null
                     ? item.getElement().getTimestamp() + "_" + item.getElement().getElementId()

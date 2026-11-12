@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.stream.config.PnStreamConfigs;
 import it.pagopa.pn.stream.config.springbootcfg.AbstractCachedSsmParameterConsumerActivation;
+import it.pagopa.pn.stream.dto.CommunicationType;
 import it.pagopa.pn.stream.dto.CustomPaConfiguration;
 import it.pagopa.pn.stream.dto.ext.delivery.notification.status.NotificationStatusInt;
 import it.pagopa.pn.stream.dto.timeline.TimelineElementInternal;
@@ -18,11 +19,11 @@ import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.Enti
 import it.pagopa.pn.stream.middleware.dao.timelinedao.dynamo.mapper.webhook.WebhookTimelineElementJsonConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.*;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class StreamUtils {
     private final EntityToDtoWebhookTimelineMapper entityToDtoTimelineMapper;
     private final WebhookTimelineElementJsonConverter timelineElementJsonConverter;
     private final Duration ttl;
+    private final Duration ttlInformal;
     private final PnStreamConfigs pnStreamConfigs;
 
     private final AbstractCachedSsmParameterConsumerActivation ssmParameterConsumerActivation;
@@ -50,6 +52,7 @@ public class StreamUtils {
         this.pnStreamConfigs = pnStreamConfigs;
         this.timelineElementJsonConverter = timelineElementJsonConverter;
         this.ttl = pnStreamConfigs.getTtl();
+        this.ttlInformal = pnStreamConfigs.getTtlInformal();
         this.mapperTimeline = mapperTimeline;
         this.ssmParameterConsumerActivation = ssmParameterConsumerActivation;
     }
@@ -62,9 +65,13 @@ public class StreamUtils {
         // creo l'evento e lo salvo
         EventEntity eventEntity = new EventEntity(atomicCounterUpdated, streamEntity.getStreamId());
 
-        if (!ttl.isZero())
+        if (!CommunicationType.INFORMAL.equals(streamEntity.getCommunicationType()) && !ttl.isZero()) {
             eventEntity.setTtl(LocalDateTime.now().plus(ttl).atZone(ZoneId.systemDefault()).toEpochSecond());
+        } else if (CommunicationType.INFORMAL.equals(streamEntity.getCommunicationType()) && !ttlInformal.isZero()) {
+            eventEntity.setTtl(LocalDateTime.now().plus(ttlInformal).atZone(ZoneId.systemDefault()).toEpochSecond());
+        }
         eventEntity.setEventDescription(timestamp.toString() + "_" + timelineElementInternal.getTimelineElementId());
+
 
         // Lo iun ci va solo se è stata accettata, quindi escludo gli stati invalidation e refused
         if (StringUtils.hasText(newStatus)
@@ -75,7 +82,7 @@ public class StreamUtils {
         eventEntity.setNewStatus(newStatus);
 
         // il requestId ci va sempre, ed è il base64 dello iun
-        eventEntity.setNotificationRequestId(Base64Utils.encodeToString(timelineElementInternal.getIun().getBytes(StandardCharsets.UTF_8)));
+        eventEntity.setNotificationRequestId(Base64.getEncoder().encodeToString(timelineElementInternal.getIun().getBytes(StandardCharsets.UTF_8)));
 
         WebhookTimelineElementEntity timelineElementEntity;
         try {

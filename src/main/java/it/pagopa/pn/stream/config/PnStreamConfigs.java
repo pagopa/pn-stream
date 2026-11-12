@@ -28,6 +28,7 @@ public class PnStreamConfigs {
     private Integer readBufferDelay;
     private Integer deltaCounter;
     private Duration ttl;
+    private Duration ttlInformal;
     private Duration disableTtl;
     private String firstVersion;
     private String currentVersion;
