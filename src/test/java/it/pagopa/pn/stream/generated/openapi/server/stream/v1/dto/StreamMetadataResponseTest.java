@@ -33,7 +33,7 @@ class StreamMetadataResponseTest {
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .build();
         Assertions.assertEquals(expected, response.title("002"));
     }
@@ -52,7 +52,7 @@ class StreamMetadataResponseTest {
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .build();
         Assertions.assertEquals(expected, response.eventType(StreamMetadataResponseV30.EventTypeEnum.STATUS));
     }
@@ -71,7 +71,7 @@ class StreamMetadataResponseTest {
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .build();
         Assertions.assertEquals(expected, response.filterValues(Collections.singletonList("001")));
     }
@@ -90,7 +90,7 @@ class StreamMetadataResponseTest {
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .build();
         Assertions.assertEquals(expected, response.streamId(UUID.fromString("f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454")));
     }
@@ -109,7 +109,7 @@ class StreamMetadataResponseTest {
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .build();
         Assertions.assertEquals(expected, response.activationDate(instant));
     }
@@ -128,7 +128,7 @@ class StreamMetadataResponseTest {
                 .activationDate(instant)
                 .eventType(StreamMetadataResponseV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .build();
         Assertions.assertEquals(Boolean.TRUE, expected.equals(response));
     }
