@@ -26,7 +26,7 @@ class StreamCreationRequestTest {
                 .title("001")
                 .eventType(StreamCreationRequestV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .waitForAccepted(false)
                 .build();
         Assertions.assertEquals(expected, request.title("001"));
@@ -43,7 +43,7 @@ class StreamCreationRequestTest {
                 .title("001")
                 .eventType(StreamCreationRequestV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .waitForAccepted(false)
                 .build();
         Assertions.assertEquals(expected, request.eventType(StreamCreationRequestV30.EventTypeEnum.STATUS));
@@ -60,7 +60,7 @@ class StreamCreationRequestTest {
                 .title("001")
                 .eventType(StreamCreationRequestV30.EventTypeEnum.STATUS)
                 .filterValues(Collections.singletonList("001"))
-                .groups(Collections.emptyList())
+                .groups(null)
                 .waitForAccepted(false)
                 .build();
         Assertions.assertEquals(expected, request.filterValues(Collections.singletonList("001")));
