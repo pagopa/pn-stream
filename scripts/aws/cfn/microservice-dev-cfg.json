@@ -34,6 +34,7 @@
     "InformalStreamEventManagerLambdaBatchSize": "60",
     "InformalStreamEventManagerLambdaMaximumBatchingWindowInSeconds": "20",
     "InformalMaximumRetryAttemptsValueStream": "5",
-    "InformalStreamEventManagerMaximumRecordAge": "604800"
+    "InformalStreamEventManagerMaximumRecordAge": "604800",
+    "CpuArchitecture": "ARM"
   }
 }
