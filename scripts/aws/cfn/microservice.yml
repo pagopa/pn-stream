@@ -470,18 +470,19 @@ Parameters:
   InformalStreamEventManagerMaximumRecordAge:
     Type: Number
     Description: "Maximum record age in seconds for StreamEventManagerLambdaKinesisSource"
-    Default: -1 # Limitato alla retention dello stream
-
-  CpuArchitecture:
-    Type: String
-    Default: 'ARM'
-    Description: CPU architecture for the Fargate tasks
+    Default: -1 # Limitato alla retention dello streamx
 
   InformalStreamEventManagerEventSourceMappingEnabled:
     Type: String
     Description: 'Enable or disable the Kinesis event source mapping of StreamEventManagerLambdaAliasKinesisSource'
     Default: 'false'
     AllowedValues: [ 'true', 'false' ]
+
+  CpuArchitecture:
+    Type: String
+    Default: 'ARM'
+    Description: CPU architecture for the Fargate tasks
+    AllowedValues: [ 'ARM', 'AMD' ]
 
 Resources:
 
