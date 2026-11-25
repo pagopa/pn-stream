@@ -1,5 +1,4 @@
-const axios = require("axios");
-const axiosRetry = require("axios-retry").default;
+const axios = require("../lib/httpClient");
 const EventHandler  = require('./baseHandler.js');
 const {createProgressResponseV10} = require("./mapper/transformProgressResponseFromV23ToV10");
 const {createProgressResponseV23} = require("./mapper/transformProgressResponseFromV24ToV23");
@@ -31,20 +30,6 @@ class ConsumeEventStreamHandler extends EventHandler {
         if (lastEventId != null && lastEventId !== undefined && lastEventId !== "")
           lastEventIdQueryParam = `?lastEventId=${lastEventId}`;
         let url = `${this.baseUrl}/streams/${streamId}/events${lastEventIdQueryParam}`;
-
-        axiosRetry(axios, {
-            retries: this.numRetry,
-            shouldResetTimeout: true ,
-            retryCondition: (error) => {
-              return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.code === 'ECONNABORTED';
-            },
-            onRetry: (retryCount, error, requestConfig) => {
-                console.warn(`Retry num ${retryCount} - error:${error.message}`);
-            },
-            onMaxRetryTimesExceeded: (error, retryCount) => {
-                console.warn(`Retries exceeded: ${retryCount} - error:${error.message}`);
-            }
-        });
         console.log('calling ', url);
         let response = await axios.get(url, {headers: headers, timeout: this.attemptTimeout});
 

@@ -1,17 +1,17 @@
 const { expect } = require("chai");
-const axios = require("axios");
+const httpClient = require("../../app/lib/httpClient");
 const DeleteEventStreamHandler  = require("../../app/handlers/deleteEventStreamHandler.js");
 
-let MockAdapter = require("axios-mock-adapter")
-let mock = new MockAdapter(axios);
+const MockAdapter = require("axios-mock-adapter");
 
 describe("DeleteEventStreamHandler", () => {
 
     let deleteEventStreamHandler;
+    let mock;
 
     beforeEach(() => {
         deleteEventStreamHandler = new DeleteEventStreamHandler();
-        mock = new MockAdapter(axios);
+        mock = new MockAdapter(httpClient);
     });
 
     afterEach(() => {

@@ -1,17 +1,17 @@
 const { expect } = require("chai");
-const axios = require("axios");
+const httpClient = require("../../app/lib/httpClient");
 const GetEventStreamHandler = require("../../app/handlers/getEventStreamHandler")
 
-let MockAdapter = require("axios-mock-adapter")
-let mock = new MockAdapter(axios);
+const MockAdapter = require("axios-mock-adapter");
 
 describe("GetEventStreamHandler", () => {
 
     let getEventStreamHandler;
+    let mock;
 
     beforeEach(() => {
         getEventStreamHandler = new GetEventStreamHandler();
-        mock = new MockAdapter(axios);
+        mock = new MockAdapter(httpClient);
     });
 
     afterEach(() => {
@@ -124,18 +124,6 @@ describe("GetEventStreamHandler", () => {
     });
 
     describe("handlerEvent that does not apply a map function for response body", () => {
-
-        let getEventStreamHandler;
-
-        beforeEach(() => {
-            getEventStreamHandler = new GetEventStreamHandler();
-            mock = new MockAdapter(axios);
-        });
-
-        afterEach(() => {
-            mock.restore();
-        });
-
         const testCases = [
             {
                 version: "v1.0",

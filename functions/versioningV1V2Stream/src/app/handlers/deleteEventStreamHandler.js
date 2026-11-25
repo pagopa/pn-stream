@@ -1,5 +1,4 @@
-const axios = require("axios");
-const axiosRetry = require("axios-retry").default;
+const axios = require("../lib/httpClient");
 const EventHandler  = require('./baseHandler.js');
 class DeleteEventStreamHandler extends EventHandler {
     constructor() {
@@ -21,21 +20,6 @@ class DeleteEventStreamHandler extends EventHandler {
 
         const streamId = event["pathParameters"]["streamId"];
         const url = `${this.baseUrl}/streams/${streamId}`;
-
-        axiosRetry(axios, {
-            retries: this.numRetry,
-            shouldResetTimeout: true ,
-            retryCondition: (error) => {
-              return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.code === 'ECONNABORTED';
-            },
-            onRetry: (retryCount, error, requestConfig) => {
-                console.warn(`Retry num ${retryCount} - error:${error.message}`);
-            },
-            onMaxRetryTimesExceeded: (error, retryCount) => {
-                console.warn(`Retries exceeded: ${retryCount} - error:${error.message}`);
-            }
-        });
-
 
         console.log('calling ', url);
         let response = await axios.delete(url, { headers: headers, timeout: this.attemptTimeout});
