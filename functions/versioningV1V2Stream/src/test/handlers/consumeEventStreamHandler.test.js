@@ -1,19 +1,24 @@
 const { expect } = require("chai");
+const assert = require("assert");
 const axios = require("axios");
+const httpClient = require("../../app/lib/httpClient");
 const ConsumeEventStreamHandler  = require("../../app/handlers/consumeEventStreamHandler");
 
-let MockAdapter = require("axios-mock-adapter")
-let mock = new MockAdapter(axios);
+const MockAdapter = require("axios-mock-adapter");
 describe("ConsumeEventStreamHandler", () => {
     let consumeEventStreamHandler;
+    let mock;
+    let mapperMock;
 
     beforeEach(() => {
         consumeEventStreamHandler = new ConsumeEventStreamHandler();
-        mock = new MockAdapter(axios);
+        mock = new MockAdapter(httpClient);
+        mapperMock = new MockAdapter(axios);
     });
 
     afterEach(() => {
         mock.restore();
+        mapperMock.restore();
     });
 
     describe("checkOwnership", () => {
@@ -961,13 +966,15 @@ describe("ConsumeEventStreamHandler", () => {
                     }
 
                     mock.onGet(url).reply(200, responseBodyV25);
-                    mock.onGet(urlNotification).reply(200, responseNotification);
-                    mock.onGet(urlStatusHistory).reply(200, responseStatusHistory);
+                    mapperMock.onGet(urlNotification).reply(200, responseNotification);
+                    mapperMock.onGet(urlStatusHistory).reply(200, responseStatusHistory);
 
                     const response = await consumeEventStreamHandler.handlerEvent(event, {});
 
                     expect(response.statusCode).to.equal(200);
                     expect(response.body).to.not.contain("RETURNED_TO_SENDER");
+                    expect(mock.history.get.length).to.equal(1);
+                    expect(mapperMock.history.get.length).to.equal(2);
                 });
 
         it("Error delivery-private RETURNED_TO_SENDER v25", async () => {
@@ -1090,16 +1097,19 @@ describe("ConsumeEventStreamHandler", () => {
             }
 
             mock.onGet(url).reply(200, responseBodyV25);
-            mock.onGet(urlNotification).reply(404, responseNotification);
-            mock.onGet(urlStatusHistory).reply(200, responseStatusHistory);
+            mapperMock.onGet(urlNotification).reply(404, responseNotification);
+            mapperMock.onGet(urlStatusHistory).reply(200, responseStatusHistory);
 
-            try {
-            const response = await consumeEventStreamHandler.handlerEvent(event, {});
-
-            } catch (e) {
-                expect(e.response.status).to.equal(404);
-                expect(e.message).to.equal("Call to delivery-private failed with status 404, iun : LNWV-GRMV-KPWV-202503-W-1");
-            }
+            await assert.rejects(
+                () => consumeEventStreamHandler.handlerEvent(event, {}),
+                (e) => {
+                    expect(e.response.status).to.equal(404);
+                    expect(e.message).to.equal("Call to delivery-private failed with status 404, iun : LNWV-GRMV-KPWV-202503-W-1");
+                    return true;
+                }
+            );
+            expect(mock.history.get.length).to.equal(1);
+            expect(mapperMock.history.get.length).to.equal(1);
         });
 
         it("Error delivery-push-private RETURNED_TO_SENDER v25", async () => {
@@ -1199,15 +1209,18 @@ describe("ConsumeEventStreamHandler", () => {
             }
 
             mock.onGet(url).reply(200, responseBodyV25);
-            mock.onGet(urlNotification).reply(200, responseNotification);
-            mock.onGet(urlStatusHistory).reply(200, responseStatusHistory);
+            mapperMock.onGet(urlNotification).reply(200, responseNotification);
+            mapperMock.onGet(urlStatusHistory).reply(200, responseStatusHistory);
 
-            try {
-            const response = await consumeEventStreamHandler.handlerEvent(event, {});
-
-            } catch (e) {
-                expect(e.message).to.equal('Call to delivery-private failed, [iun : LNWV-GRMV-KPWV-202503-W-1, createdAt : 2024-03-22T01:14:00.526096073Z, numberOfRecipients : 1 ]');
-            }
+            await assert.rejects(
+                () => consumeEventStreamHandler.handlerEvent(event, {}),
+                (e) => {
+                    expect(e.message).to.equal('Call to delivery-private failed, [iun : LNWV-GRMV-KPWV-202503-W-1, createdAt : 2024-03-22T01:14:00.526096073Z, numberOfRecipients : 1 ]');
+                    return true;
+                }
+            );
+            expect(mock.history.get.length).to.equal(1);
+            expect(mapperMock.history.get.length).to.equal(2);
         });
 
         it("successful request V28 to V27", async () => {

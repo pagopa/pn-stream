@@ -1,5 +1,4 @@
-const axios = require("axios");
-const axiosRetry = require("axios-retry").default;
+const axios = require("../lib/httpClient");
 const EventHandler  = require('./baseHandler.js');
 const { createStreamMetadataResponseV26 } = require("./mapper/transformStreamMetadataResponseFromV27ToV26");
 const { createStreamMetadataResponseV29 } = require("./mapper/transformStreamMetadataResponseFromV30ToV29");
@@ -31,20 +30,6 @@ class DisableEventStreamHandler extends EventHandler {
 
         const streamId = event["pathParameters"]["streamId"];
         const url = `${this.baseUrl}/streams/${streamId}/action/disable`;
-        axiosRetry(axios, {
-            retries: this.numRetry,
-            shouldResetTimeout: true ,
-            retryCondition: (error) => {
-              return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.code === 'ECONNABORTED';
-            },
-            onRetry: (retryCount, error, requestConfig) => {
-                console.warn(`Retry num ${retryCount} - error:${error.message}`);
-            },
-            onMaxRetryTimesExceeded: (error, retryCount) => {
-                console.warn(`Retries exceeded: ${retryCount} - error:${error.message}`);
-            }
-        });
-
         console.log('calling ', url);
         let response = await axios.post(url, requestBodyV24, {headers: headers, timeout: this.attemptTimeout});
 
